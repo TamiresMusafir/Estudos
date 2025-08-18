@@ -1,0 +1,27 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta http-equiv="refresh" content="1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>teste</title>
+  </head>
+  <body>
+	<p>Comi hehe</p>
+    <p>Comi de novo rsrs</p>
+    <p>testando o <strong>teste</strong></p>
+  </body>
+
+  <script>
+	var p1 = document.getElementsByTagName('p')[0] // cria a varíavel
+  var p2 = document.getElementsByTagName('p')[2] // cria a varíavel
+  var corpo = document.body  // cria a varíavel
+
+  corpo.style.background = 'orange' // define a cor de fundo
+  document.write('Assim: ' + p1.innerText) // escreve
+  p1.style.color = 'blue' //define a cor da letra
+  document.write(p2.innerHTML) //innerHTML trás a formatação
+  </script>
+</html>
