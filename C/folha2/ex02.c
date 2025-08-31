@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 
-float hipotensua (float a, float b)
+float hipotenusa (float a, float b)
 {
     return sqrt(a*a + b*b);
 }
@@ -13,7 +13,7 @@ int main()
     printf("Digite os dois catetos:\n"); 
     scanf("%f %f", &cateto1, &cateto2);
     
-    resultado = hipotensua(cateto1, cateto2);
+    resultado = hipotenusa(cateto1, cateto2);
 
     printf("A hipotenusa é: %f\n", resultado);
     return 0;    
