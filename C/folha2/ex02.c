@@ -10,11 +10,14 @@ int main()
 {
     float cateto1, cateto2, resultado;
 
-    printf("Digite os dois catetos:\n"); 
-    scanf("%f %f", &cateto1, &cateto2);
+    printf("Digite o primeiro cateto:\n"); 
+    scanf("%f", &cateto1);
+
+    printf("\nDigite o segundo cateto:\n"); 
+    scanf("%f", &cateto2);
     
     resultado = hipotenusa(cateto1, cateto2);
 
-    printf("A hipotenusa é: %f\n", resultado);
+    printf("A hipotenusa é: %.1f\n", resultado);
     return 0;    
 }
