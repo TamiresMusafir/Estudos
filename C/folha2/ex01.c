@@ -13,19 +13,19 @@ int main ()
     float nota_p1, nota_p2, nota_t1, nota_t2;
     float mediaProvas, mediaTrabalhos, mediaFinal;
 
-    printf("Digite sua matrícula:");
+    printf("Digite sua matrícula:\n");
     scanf("%d", &matricula);
 
-    printf("\nDigite sua nota da p1:");
+    printf("\nDigite sua nota da p1:\n");
     scanf("%f", &nota_p1);
 
-    printf("\nDigite sua nota da p2:");
+    printf("\nDigite sua nota da p2:\n");
     scanf("%f", &nota_p2);
 
-    printf("\nDigite sua nota do primeiro trabalho:");
+    printf("\nDigite sua nota do primeiro trabalho:\n");
     scanf("%f", &nota_t1);
 
-    printf("\nDigite sua nota do segundo trabalho:");
+    printf("\nDigite sua nota do segundo trabalho:\n");
     scanf("%f", &nota_t2);
 
     mediaProvas = calculaMedia(nota_p1, nota_p2);
@@ -33,14 +33,9 @@ int main ()
     mediaFinal = calculaMedia(mediaProvas, mediaTrabalhos);
 
     printf("\nSua matrícula é: %d", matricula);
-
     printf("\nSua média nas provas foi: %.1f", mediaProvas);
-
     printf("\nSua média nos trabalhos foi: %.1f", mediaTrabalhos);
-
-    printf("\nSua média nas provas foi: %.1f", mediaProvas);
-
-    printf("\nSua média final foi: %.1f", mediaFinal);
+    printf("\nSua média final foi: %.1f\n", mediaFinal);
 
     return 0;
 }
