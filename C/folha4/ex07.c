@@ -6,6 +6,8 @@ int leValidaQtd()
 
     printf("Digite a quantidade de modelos:");
     scanf("%d", &qtdModelos);
+
+    if(valida = )
 }
 
 int processaModelos()
