@@ -7,5 +7,8 @@ int retornaPares(int numeros[], int qtd){
         if(numeros[i] % 2 == 0)
             produto *= numeros[i];
     } 
+    if(produto == 1)
+        produto = 0;
+
     return produto;
 }
