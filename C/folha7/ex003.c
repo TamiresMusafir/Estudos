@@ -3,7 +3,8 @@
 
 struct depto{
     int soma, qtd
-}typedef struct depto Tdepto;
+};
+typedef struct depto Tdepto;
 
 void inicializa(Tdepto v[]){
     for(int i = 0; i < TOT; i++)
