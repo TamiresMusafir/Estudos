@@ -16,8 +16,8 @@ int leitura(Tcliente clientes[], float *media){
     scanf("%d", &conta); // varável normal para não guardar o 0;
 
     while(conta != 0 && i < MAX){
-
-        v[i].conta = conta;
+ 
+        clientes[i].conta = conta;
         printf("\nDigite o saldo: ");
         scanf("%f", &clientes[i].saldo);
 

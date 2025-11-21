@@ -7,9 +7,10 @@ struct depto{
 typedef struct depto Tdepto;
 
 void inicializa(Tdepto v[]){
-    for(int i = 0; i < TOT; i++)
+    for(int i = 0; i < TOT; i++){
         v[i].soma = 0;
-        v.qtd = 0;
+        v[i].qtd = 0;
+    }
 }
 
 void exibe(Tfunc v[]){
