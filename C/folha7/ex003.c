@@ -17,7 +17,7 @@ void exibe(Tfunc v[]){
     float media;
 
     for(int i = 0; i < TOT; i++){
-        if(v[i]. qtd != 0)
+        if(v[i].qtd != 0)
             media = (float)v[i].soma / v[i].qtd;
         else
             media = 0;
