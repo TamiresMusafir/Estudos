@@ -5,6 +5,7 @@ struct produto{
     int cod, qtd;
     float preco;
 }; 
+
 typedef struct produto Tpro;
 
 void leitura(Tpro v[]){
@@ -38,7 +39,7 @@ int main(){
             printf("\nProduto não encontrado");
         else{
             printf("\nPreco: %.2f", v[pos].preco);
-            printf("\nPreco: %d", v[pos].qtd);
+            printf("\nQuantidade: %d", v[pos].qtd);
         }
         printf("Digite o código ou 0: ");
         scanf("%d", &codpesq);
