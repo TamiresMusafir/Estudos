@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#define TOT 1000 
+#define TOT 3 
 #define MAXC 31
 
 struct produto{
@@ -11,15 +11,15 @@ struct produto{
 typedef struct produto Tpro;
 
 void leitura(Tpro v[]){
-    for(int i = 0; i > TOT; i++){
+    for(int i = 0; i < TOT; i++){
         printf("Digite nome, preço e quantidade: ");
-        scanf(" %[^\n]%f%d", &v[i].nome, &v[i].preco, &v[i].qtd);
+        scanf(" %[^\n]%f%d", v[i].nome, &v[i].preco, &v[i].qtd);
     }
 }
 
 int busca(Tpro v[], char elemproc[]) 
 {
-    for(int i = 0; i < TOT, i++){
+    for(int i = 0; i < TOT; i++){
         if(strcmp(v[i].nome, elemproc) == 0)
             return i;
     }
@@ -34,7 +34,7 @@ int main(){
     leitura(v);
 
     printf("Digite o nome ou fim: ");
-    scanf(" %[^\n]", &nomepesq); //folha de cola as 4 linhas
+    scanf(" %[^\n]", nomepesq); //folha de cola as 4 linhas
 
     while(strcmp(nomepesq, "Fim") != 0){
         pos = busca(v, nomepesq);
@@ -45,7 +45,7 @@ int main(){
             printf("\nPreco: %d", v[pos].qtd);
         }
         printf("Digite o nome ou Fim: ");
-        scanf(" %[^\n]", &nomepesq);
+        scanf(" %[^\n]", nomepesq);
     }
 
     return 0;
