@@ -1,20 +1,20 @@
 #include <stdio.h>
-#define MAX 1000
+#define MAX 3
 
-struct produtos{
+struct produto{
     int codigo, qtd;
     float preco;
 };
-typedef struct produtos produtos;
+typedef struct produto produto;
 
-void leitura(produtos produto[]){
+void leitura(produto produto[]){
     for(int i = 0; i < MAX; i++){
         printf("Digite o código, o preço e a quantidade do produto: ");
         scanf("%d%f%d", &produto[i].codigo, &produto[i].preco, &produto[i].qtd);
     }
 }
 
-int busca(produtos produto[], int procura){
+int busca(produto produto[], int procura){
     for(int i = 0; i < MAX; i++){
         if(produto[i].codigo == procura)
             return i;
@@ -23,20 +23,20 @@ int busca(produtos produto[], int procura){
 }
 
 int main(){
-    produtos produto[MAX];
+    produto produtos[MAX];
     int procura, resultado;
 
-    leitura();
+    leitura(produtos);
 
     printf("Informe o código do produto a ser pesquisado (0 para encerrar): ");
     scanf("%d", &procura);
 
     while(procura != 0){
-        resultado = busca(produto, procura);
-        if(resultado == procura)
-            printf("Preço do produto: %f\tQuantidade em estoque: %d", produto[resultado].preco, produto[resultado].qtd);
+        resultado = busca(produtos, procura);
+        if(resultado == -1) //melhor começar por -1
+            printf("Produto não encontrado\n");
         else
-            printf("Produto não encontrado");
+            printf("Preço do produto: %.2f\t Quantidade em estoque: %d\n", produtos[resultado].preco, produtos[resultado].qtd);
 
         printf("Informe o código do produto a ser pesquisado (0 para encerrar): ");
         scanf("%d", &procura);
