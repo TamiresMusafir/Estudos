@@ -2,23 +2,17 @@
 
 #include <stdio.h>
 
-/*void exibe(int qtdmensal[6][12], int preco[6]){
-     soma;
-    int i;
-    int j;
+void exibe(int qtdmensal[6][12], int preco[6]){
+	float total = 0;
+	int ano = 2010;
 
-    i = 0;  
-    while (i < 6)
-    {
-        j = 0;
-        while(j < 12)
-        {
-          soma += qtdmensal[i][j];
-          j++;
-        }int
-        i++;
-        float total = soma * preco[6];
-    }
-}*/
-
-void exibe(int qtdmensal[6][12], int preco[6])
+	for(int i = 0; i < 6; i++){
+		int soma = 0;
+		for(int k = 0; k < 12; k++){
+			soma += qtdmensal[i][k];
+		}
+		total = soma * preco[i];
+		printf("Total no ano %d : R$%.2f\n", ano, total); //folha: sempre colocar \n
+		ano++;
+	}
+}

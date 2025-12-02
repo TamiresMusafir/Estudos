@@ -21,7 +21,7 @@ int main(){
     scanf("%d", &quarto);
 
     while(quarto != 0){
-        registro[quarto - 1]++;
+        registro[quarto - 1]++; // folha
 
         printf("Digite um quarto (0 para encerrar): \n");
         scanf("%d", &quarto);
