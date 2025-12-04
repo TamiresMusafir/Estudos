@@ -15,14 +15,14 @@ int leitura(Tcliente clientes[], float *media){
     printf("Digite o número da conta (digite 0 para terminar): \n");
     scanf("%d", &conta); // varável normal para não guardar o 0;
 
-    while(conta != 0 && i < MAX){
+    while(conta != 0 && i < MAX){ //folha. Não necessariamente usa o MAX num for. Se tem no max algo, talvez seja uma condição.
  
         clientes[i].conta = conta;
         printf("\nDigite o saldo: ");
         scanf("%f", &clientes[i].saldo);
 
         soma += clientes[i].saldo;
-        i++;
+        i++; //ele quer pegar o número total, então não entra for, é indeterminado. ATENÇÃO!
 
         printf("Digite o número da conta (digite 0 para terminar): \n");
         scanf("%d", &conta);

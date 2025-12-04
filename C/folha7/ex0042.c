@@ -20,7 +20,7 @@ void leitura(Tpro v[]){
 int busca(Tpro v[], char elemproc[]) 
 {
     for(int i = 0; i < TOT; i++){
-        if(strcmp(v[i].nome, elemproc) == 0)
+        if(strcmp(v[i].nome, elemproc) == 0) //folha de cola de string
             return i;
     }
     return -1;
@@ -36,7 +36,7 @@ int main(){
     printf("Digite o nome ou fim: ");
     scanf(" %[^\n]", nomepesq); //folha de cola as 4 linhas
 
-    while(strcmp(nomepesq, "Fim") != 0){
+    while(strcmp(nomepesq, "Fim") != 0){ // folha. ""
         pos = busca(v, nomepesq);
         if(pos == -1)
             printf("\nProduto não encontrado");

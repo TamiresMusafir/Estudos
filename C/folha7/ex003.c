@@ -18,7 +18,7 @@ void exibe(Tfunc v[]){
 
     for(int i = 0; i < TOT; i++){
         if(v[i].qtd != 0)
-            media = (float)v[i].soma / v[i].qtd;
+            media = (float)v[i].soma / v[i].qtd; //folha, conversão
         else
             media = 0;
         printf("\nDepartamento %d: %.2f", i+10, media);

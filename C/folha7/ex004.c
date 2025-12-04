@@ -19,7 +19,7 @@ int busca(Tpro v[], int elemproc) //nao recebe qtd como parâmetro pq é exatame
 {
     for(int i = 0; i < TOT; i++){
         if(v[i].cod == elemproc)
-            return i;
+            return i; //folha, codigo de procura.
     }
     return -1;
 }
