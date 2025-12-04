@@ -12,10 +12,10 @@ void calculaSalario(Tdepto departamentos[]){
     printf("Departamento\tSalario Médio");
     for(int i = 0; i < 30; i++){
         if(departamentos[] != 0){
-            media = departamentos[i].soma / departamentos[i].qtd;
+            media = departamentos[i].soma / departamentos[i].qtd; // lembrar notação
         }else{
             media = 0;
         }
-        printf("Departamento %d: média: %.2f\n", i + 1, media);
+        printf("Departamento %d: média: %.2f\n", i + 1, media); // %.2f
     }
 }

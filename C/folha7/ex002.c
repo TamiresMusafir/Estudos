@@ -13,16 +13,16 @@ int leitura(Tcliente clientes[], float *media){
     int i = 0;
 
     printf("Digite o número da conta (digite 0 para terminar): \n");
-    scanf("%d", &conta); // varável normal para não guardar o 0;
+    scanf("%d", &conta); // variável normal para não guardar o 0;
 
     while(conta != 0 && i < MAX){ //folha. Não necessariamente usa o MAX num for. Se tem no max algo, talvez seja uma condição.
  
-        clientes[i].conta = conta;
+        clientes[i].conta = conta; //atribui antes o struct. utilizar isso so com vetor de struct
         printf("\nDigite o saldo: ");
         scanf("%f", &clientes[i].saldo);
 
         soma += clientes[i].saldo;
-        i++; //ele quer pegar o número total, então não entra for, é indeterminado. ATENÇÃO!
+        i++; //ele quer pegar o número total, então não entra for, é indeterminado. ATENÇÃO! nao esquecer disso no while
 
         printf("Digite o número da conta (digite 0 para terminar): \n");
         scanf("%d", &conta);

@@ -18,7 +18,7 @@ void leitura(Tpro v[]){
 int busca(Tpro v[], int elemproc) //nao recebe qtd como parâmetro pq é exatamente 1000
 {
     for(int i = 0; i < TOT; i++){
-        if(v[i].cod == elemproc)
+        if(v[i].cod == elemproc) //nao esquecer do struct
             return i; //folha, codigo de procura.
     }
     return -1;

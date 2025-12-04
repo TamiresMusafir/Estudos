@@ -23,6 +23,32 @@ void ordena(livro livros[], int qtd){
     }
 }
 
-int busca(){
+int busca(livro livros[], int busca, int qtd){
+    int ini = 0;
+    pos = -1;
+    int fim = qtd - 1;
+    int med;
+
+    while(pos == -1 && ini <= fim){
+        med = (ini + fim) / 2;
+
+        if(livros[med].codigo == codigo)
+            pos = med;        // achou!
+
+        else
+            if(livros[med].codigo < codigo)
+                ini = med + 1;     // procura na direita
+            else
+                fim = med - 1;     // procura na esquerda
+    }
+
+    return -1; // não achou
+}
+
+void leitura(livro livros[]){
+
 
 }
+
+
+
