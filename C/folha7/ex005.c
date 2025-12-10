@@ -7,12 +7,13 @@ struct livro{
 typedef struct livro livro;
 
 void ordena(livro livros[], int qtd){
-    int k, i, min, aux; //colocar toda a função na folha
+    int k, i, min; //colocar toda a função na folha
+    livro aux; // colocar na folha, precisa ser struct o aux
 
     for(k = 0; k < qtd - 1; k++){
         min = k;
         for(i = k+1; i < qtd; i++){
-            if(livros[i].cod < livros[min].cod)
+            if(livros[i].codigo < livros[min].codigo)
                 min = i;
         }
         if(min != k){
@@ -23,9 +24,9 @@ void ordena(livro livros[], int qtd){
     }
 }
 
-int busca(livro livros[], int busca, int qtd){
+int busca(livro livros[], int codigo, int qtd){
     int ini = 0;
-    pos = -1;
+    int pos = -1;
     int fim = qtd - 1;
     int med;
 
@@ -42,12 +43,55 @@ int busca(livro livros[], int busca, int qtd){
                 fim = med - 1;     // procura na esquerda
     }
 
-    return -1; // não achou
+    return pos; // não achou
 }
 
-void leitura(livro livros[]){
+int leitura(livro livros[]){
+    int codigo;
+    int i = 0; //não esquecer, declarar no while fora.
 
+    printf("Digite o código ou 0: ");
+    scanf("%d", &codigo);
 
+    while(codigo != 0 && codigo < MAX){
+        livros[i].codigo = codigo;
+
+        printf("Digite a quantidade existente e emprestada: ");
+        scanf("%d%d", &livros[i].qtdexist, &livros[i].qtdemp);
+
+        i++; //NÃO ESQUECER NO WHILE E NEM OS ;!
+
+        printf("Digite o código ou 0: ");
+        scanf("%d", &codigo);
+    }
+
+    return i;
+}
+
+int main(){
+    int qtd, pesquisa, resultado;
+    livro livros[MAX];
+
+    qtd = leitura(livros);
+    ordena(livros, qtd);
+
+    printf("Digite o código a ser pesquisado: ");
+    scanf("%d", &pesquisa);
+
+    while(pesquisa != 0){
+        resultado = busca(livros, pesquisa, qtd);
+        if(resultado == -1)
+            printf("Livro inexistente.\n");
+        else if(livros[resultado].qtdexist == livros[resultado].qtdemp)
+            printf("Livro não disponível para empréstimo\n");
+        else    
+            printf("Livro disponível para empréstimo.\n");
+
+        printf("Digite o código a ser pesquisado: ");
+        scanf("%d", &pesquisa);
+    }
+
+    return 0; //não esquecer!
 }
 
 
