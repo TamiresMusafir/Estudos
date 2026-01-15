@@ -1,14 +1,19 @@
 # Instalando o Rails
 
-##1 - Tenha o ruby/rvm instalado
-	###1.1 ruby --version
-	###1.2 rvm -v
+## 1 - Tenha o ruby/rvm instalado
+	ruby --version
+	rvm -v
 
-##2 - Instale o rails
-	###2.1gem install rails
-	###2.2rails --version
-##3 - Crie o app
-	###3.1rails new myapp
+## 2 - Instale o rails
+	gem install rails
+	rails --version
+	
+## 3 - Crie o app
+	rails new myapp
+	
+## 4 - Entre no app
+	cd myapp
+	$ bin/rails server
 
  
 
