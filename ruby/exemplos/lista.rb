@@ -1,8 +1,10 @@
 #arrays e vetores são o mesmo
 
 lista []
+lista ["isso", "aquilo", "nisso"]
 
 lista.push("Nome", "Nome2")
+lista.push "Nome", "Nome2" #parenteses sao opicionais, da no mesmo
 lista << "Maria" #coloca na última posição
 
 lista.insert(0, "Fulano") #substitui a posição 0
