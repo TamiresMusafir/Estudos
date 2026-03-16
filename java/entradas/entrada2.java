@@ -1,11 +1,9 @@
-package entrada2;
-
 import java.util.Scanner;
 
 public class entrada2 {
     double soma = 0;
     	
-    int [] k = new int [3];
+    int [] k = new int [3]
     
     k [0] = 8;
     k [1] = 3;

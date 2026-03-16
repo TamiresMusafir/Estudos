@@ -1,5 +1,3 @@
-package entradas;
-
 import java.util.Scanner;
 
 public class entrada {

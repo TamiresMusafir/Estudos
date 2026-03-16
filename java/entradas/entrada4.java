@@ -1,5 +1,3 @@
-package entradas;
-
 import java.util.Scanner;
 
 public class entrada4 {
@@ -19,5 +17,4 @@ public class entrada4 {
     	System.out.println(soma/k.length);
     }
 }
- {
 //calcular media de cada idade dos gatos;
