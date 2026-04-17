@@ -4,7 +4,11 @@ import java.util.Scanner;
 public class Mochila {
     String cor;
     int anoFabricacao;
+
     public static void main(String[] args) {
+        int soma = 0;
+        double media;
+
         Mochila[] mochila = new Mochila[4];
         Scanner leitura = new Scanner(System.in);
 
@@ -16,6 +20,11 @@ public class Mochila {
             int lendo = leitura.nextInt();
 
             mochila[i].anoFabricacao = lendo;
+            soma += mochila[i].anoFabricacao;
         }
+
+        media = (double) soma / mochila.length;
+
+        System.out.println("Média: " + media);
     }
 }
