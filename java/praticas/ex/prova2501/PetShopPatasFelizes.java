@@ -6,7 +6,7 @@ public class PetShopPatasFelizes{
         Scanner sc = new Scanner(System.in);
         ItemPet[] itens = new ItemPet[5]; 
 
-        for(int i = 0; i < 3; i++){
+        for(int i = 0; i < 2; i++){
             System.out.println("Ração " + (i+1) + ":");
 
             System.out.println("Digite o código: ");
@@ -19,7 +19,7 @@ public class PetShopPatasFelizes{
             itens[i] = new Racao(codigo, preco);
         }
 
-        for(int i = 0; i < 2; i++){
+        for(int i = 2; i < 4; i++){
             System.out.println("Acessório " + i+1 + ":");
 
             System.out.println("Digite o código: ");
@@ -29,7 +29,7 @@ public class PetShopPatasFelizes{
             double preco = sc.nextDouble();
             sc.nextLine();
 
-            itens[i+3] = new Acessorio(codigo, preco);
+            itens[i] = new Acessorio(codigo, preco);
         }
 
         System.out.println("\n--- Lista de Itens Cadastrados ---");
