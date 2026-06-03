@@ -17,24 +17,23 @@ int main(){
     int op, qtde = 0;
     
     do {
-    cin >> op;
+        cin >> op;
 
-    switch(op)
-    {
-        case 1:
-            inserir(&ult, &qtde);
+        switch(op){
+            case 1:
+                inserir(&ult, &qtde);
 
-            cout << "\nA lista possui "
-                << qtde
-                << " no(s).\n";
+                cout << "\nA lista possui "
+                    << qtde
+                    << " no(s).\n";
 
-            break;
-        case 2: 
-            retirar(&ult, &qtde); 
-            break;
-        case 3: 
-            listar(ult, qtde); 
-            break;
+                break;
+            case 2: 
+                retirar(&ult, &qtde); 
+                break;
+            case 3: 
+                listar(ult, qtde); 
+                break;
         }
     } while (op !=0); 
 }
@@ -51,7 +50,7 @@ void inserir(noPtr *i, int *q){
     } else {
         // Se já tem elementos, *i é o ÚLTIMO nó. Logo, (*i)->prox é o PRIMEIRO nó atual da lista.
         
-        p->prox = (*i)->prox; // O novo nó (p) copia o ponteiro do último, passando a apontar para o atual PRIMEIRO.
+        p->prox = (*i)->prox; // O novo nó (p) copia o ponteiro do último, passando a apontar para o antigo PRIMEIRO (*i).
         (*i)->prox = p;       // O último nó (*i) deixa de apontar para o antigo primeiro e aponta para o NOVO nó (p).
         
         // NOTA: Como não escrevemos "*i = p;", o ponteiro '*i' NÃO sai do lugar. 
@@ -80,7 +79,7 @@ void retirar (noPtr *i, int *q) {
         delete(p); 
         
         cout << "\nO elemento foi retirado da lista!\n";
-        *q = *q - 1; // Cuidado com o caractere do sinal de menos (– vs -)
+        *q = *q - 1;
     } else {
         cout << "\n\nLista Vazia!\n";
     }
