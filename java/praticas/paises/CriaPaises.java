@@ -22,7 +22,31 @@ public class CriaPaises{
         return paises;
     }
 
-    public List<Pais> retornaPaises(String[] dados){
-        
+    public List<Pais> retornaPaises(String[] dados)
+        throws FormatoIncorretoException {
+
+        List<Pais> paises = new ArrayList<>();
+    
+        for(int i = 0; i < dados.length; i++){
+    
+            String[] partes = dados[i].split("#");
+    
+            if(partes.length != 4)
+                throw new FormatoIncorretoException(partes.length - 1, dados[i]);
+    
+            String codigo = partes[0];
+            String nome = partes[1];
+            double dimensao =
+                Double.parseDouble(partes[2]);
+            long populacao =
+                Long.parseLong(partes[3]);
+    
+            Pais pais = new Pais(codigo,nome,dimensao);
+            pais.setPopulacao(populacao);
+    
+            paises.add(pais);
+        }
+    
+        return paises;
     }
 }
