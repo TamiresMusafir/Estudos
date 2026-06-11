@@ -22,7 +22,7 @@ public class CriaPaises{
         return paises;
     }
 
-    public List<Pais> retornaPaises(){
+    public List<Pais> retornaPaises(String[] dados){
         
     }
 }
