@@ -7,10 +7,10 @@ struct no {
 };
 typedef struct no * noPtr;
 
-int inserir(noPtr *, int *);
-void retirar(noPtr *, int *);
-void listar(noPtr, int);
-bool listaVazia(noPtr);
+int inserir(noPtr *i, int *q);
+void retirar(noPtr *i, int *q);
+void listar(noPtr i, int q);
+bool listaVazia(noPtr i);
 
 int main(){
     noPtr ult = NULL;

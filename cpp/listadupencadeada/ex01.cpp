@@ -60,7 +60,8 @@ void retirar (noPtr * i) {
         delete(p);
         cout << "\nO elemento foi retirado da lista!\n";
     }
-    else cout << "\n\nLista está Vazia!\n";
+    else 
+        cout << "\n\nLista está Vazia!\n";
 }
 
 void listar(noPtr p) {
