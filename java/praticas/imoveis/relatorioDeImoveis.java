@@ -1,6 +1,7 @@
 package praticas.imoveis;
 
 import java.util.HashMap;
+import java.util.Iterator;;
 
 public class relatorioDeImoveis {
     public static void relatorioDeImoveis(HashMap mapa){
@@ -21,5 +22,6 @@ public class relatorioDeImoveis {
             }
             
             System.out.println(pessoa.getNome() + " - " + totalPreco);
+        }
     }
 }

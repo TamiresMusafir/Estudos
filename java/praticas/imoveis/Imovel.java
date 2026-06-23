@@ -21,7 +21,7 @@ public class Imovel {
         return preco;
     }
 
-    public void setPreco(){
+    public void setPreco(double Preco){
         this.preco = preco;
     }
 }
