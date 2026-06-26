@@ -14,10 +14,17 @@ public class Util {
         while(it.hasNext()){
             String linha = (String) it.next(); // FAZER CASTING
 
-            String[] partes = linha.split("#");
+            int count = 0;
 
-            if(partes.length != 3)
+            for(int i = 0; linhas.lenth; i++){
+                if(linha.chatAt[i] == '#')
+                    count++;
+            }
+
+            if(count != 2)
                 throw new ProcessamentoException("Formato incorreto: " + linha);
+
+            String[] partes = linha.split("#");
             
             String id = partes[0];
             String nome = partes[1];
