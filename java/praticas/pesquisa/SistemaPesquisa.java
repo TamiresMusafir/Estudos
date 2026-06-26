@@ -33,11 +33,8 @@ public class SistemaPesquisa {
         while(it.hasNext()){
             double soma = 0;
 
-            String codigo = (String) it.next();
 
-            GrupoPesquisa grupo = (GrupoPesquisa) mapa.get(codigo);
-
-            Iterator it = grupo.iterator();
+            }
         }
 
     }
