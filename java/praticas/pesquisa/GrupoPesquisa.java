@@ -10,7 +10,7 @@ public class GrupoPesquisa {
     public GrupoPesquisa(String codigo, String nome){
         this.codigo = codigo;
         this.nome = nome;
-        projetos = new ArrayList<>();
+        projetos = new ArrayList();
     }
 
      public String getCodigo() {
