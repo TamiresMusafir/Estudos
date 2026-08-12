@@ -49,8 +49,17 @@ print(f"Modelo: {carro['modelo']} - Ano: {carro['ano']} - Cor: {carro['cor']}")
 if __name__ == "__main__":
  	main()
 
-def analisar_pedido(valor_total, cupon, taxa_entrega):
+def analisar_pedido(valor_total, cupon=None, taxa_entrega=10.0):
+	desconto = 0.0
+
 	if cupon == "PROMO10":
-		valor_total = -0.10
-		if valor_total > 100.0:
-			taxa_entrega = 0.0
+		desconto = valor_total * 0.10
+		valor_com_desconto = valor_total - desconto
+
+	if valor_total > 100:
+		taxa_entrega = 0.0
+
+	valor_final = valor_com_desconto + taxa_entrega
+    
+    return valor_final, desconto
+		
