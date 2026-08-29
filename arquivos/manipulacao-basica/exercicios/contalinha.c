@@ -4,7 +4,8 @@
 
 int main(int argc, char** argv){
 	FILE *entrada;
-	int c, count;
+	int c;
+	int count = 0;
 
 	if(argc != 2){
 		fprintf(stderr,"Erro na chamada do comando.\n");
