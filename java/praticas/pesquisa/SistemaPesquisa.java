@@ -28,14 +28,24 @@ public class SistemaPesquisa {
 
     public static void relatorioDeFinanciamento(HashMap mapa){
 
-        Iterator it = mapa.keySet().iterator(); // ESQUECE SEMPRE
+       Iterator it = mapa.keySet().iterator();
 
-        while(it.hasNext()){
-            double soma = 0;
+       while(it.hasNext()){
+            String codigo = (String) it.next();
 
+            GrupoPesquisa grupo = (GrupoPesquisa) mapa.get(codigo);
 
+            double soma = 0; 
+
+            Iterator itGrupo = grupo.getProjetos().iterator();
+
+            while(itGrupo.hasNext()){
+                Projeto projeto = (Projeto) itGrupo.next();
+                
+                soma += projeto.getValorFinanciamento();
             }
-        }
 
+            System.out.println(grupo.getNome() + soma);
+        }
     }
 }
