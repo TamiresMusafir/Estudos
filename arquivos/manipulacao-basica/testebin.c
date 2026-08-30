@@ -13,19 +13,20 @@ struct _Pessoa {
 };
 
 int main(){
-    FILE *f = fopen("saida.dat", "wb"); // Abre/cria o arquivo "saida.dat" para escrita em modo binário.
-                                        // f representa o arquivo aberto.
+    // Abre/cria o arquivo "saida.dat" para escrita em modo binário. f representa o arquivo aberto.
+    FILE *f = fopen("saida.dat", "wb"); 
 
-    Pessoa p[1000];                     // Cria um ARRAY com espaço para 1000 pessoas.
-                                        // Cada posição do array é uma struct Pessoa:
-                                        // p[0] → Pessoa
-
-    memset(p, 0, 1000 * sizeof(Pessoa));    // Preenche toda a memória ocupada pelo array com zeros.
-                                            // p → endereço inicial do array
-                                            // 0 → valor usado para preencher
-                                            // 1000 * sizeof(Pessoa) → quantidade total de bytes que queremos zerar.
-                                            // Depois disso, todas as 1000 Pessoas começam com seus bytes zerados.
-
+    // Cria um ARRAY com espaço para 1000 pessoas. Cada posição do array é uma struct Pessoa:
+    // p[0] → Pessoa
+    Pessoa p[1000];                    
+                                        
+    // Preenche toda a memória ocupada pelo array com zeros.        
+    // p → endereço inicial do array
+    // 0 → valor usado para preencher
+    // 1000 * sizeof(Pessoa) → quantidade total de bytes que queremos zerar.
+    // Depois disso, todas as 1000 Pessoas começam com seus bytes zerados.
+    memset(p, 0, 1000 * sizeof(Pessoa));    
+                                            
     // p.nome = "Renato Mauro"; // Não podemos fazer isso. p é um ARRAY de Pessoa.
                                 // Além disso, arrays de char não podem receber uma string usando = depois de criados.
 
