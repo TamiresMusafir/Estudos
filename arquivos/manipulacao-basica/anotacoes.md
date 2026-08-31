@@ -1,18 +1,49 @@
-# Estrutura de Arquivos — Anotações
+# 📁 Estrutura de Arquivos em C
 
-## 1. Ideia geral
+> Material de estudo consolidado — conceitos, funções, exercícios e principais dificuldades
 
-Um arquivo pode ser visto como uma sequência de **bytes** armazenados no disco.
+---
 
-O programa pode:
+## 📑 Sumário
 
-* abrir um arquivo;
-* ler dados dele;
-* escrever dados nele;
-* alterar a posição de leitura/escrita;
-* fechar o arquivo.
+1. [O que é manipulação de arquivos](#1)
+2. [O tipo `FILE`](#2)
+3. [`FILE *entrada` — ponteiro para arquivo](#3)
+4. [`entrada` x `*entrada`](#4)
+5. [Por que `entrada = fopen(...)`](#5)
+6. [`fopen()`](#6)
+7. [Modos de abertura](#7)
+8. [Texto x binário](#8)
+9. [`fclose()`](#9)
+10. [Fechar antes do `return`](#10)
+11. [`fgetc()` e `fputc()`](#11)
+12. [`int c` e `EOF`](#12)
+13. [`fread()` e `fwrite()`](#13)
+14. [Memória: struct, array, `sizeof`, `memset`, `strcpy`](#14)
+15. [`argc` e `argv`](#15)
+16. [Exercícios resolvidos](#16)
+17. [Bytes e caracteres (ASCII)](#17)
+18. [`fseek()`, `ftell()` e acesso direto](#18)
+19. [Registros e busca binária](#19)
+20. [Mapa mental e resumo final](#20)
 
-A biblioteca usada para isso é principalmente:
+---
+
+<a id="1"></a>
+
+# 🧠 1. O que é manipulação de arquivos?
+
+Um arquivo pode ser entendido como uma sequência de **bytes armazenados no disco**.
+
+Um programa pode:
+
+* 📂 abrir um arquivo;
+* 📖 ler dados;
+* ✍️ escrever dados;
+* 🔀 mudar a posição de leitura/escrita dentro do arquivo;
+* ❌ fechar o arquivo.
+
+A biblioteca principal usada é:
 
 ```c
 #include <stdio.h>
@@ -33,26 +64,69 @@ ftell()
 
 ---
 
-# 2. `FILE`
+<a id="2"></a>
 
-`FILE` é um **tipo** fornecido pela biblioteca padrão do C.
+# 📌 2. O tipo `FILE`
 
-Ele representa as informações necessárias para o programa trabalhar com um arquivo aberto.
+`FILE` é um **tipo fornecido pela biblioteca padrão do C**, usado para representar e controlar um arquivo aberto.
 
-Podemos imaginar, de forma simplificada, que um `FILE` guarda informações como:
+De forma simplificada, podemos imaginar que um `FILE` guarda informações como:
 
 * qual arquivo está sendo usado;
 * modo de abertura;
 * posição atual dentro do arquivo;
 * informações de buffer;
 * estado de erro;
-* indicação de fim de arquivo etc.
+* indicação de fim de arquivo.
 
-Não precisamos conhecer os campos internos de `FILE`.
+> ⚠️ **Não precisamos conhecer os campos internos de `FILE`.** Trabalhamos sempre através das funções da biblioteca.
+
+Declaração típica:
+
+```c
+FILE *f;
+```
+
+Aqui:
+
+```text
+FILE
+ ↓
+é um tipo
+
+f
+ ↓
+é uma variável
+
+*
+ ↓
+indica que f é um ponteiro
+```
+
+Portanto:
+
+> `f` é um ponteiro para um `FILE`.
+
+Podemos imaginar:
+
+```text
+f
+│
+│ endereço
+▼
+┌──────────────┐
+│     FILE     │
+│              │
+│ informações  │
+│ do arquivo   │
+└──────────────┘
+```
 
 ---
 
-# 3. `FILE *entrada`
+<a id="3"></a>
+
+# 🔗 3. `FILE *entrada` — ponteiro para arquivo
 
 Quando fazemos:
 
@@ -62,30 +136,28 @@ FILE *entrada;
 
 estamos criando uma variável chamada `entrada` que é um **ponteiro para `FILE`**.
 
-É importante entender:
-
 ```text
 entrada → endereço de um FILE
 ```
 
-`entrada` NÃO é o arquivo diretamente.
-
-Ele guarda o endereço de uma estrutura `FILE` usada para controlar o arquivo.
+`entrada` **NÃO é o arquivo diretamente**. Ele guarda o endereço de uma estrutura `FILE` usada para controlar o arquivo.
 
 ---
 
-## `entrada` x `*entrada`
+<a id="4"></a>
 
-Essa foi uma das partes mais confusas.
+# ⭐ 4. A diferença entre `entrada` e `*entrada`
 
-Se:
+Essa é uma das partes mais importantes — e mais confusas.
+
+Comparando com um caso simples:
 
 ```c
 int x = 10;
 int *p = &x;
 ```
 
-então:
+Temos:
 
 ```text
 p  → endereço de x
@@ -95,8 +167,8 @@ p  → endereço de x
 Por exemplo:
 
 ```text
-p  = 1000       (endereço)
-*p = 10         (valor naquele endereço)
+p  = 1000       ← endereço
+*p = 10         ← valor naquele endereço
 ```
 
 A mesma ideia vale para:
@@ -109,68 +181,49 @@ Podemos imaginar:
 
 ```text
 entrada
-   ↓
- endereço
-   ↓
- FILE
+   │
+   │ endereço
+   ▼
+  FILE
 ```
 
-Então:
+| Expressão  | Significado                      |
+| ---------- | -------------------------------- |
+| `entrada`  | endereço armazenado no ponteiro  |
+| `*entrada` | acessa o `FILE` naquele endereço |
 
-```text
-entrada   → o endereço armazenado no ponteiro
-*entrada  → acessar o FILE que está naquele endereço
-```
-
-### Importante
-
-`entrada` **não aponta para si mesma**.
+⚠️ **`entrada` não aponta para si mesma.**
 
 É:
 
 ```text
-entrada ─────────→ FILE
+entrada ───────────► FILE
 ```
 
-O `*` usado em:
+### Dois usos diferentes do `*`
 
 ```c
-FILE *entrada;
+FILE *entrada;   // aqui o * DECLARA que entrada é um ponteiro
 ```
-
-indica que `entrada` é um ponteiro.
-
-Já o `*` usado em:
 
 ```c
-*entrada
+*entrada         // aqui o * é o operador de DESREFERENCIAÇÃO:
+                 // "vá até o endereço armazenado no ponteiro"
 ```
-
-é o operador de desreferenciação: ele significa "vá até o endereço armazenado no ponteiro".
 
 ---
 
-# 4. Por que `fopen()` fica assim?
+<a id="5"></a>
+
+# 🔑 5. Por que usamos `entrada = fopen(...)`?
+
+A função `fopen()` retorna um:
 
 ```c
-entrada = fopen(argv[1], "rb");
+FILE *
 ```
 
-O `fopen()` retorna um `FILE *`.
-
-Portanto:
-
-```text
-fopen()
-   ↓
- FILE*
-   ↓
-entrada
-```
-
-Estamos guardando em `entrada` o ponteiro retornado por `fopen()`.
-
-Também poderíamos separar:
+Por exemplo:
 
 ```c
 FILE *entrada;
@@ -178,52 +231,77 @@ FILE *entrada;
 entrada = fopen("arquivo.txt", "rb");
 ```
 
-Ou escrever tudo em uma linha:
-
-```c
-FILE *entrada = fopen("arquivo.txt", "rb");
-```
-
-Os dois são equivalentes.
-
----
-
-# 5. Por que não `*entrada = fopen(...)`?
-
-Porque:
+O fluxo é:
 
 ```text
-entrada   → FILE*
-*entrada  → FILE
+             fopen()
+                │
+                ▼
+             FILE *
+                │
+                ▼
+            entrada
 ```
 
-Enquanto `fopen()` retorna:
-
-```text
-FILE*
-```
-
-Então queremos:
-
-```text
-FILE* → FILE*
-```
-
-por isso:
+Por isso usamos:
 
 ```c
 entrada = fopen(...);
 ```
 
-E não:
+e **não**:
 
 ```c
-*entrada = fopen(...);
+*entrada = fopen(...);   // ❌
 ```
+
+Porque:
+
+```text
+entrada  → FILE *
+*entrada → FILE
+```
+
+Enquanto `fopen()` retorna:
+
+```text
+FILE *
+```
+
+Então queremos atribuir:
+
+```text
+FILE * → FILE *
+```
+
+### Formas equivalentes de escrever
+
+Separado:
+
+```c
+FILE *entrada;
+entrada = fopen("arquivo.txt", "rb");
+```
+
+Em uma linha só:
+
+```c
+FILE *entrada = fopen("arquivo.txt", "rb");
+```
+
+Com argumento da linha de comando:
+
+```c
+entrada = fopen(argv[1], "rb");
+```
+
+Os três são equivalentes.
 
 ---
 
-# 6. `fopen()`
+<a id="6"></a>
+
+# 📂 6. `fopen()`
 
 A função:
 
@@ -243,17 +321,26 @@ Podemos pensar:
 
 ```text
 arquivo no disco
-       ↓
-     fopen()
-       ↓
-    FILE*
-       ↓
+       │
+       ▼
+    fopen()
+       │
+       ▼
+     FILE *
+       │
+       ▼
        f
 ```
 
-Se não conseguir abrir o arquivo, `fopen()` retorna `NULL`.
+Se não conseguir abrir o arquivo:
 
-Por isso verificamos:
+```text
+fopen()
+   ↓
+NULL
+```
+
+Por isso **sempre** verificamos:
 
 ```c
 if(!f)
@@ -263,95 +350,84 @@ if(!f)
 }
 ```
 
-`!f` significa que `f` é `NULL`.
+> `!f` significa que `f` é `NULL`.
 
 ---
 
-# 7. Modos do `fopen`
+<a id="7"></a>
 
-O segundo parâmetro de `fopen()` determina **como o arquivo será aberto**.
+# 🛠️ 7. Modos do `fopen()`
 
-## `r` — read
+O segundo parâmetro informa **como queremos abrir o arquivo**.
+
+## `r` — Read
 
 ```c
 fopen("arquivo.txt", "r");
 ```
 
-Abre para **leitura**.
+📖 Abre para **leitura**.
 
-O arquivo precisa existir.
-
-Não é usado para escrever.
+* O arquivo precisa existir.
+* Não é usado para escrita.
 
 ---
 
-## `w` — write
+## `w` — Write
 
 ```c
 fopen("arquivo.txt", "w");
 ```
 
-Abre para **escrita**.
+✍️ Abre para **escrita**.
 
-Se o arquivo não existir, ele pode ser criado.
-
-Se já existir, seu conteúdo é **apagado/truncado**.
-
-Cuidado com `w` porque pode destruir o conteúdo existente.
+* Cria o arquivo se ele não existir.
+* ⚠️ Se o arquivo já existir, seu conteúdo é **apagado/truncado**.
+* Cuidado: `w` pode destruir o conteúdo existente.
 
 ---
 
-## `a` — append
+## `a` — Append
 
 ```c
 fopen("arquivo.txt", "a");
 ```
 
-Abre para escrita no **final do arquivo**.
+➕ Abre para escrita no **final do arquivo**.
 
-Se o arquivo não existir, pode ser criado.
-
-O conteúdo existente é preservado.
-
-É útil quando queremos adicionar informações sem apagar o que já existe.
+* Preserva o conteúdo existente.
+* Cria o arquivo se necessário.
+* Útil para adicionar informações sem apagar o que já existe.
 
 ---
 
-## `r+` — leitura e escrita
+## `r+` — Read + Write
 
 ```c
 fopen("arquivo.txt", "r+");
 ```
 
-Permite:
+📖✍️ Permite ler e escrever.
 
-* ler;
-* escrever.
-
-O arquivo precisa existir.
-
-O conteúdo existente não é apagado ao abrir.
+* O arquivo precisa existir.
+* O conteúdo existente **não** é apagado ao abrir.
 
 ---
 
-## `w+` — leitura e escrita
+## `w+` — Write + Read
 
 ```c
 fopen("arquivo.txt", "w+");
 ```
 
-Permite:
+📖✍️ Permite escrever e ler.
 
-* ler;
-* escrever.
-
-Pode criar o arquivo se ele não existir.
-
-Se já existir, o conteúdo é **apagado/truncado**.
+* Cria o arquivo se não existir.
+* ⚠️ Se já existir, o conteúdo é **apagado/truncado**.
 
 ---
 
-## `rb` — read binary
+## `rb` — Read Binary
 
 ```c
 fopen("arquivo.dat", "rb");
@@ -364,15 +440,13 @@ r = read
 b = binary
 ```
 
-Ou seja:
+> 📖 Ler um arquivo em modo binário.
 
-> Abrir para leitura em modo binário.
-
-É muito usado quando trabalhamos diretamente com bytes ou arquivos binários.
+Muito utilizado quando queremos trabalhar diretamente com **bytes**.
 
 ---
 
-## `r+b`
+## `r+b` — Read + Write Binary
 
 ```c
 fopen("arquivo.dat", "r+b");
@@ -381,35 +455,60 @@ fopen("arquivo.dat", "r+b");
 É:
 
 ```text
-r = leitura
-+ = leitura e escrita
-b = binário
+r = read
++ = leitura + escrita
+b = binary
 ```
 
 Permite ler e escrever em um arquivo binário existente.
 
 ---
 
-# 8. Texto x binário
+## 📋 Resumo dos modos
 
-Os modos podem ter `b`:
+| Modo  | Leitura | Escrita | Cria | Apaga conteúdo |
+| ----- | :-----: | :-----: | :--: | :------------: |
+| `r`   |    ✅    |    ❌    |   ❌  |        ❌       |
+| `w`   |    ❌    |    ✅    |   ✅  |     ⚠️ Sim     |
+| `a`   |    ❌    |    ✅    |   ✅  |        ❌       |
+| `r+`  |    ✅    |    ✅    |   ❌  |        ❌       |
+| `w+`  |    ✅    |    ✅    |   ✅  |     ⚠️ Sim     |
+| `rb`  |    ✅    |    ❌    |   ❌  |        ❌       |
+| `wb`  |    ❌    |    ✅    |   ✅  |     ⚠️ Sim     |
+| `r+b` |    ✅    |    ✅    |   ❌  |        ❌       |
+
+### 🧠 Macete
 
 ```text
-r
-rb
+r → read
+w → write
+a → append
 
-w
-wb
-
-r+
-r+b
++ → leitura E escrita
+b → binary
 ```
 
-O `b` significa **binary**.
+---
 
-Em sistemas como Windows, existe uma diferença importante entre modo texto e binário, especialmente relacionada à representação de quebras de linha.
+<a id="8"></a>
 
-Para trabalhar diretamente com arquivos de dados binários, usamos normalmente:
+# 💾 8. Texto x Binário
+
+Os modos podem ou não ter o `b`:
+
+```text
+r    →  rb
+w    →  wb
+r+   →  r+b
+```
+
+O `b` significa:
+
+> **binary**
+
+Em arquivos binários, trabalhamos diretamente com os bytes armazenados.
+
+⚠️ Em sistemas como o Windows existe uma diferença importante entre o modo texto e o modo binário, especialmente na representação das **quebras de linha**. Por isso, para arquivos de dados, usamos normalmente:
 
 ```c
 "rb"
@@ -417,9 +516,20 @@ Para trabalhar diretamente com arquivos de dados binários, usamos normalmente:
 "r+b"
 ```
 
+O modo binário é especialmente importante quando trabalhamos com:
+
+* estruturas;
+* registros;
+* arquivos `.dat`;
+* índices;
+* acesso direto;
+* busca binária em arquivos.
+
 ---
 
-# 9. `fclose()`
+<a id="9"></a>
+
+# ❌ 9. `fclose()`
 
 ```c
 fclose(f);
@@ -427,19 +537,19 @@ fclose(f);
 
 Fecha o arquivo que foi aberto.
 
-Isso **não significa apertar o X de uma janela**.
-
-É uma operação do programa para informar à biblioteca:
+⚠️ Isso **não significa apertar o X de uma janela**. É uma operação do programa, que informa à biblioteca:
 
 > "Terminei de trabalhar com esse arquivo."
 
-O arquivo deixa de ficar aberto pelo programa.
+O arquivo deixa de ficar aberto pelo programa. Todo arquivo aberto deve ser fechado.
 
-É importante fechar arquivos que foram abertos.
+> 📌 `fclose()` recebe um `FILE *`. Por isso é `fclose(f);` e **nunca** `fclose(*f);`
 
 ---
 
-# 10. Por que fechar antes de `return` em alguns casos?
+<a id="10"></a>
+
+# ⚠️ 10. Por que às vezes precisamos fechar antes do final?
 
 Exemplo:
 
@@ -455,51 +565,49 @@ saida = fopen(...);
 
 if(!saida)
 {
-    fclose(entrada);
+    fclose(entrada);   // ← fechamos aqui!
     return 1;
 }
 ```
 
-Se `entrada` abriu corretamente, mas `saida` falhou:
+Imagine:
 
 ```text
-entrada → aberto
-saida   → não abriu
+entrada → abriu ✅
+saida   → falhou ❌
 ```
 
-Como o programa vai sair imediatamente:
+Como o programa vai executar:
 
 ```c
 return 1;
 ```
 
-não chegaremos ao:
+ele **não chegará** ao `fclose(entrada);` que está no final do programa.
 
-```c
-fclose(entrada);
-```
-
-que está no final do programa.
-
-Por isso precisamos fechar `entrada` **antes de sair**.
+Por isso fazemos `fclose(entrada);` **antes do `return`**.
 
 ---
 
-# 11. `fgetc()`
+<a id="11"></a>
+
+# 📖 11. `fgetc()` e `fputc()`
+
+## `fgetc()` — lê um byte
 
 ```c
 c = fgetc(entrada);
 ```
 
-Lê **um caractere/byte por vez** do arquivo.
+Lê **um byte por vez** do arquivo.
 
-Exemplo de arquivo:
+Imagine um arquivo contendo:
 
 ```text
 ABC
 ```
 
-Podemos imaginar:
+A leitura seria aproximadamente:
 
 ```text
 fgetc() → A
@@ -509,37 +617,92 @@ fgetc() → \n
 fgetc() → EOF
 ```
 
----
-
-# 12. Por que `fgetc()` retorna `int` e não `char`?
-
-Essa foi outra parte importante.
-
-Embora `fgetc()` leia um caractere/byte, ela precisa conseguir retornar também:
+## `fputc()` — escreve um byte
 
 ```c
-EOF
+fputc(c, saida);
 ```
 
-`EOF` significa:
+Escreve um byte/caractere no arquivo.
 
-> End Of File — fim do arquivo.
+## Direção dos dados
 
-Por isso usamos:
+```text
+fgetc()
+ARQUIVO ───────► MEMÓRIA
+
+fputc()
+MEMÓRIA ───────► ARQUIVO
+```
+
+## Programa de cópia (ideia central)
+
+```text
+ARQUIVO DE ENTRADA
+        ↓
+      fgetc
+        ↓
+        c
+        ↓
+      fputc
+        ↓
+ARQUIVO DE SAÍDA
+```
+
+Em código:
+
+```c
+int c;
+
+c = fgetc(entrada);
+
+while(c != EOF)
+{
+    fputc(c, saida);
+    c = fgetc(entrada);
+}
+```
+
+O programa repete isso até chegar ao `EOF`.
+
+---
+
+<a id="12"></a>
+
+# 🤔 12. Por que `int c` e não `char c`? E o que é `EOF`?
+
+## Por que `int`
+
+Mesmo lendo um único caractere/byte, usamos:
 
 ```c
 int c;
 ```
 
-e não:
+porque `fgetc()` precisa conseguir retornar **duas coisas diferentes**:
+
+1. um valor correspondente ao byte lido (0 a 255);
+2. ou `EOF`.
+
+Então:
 
 ```c
-char c;
+c = fgetc(entrada);
 ```
 
-A variável `int` consegue representar os valores dos bytes e também o valor especial `EOF`.
+pode resultar em:
 
-Por isso o padrão é:
+```text
+byte
+```
+
+ou:
+
+```text
+EOF
+```
+
+Um `int` consegue representar tanto os valores dos bytes quanto o valor especial `EOF`. Por isso o padrão é:
 
 ```c
 int c;
@@ -553,15 +716,13 @@ while(c != EOF)
 }
 ```
 
----
+## 🚩 `EOF`
 
-# 13. `EOF`
+`EOF` significa:
 
-`EOF` significa **End Of File**.
+> **End Of File** — fim do arquivo.
 
-Não é exatamente um caractere armazenado no arquivo.
-
-É um valor especial retornado por funções de leitura para indicar que não existem mais dados para ler.
+⚠️ `EOF` **não é um caractere comum armazenado no arquivo**. É um valor especial retornado pelas funções de leitura para indicar que **não há mais dados**.
 
 Por isso:
 
@@ -571,109 +732,53 @@ while(c != EOF)
 
 significa:
 
-> Continue enquanto ainda houver dados no arquivo.
+> Continue enquanto não chegamos ao fim do arquivo.
 
 ---
 
-# 14. `fputc()`
+<a id="13"></a>
 
-```c
-fputc(c, saida);
-```
-
-Escreve um caractere/byte no arquivo.
-
-Assim:
-
-```text
-fgetc                 fputc
-
-arquivo → programa    programa → arquivo
-```
-
-Exemplo:
-
-```c
-c = fgetc(entrada);
-fputc(c, saida);
-```
-
-Lê um byte da entrada e escreve esse byte na saída.
-
----
-
-# 15. Programa de cópia usando `fgetc` e `fputc`
-
-A ideia:
-
-```text
-ARQUIVO DE ENTRADA
-        ↓
-      fgetc
-        ↓
-       c
-        ↓
-      fputc
-        ↓
-ARQUIVO DE SAÍDA
-```
-
-O programa faz isso repetidamente até `EOF`.
-
----
-
-# 16. `fread()` e `fwrite()`
+# 📦 13. `fread()` e `fwrite()`
 
 Essas funções permitem trabalhar com **blocos de dados**, em vez de um byte por vez.
 
-### `fwrite`
+## Direção — a coisa mais importante para memorizar
 
 ```text
-MEMÓRIA → ARQUIVO
+┌──────────────┐
+│   ARQUIVO    │
+└──────┬───────┘
+       │
+       │ fread
+       ▼
+┌──────────────┐
+│    MEMÓRIA   │
+└──────────────┘
 ```
 
-### `fread`
+`fread()`:
+
+> 📂 Arquivo → Memória
 
 ```text
-ARQUIVO → MEMÓRIA
+┌──────────────┐
+│    MEMÓRIA   │
+└──────┬───────┘
+       │
+       │ fwrite
+       ▼
+┌──────────────┐
+│   ARQUIVO    │
+└──────────────┘
 ```
 
-Essa é uma das coisas mais importantes para memorizar.
+`fwrite()`:
+
+> 💾 Memória → Arquivo
 
 ---
 
-# 17. Parâmetros do `fwrite`
-
-Formato:
-
-```c
-fwrite(dados, tamanho, quantidade, arquivo);
-```
-
-Pode pensar:
-
-```text
-fwrite(
-    ONDE ESTÃO OS DADOS,
-    TAMANHO DE CADA ITEM,
-    QUANTOS ITENS,
-    ARQUIVO
-);
-```
-
-Exemplo:
-
-```c
-fwrite(p, sizeof(Pessoa), 1000, f);
-```
-
-Significa:
-
-> Grave 1000 estruturas `Pessoa`, cada uma ocupando `sizeof(Pessoa)` bytes, começando em `p`, no arquivo `f`.
-
----
-
-# 18. Parâmetros do `fread`
+## 🧩 Parâmetros do `fread()`
 
 Formato:
 
@@ -681,46 +786,253 @@ Formato:
 fread(destino, tamanho, quantidade, arquivo);
 ```
 
-Pode pensar:
+Pense sempre:
 
 ```text
-fread(
-    ONDE COLOCAR OS DADOS,
-    TAMANHO DE CADA ITEM,
-    QUANTOS ITENS,
-    ARQUIVO
-);
+ONDE COLOCAR OS DADOS?
+QUANTO CADA UM?
+QUANTOS?
+DE QUAL ARQUIVO?
 ```
 
 Exemplo:
 
 ```c
-fread(p, sizeof(Pessoa), 1000, f);
+fread(
+    p,
+    sizeof(Pessoa),
+    1000,
+    f
+);
 ```
 
 Significa:
 
-> Leia até 1000 estruturas `Pessoa` do arquivo `f` e coloque os dados em `p`.
+> Leia até 1000 estruturas `Pessoa` do arquivo `f` e coloque os dados começando em `p`.
 
 ---
 
-# 19. `fwrite` x `fread`
+## 🧩 Parâmetros do `fwrite()`
 
-| Função   | Direção           |
-| -------- | ----------------- |
-| `fwrite` | memória → arquivo |
-| `fread`  | arquivo → memória |
+Formato:
 
-Uma forma de lembrar:
+```c
+fwrite(origem, tamanho, quantidade, arquivo);
+```
+
+Pense:
 
 ```text
-WRITE = ESCREVER NO ARQUIVO
-READ  = LER DO ARQUIVO
+O QUE GRAVAR?
+QUANTO CADA UM?
+QUANTOS?
+EM QUAL ARQUIVO?
+```
+
+Exemplo:
+
+```c
+fwrite(
+    p,
+    sizeof(Pessoa),
+    1000,
+    f
+);
+```
+
+Visualmente:
+
+```text
+                tamanho        quantidade
+                    ↓               ↓
+
+fwrite(          p,       sizeof(Pessoa),   1000,   f);
+                 ↑                                  ↑
+          início dos dados                       arquivo
+```
+
+Significa:
+
+> Grave 1000 estruturas `Pessoa` no arquivo `f`, considerando que cada uma possui `sizeof(Pessoa)` bytes.
+
+### Gravando uma única estrutura
+
+```c
+fwrite(&p, sizeof(Pessoa), 1, f);   // uma Pessoa (variável simples → precisa do &)
+fwrite(p,  sizeof(Pessoa), 1000, f); // 1000 Pessoas (array → já é endereço)
 ```
 
 ---
 
-# 20. `sizeof`
+## 📂 Lendo estruturas com `fread`
+
+```c
+int qt = fread(
+    p,
+    sizeof(Pessoa),
+    1000,
+    f
+);
+```
+
+O fluxo é:
+
+```text
+ARQUIVO
+   │
+   │ fread
+   ▼
+MEMÓRIA
+   │
+   ▼
+p[0]
+p[1]
+p[2]
+...
+```
+
+O retorno de `fread()` informa quantos **itens completos** foram lidos.
+
+Se o arquivo possui 300 Pessoas:
+
+```c
+qt = 300;
+```
+
+---
+
+## ⚠️ `fread()` não retorna bytes
+
+Observe:
+
+```c
+fread(p, sizeof(Pessoa), 1000, f);
+```
+
+O segundo parâmetro é o **tamanho de cada item** e o terceiro é a **quantidade de itens**. O retorno é a quantidade de **itens** lidos, não de bytes.
+
+Se:
+
+```text
+sizeof(Pessoa) = 52
+```
+
+e foram lidas 300 Pessoas:
+
+```text
+retorno = 300      ✅
+```
+
+e **não**:
+
+```text
+15600              ❌ (isso seria a quantidade de bytes)
+```
+
+---
+
+## 🔄 Tabelas comparativas
+
+| Função   | Direção                 |
+| -------- | ----------------------- |
+| `fread`  | 📂 Arquivo → 🧠 Memória |
+| `fwrite` | 🧠 Memória → 📂 Arquivo |
+
+| Função   | Quantidade     |
+| -------- | -------------- |
+| `fgetc`  | 1 byte por vez |
+| `fputc`  | 1 byte por vez |
+| `fread`  | vários itens   |
+| `fwrite` | vários itens   |
+
+---
+
+<a id="14"></a>
+
+# 🧠 14. Memória: struct, array, `sizeof`, `memset`, `strcpy`
+
+## 👤 `struct Pessoa`
+
+Podemos definir:
+
+```c
+struct _Pessoa {
+    char nome[40];
+    int idade;
+    float altura;
+};
+```
+
+E criar um apelido com `typedef`:
+
+```c
+typedef struct _Pessoa Pessoa;
+```
+
+Agora podemos usar:
+
+```c
+Pessoa p;
+```
+
+em vez de:
+
+```c
+struct _Pessoa p;
+```
+
+---
+
+## 👥 Array de `Pessoa`
+
+```c
+Pessoa p[1000];
+```
+
+Cria espaço para 1000 estruturas:
+
+```text
+p[0]    → Pessoa
+p[1]    → Pessoa
+p[2]    → Pessoa
+...
+p[999]  → Pessoa
+```
+
+Cada Pessoa possui:
+
+```text
+nome
+idade
+altura
+```
+
+---
+
+## 📦 `p` x `p[0]`
+
+Se temos `Pessoa p[1000];` então:
+
+```text
+p       → início/endereço do array
+p[0]    → primeira Pessoa
+p[1]    → segunda Pessoa
+p[2]    → terceira Pessoa
+```
+
+Por isso:
+
+```c
+fwrite(p, sizeof(Pessoa), 1000, f);
+```
+
+usa `p` como ponto inicial dos dados — a gravação começa no primeiro elemento do array.
+
+---
+
+## 📏 `sizeof()`
+
+`sizeof()` informa o tamanho de algo em **bytes**.
 
 ```c
 sizeof(Pessoa)
@@ -733,60 +1045,44 @@ pergunta:
 Se:
 
 ```text
-sizeof(Pessoa) = 48
+sizeof(Pessoa) = 52
 ```
 
 então:
 
 ```text
-1 Pessoa = 48 bytes
+1 Pessoa = 52 bytes
 ```
 
-Se temos:
+---
 
-```c
-Pessoa p[1000];
-```
+## ✖️ `1000 * sizeof(Pessoa)`
 
-o espaço total é:
+Se temos `Pessoa p[1000];`, então:
 
 ```c
 1000 * sizeof(Pessoa)
 ```
 
-Ou seja:
+significa:
 
-> tamanho de uma Pessoa × quantidade de Pessoas.
+> Quantos bytes são necessários para armazenar as 1000 Pessoas.
 
----
-
-# 21. `1000 * sizeof(Pessoa)`
-
-Isso aparece, por exemplo, em:
-
-```c
-memset(p, 0, 1000 * sizeof(Pessoa));
-```
-
-Significa:
-
-> A quantidade total de bytes ocupados pelas 1000 estruturas `Pessoa`.
-
-Exemplo fictício:
+Exemplo:
 
 ```text
-sizeof(Pessoa) = 48
+sizeof(Pessoa) = 52
 
-1000 * 48 = 48000 bytes
+1000 × 52
+     ↓
+52000 bytes
 ```
-
-Então estamos falando de 48000 bytes de memória.
 
 ---
 
-# 22. `memset()`
+## 🧹 `memset()`
 
-`memset()` trabalha diretamente com uma região da memória.
+`memset()` serve para preencher uma região da memória com determinado valor.
 
 Formato:
 
@@ -804,9 +1100,7 @@ Significa:
 
 > Começando no endereço `p`, preencha `1000 * sizeof(Pessoa)` bytes com zero.
 
----
-
-## Por que usar `memset`?
+### 💡 Por que usar `memset()`?
 
 Quando fazemos:
 
@@ -814,257 +1108,75 @@ Quando fazemos:
 Pessoa p[1000];
 ```
 
-a memória pode conter valores que já estavam naquele espaço.
+a memória **não deve ser tratada como se automaticamente estivesse zerada** — ela pode conter valores que já estavam naquele espaço.
 
-Não devemos assumir que tudo começa em zero.
-
-Podemos então fazer:
+Podemos inicializá-la:
 
 ```c
 memset(p, 0, sizeof(p));
 ```
 
-para zerar a região.
-
----
-
-## Outra forma neste caso
-
-Também podemos escrever:
+Neste caso específico, também podemos simplesmente fazer:
 
 ```c
 Pessoa p[1000] = {0};
 ```
 
-Isso já inicializa o array com zero.
+que é uma maneira mais simples de inicializar o array com zero.
 
-Para esse caso específico, é mais simples.
-
-`memset()` é útil de conhecer porque é uma função geral para preencher uma região da memória.
-
----
-
-# 23. `struct Pessoa`
-
-Podemos criar uma estrutura:
-
-```c
-struct _Pessoa {
-    char nome[40];
-    int idade;
-    float altura;
-};
-```
-
-E criar um apelido:
-
-```c
-typedef struct _Pessoa Pessoa;
-```
-
-Assim podemos escrever:
-
-```c
-Pessoa p;
-```
-
-em vez de:
-
-```c
-struct _Pessoa p;
-```
-
----
-
-# 24. Array de estruturas
-
-```c
-Pessoa p[1000];
-```
-
-significa:
-
-> Crie espaço para 1000 estruturas `Pessoa`.
-
-Visualmente:
+### 🧠 Diferença de ideia
 
 ```text
-p[0]     → Pessoa
-p[1]     → Pessoa
-p[2]     → Pessoa
-...
-p[999]   → Pessoa
+Pessoa p[1000] = {0};
+        ↓
+inicialização do array
+
+memset(...)
+        ↓
+preenchimento de uma região da memória
 ```
 
-Cada posição possui:
-
-```text
-nome
-idade
-altura
-```
+`memset()` é útil de conhecer porque é uma função **geral** para preencher qualquer região de memória.
 
 ---
 
-# 25. `strcpy()`
+## ✏️ `strcpy()`
 
 ```c
 strcpy(p[0].nome, "Renato Mauro");
 ```
 
-Copia uma string para o array de caracteres `nome`.
+Copia a string:
 
 ```text
 "Renato Mauro"
-       ↓
+      ↓
 p[0].nome
 ```
 
 Não podemos fazer:
 
 ```c
-p[0].nome = "Renato Mauro";
+p[0].nome = "Renato Mauro";   // ❌
 ```
 
-porque `nome` é um array de `char`.
+porque `nome` é um **array de `char`** (não se atribui array diretamente).
 
-Para colocar dados digitados pelo usuário, podemos usar, por exemplo:
+Para receber o nome pelo teclado, podemos utilizar:
 
 ```c
 fgets(p[0].nome, 40, stdin);
 ```
 
-Assim o nome pode vir do teclado.
-
 ---
 
-# 26. `p` x `p[0]`
+<a id="15"></a>
 
-Se:
+# 🔢 15. `argc` e `argv`
 
-```c
-Pessoa p[1000];
-```
+Quando executamos:
 
-então:
-
-```text
-p       → endereço/início do array
-p[0]    → primeira Pessoa
-p[1]    → segunda Pessoa
-p[2]    → terceira Pessoa
-```
-
-Por isso:
-
-```c
-fwrite(p, sizeof(Pessoa), 1000, f);
-```
-
-usa `p` como o ponto inicial dos dados.
-
----
-
-# 27. Exemplo de `fwrite` com Pessoas
-
-```c
-Pessoa p[1000];
-
-fwrite(p, sizeof(Pessoa), 1000, f);
-```
-
-Podemos interpretar:
-
-```text
-              tamanho      quantidade
-                  ↓             ↓
-
-fwrite(         p,       sizeof(Pessoa),   1000,   f);
-                ↑                                  ↑
-          início dos dados                       arquivo
-```
-
-Ou:
-
-> Comece em `p`, pegue 1000 itens, considerando que cada item tem tamanho `sizeof(Pessoa)`, e grave no arquivo `f`.
-
----
-
-# 28. Exemplo de `fread`
-
-```c
-Pessoa p[1000];
-
-int qt = fread(p, sizeof(Pessoa), 1000, f);
-```
-
-Aqui os dados vão:
-
-```text
-ARQUIVO
-   ↓
- fread()
-   ↓
- MEMÓRIA
-   ↓
-p[0], p[1], p[2]...
-```
-
-`fread()` retorna a quantidade de **itens completos** que conseguiu ler.
-
-Se:
-
-```c
-int qt = fread(p, sizeof(Pessoa), 1000, f);
-```
-
-e o arquivo possui 300 Pessoas:
-
-```text
-qt = 300
-```
-
----
-
-# 29. `fread` não retorna necessariamente bytes
-
-Isso é importante.
-
-Se fizermos:
-
-```c
-fread(p, sizeof(Pessoa), 1000, f);
-```
-
-o retorno representa quantas estruturas `Pessoa` foram lidas.
-
-Se:
-
-```text
-sizeof(Pessoa) = 48
-```
-
-e foram lidas 300 Pessoas:
-
-```text
-retorno = 300
-```
-
-e não:
-
-```text
-14400
-```
-
-O tamanho e a quantidade foram informados separadamente.
-
----
-
-# 30. `argc` e `argv`
-
-Quando o programa recebe argumentos pelo terminal:
-
-```c
+```bash
 ./programa arquivo.txt saida.txt
 ```
 
@@ -1074,7 +1186,7 @@ temos:
 argc = 3
 ```
 
-Porque o próprio nome do programa conta.
+Porque **o nome do programa também conta**.
 
 ```text
 argv[0] → ./programa
@@ -1082,27 +1194,17 @@ argv[1] → arquivo.txt
 argv[2] → saida.txt
 ```
 
----
-
 ## `argc`
 
-É:
-
-> argument count
-
-Quantidade de argumentos.
+> **argument count** — quantidade de argumentos.
 
 ## `argv`
 
-É:
-
-> argument vector
-
-Array de strings contendo os argumentos.
+> **argument vector** — array de strings contendo os argumentos.
 
 ---
 
-# 31. Por que verificar `argc`?
+## 📌 Por que verificar `argc`?
 
 Se o programa espera:
 
@@ -1110,7 +1212,7 @@ Se o programa espera:
 programa + arquivo
 ```
 
-então:
+usamos:
 
 ```c
 if(argc != 2)
@@ -1122,26 +1224,25 @@ Se espera:
 programa + origem + destino
 ```
 
-então:
+usamos:
 
 ```c
 if(argc != 3)
 ```
 
-Isso evita tentar acessar:
-
-```c
-argv[1]
-argv[2]
-```
-
-quando esses argumentos não foram fornecidos.
+Isso evita tentar acessar `argv[1]` ou `argv[2]` quando esses argumentos **não foram fornecidos**.
 
 ---
 
-# 32. Contando linhas
+<a id="16"></a>
 
-Para contar linhas:
+# 📝 16. Exercícios resolvidos
+
+## 16.1 Contar linhas
+
+A ideia é:
+
+> Contar quantas vezes aparece o caractere de quebra de linha `'\n'`.
 
 ```c
 int c;
@@ -1158,21 +1259,23 @@ while(c != EOF)
 }
 ```
 
-A ideia é simples:
-
-> Cada ocorrência de `'\n'` representa uma quebra de linha.
-
-Então:
+Se o arquivo for:
 
 ```text
-linha 1\n
-linha 2\n
-linha 3\n
+Linha 1
+Linha 2
+Linha 3
 ```
 
-possui 3 caracteres `'\n'`.
+internamente ele é:
 
-Logo:
+```text
+Linha 1\n
+Linha 2\n
+Linha 3\n
+```
+
+Então:
 
 ```text
 count = 3
@@ -1180,35 +1283,35 @@ count = 3
 
 ---
 
-# 33. Contando ocorrências de bytes
+## 16.2 Contar ocorrências de bytes
 
-Um arquivo pode conter 256 valores diferentes de byte:
+Um arquivo pode conter **256 valores diferentes de byte**:
 
 ```text
-0 até 255
+0 ─────────────────────────────── 255
 ```
 
-Podemos criar:
+Por isso criamos:
 
 ```c
 int contador[256] = {0};
 ```
 
-Cada posição representa um byte.
+Cada posição representa um possível valor de byte:
 
 ```text
-contador[0]   → quantidade de bytes 0
-contador[1]   → quantidade de bytes 1
-contador[2]   → quantidade de bytes 2
+contador[0]   → quantas vezes apareceu o byte 0
+contador[1]   → quantas vezes apareceu o byte 1
+contador[2]   → quantas vezes apareceu o byte 2
 ...
-contador[65]  → quantidade do byte 65
+contador[65]  → quantas vezes apareceu o byte 65
 ...
-contador[255] → quantidade do byte 255
+contador[255] → quantas vezes apareceu o byte 255
 ```
 
----
+### 🔁 `contador[c]++`
 
-# 34. Por que `contador[c]++`?
+Durante a leitura:
 
 ```c
 c = fgetc(entrada);
@@ -1220,10 +1323,10 @@ while(c != EOF)
 }
 ```
 
-Suponha que `c` seja:
+Suponha:
 
 ```text
-65
+c = 65
 ```
 
 Então:
@@ -1232,46 +1335,40 @@ Então:
 contador[65]++;
 ```
 
-Aumenta a contagem daquele byte.
+A contagem do byte 65 aumenta em 1. Como em ASCII `65 → 'A'`, isso corresponde à quantidade de letras `A`.
 
-Como o valor 65 corresponde ao caractere `'A'` em ASCII:
+### Imprimindo o resultado
 
-```text
-65 → 'A'
+```c
+printf("%c: %d\n", i, contador[i]);
 ```
 
-podemos depois mostrar:
-
-```text
-A: quantidade
-```
+⚠️ Isso mostra o byte como caractere — ver a seção seguinte sobre a armadilha disso.
 
 ---
 
-# 35. Bytes e caracteres
+<a id="17"></a>
 
-Um `char` normalmente representa um byte.
+# 🔤 17. Bytes e caracteres (ASCII)
 
-Em ASCII, por exemplo:
+Um `char` normalmente representa um byte. Em ASCII, alguns valores são:
 
-```text
-'A' → 65
-'B' → 66
-'C' → 67
-'a' → 97
-'b' → 98
-'0' → 48
-```
+| Número | Caractere |
+| -----: | :-------: |
+|   `48` |    `0`    |
+|   `65` |    `A`    |
+|   `66` |    `B`    |
+|   `67` |    `C`    |
+|   `97` |    `a`    |
+|   `98` |    `b`    |
 
-Por isso um valor numérico pode representar um caractere.
-
-Exemplo:
+Por isso:
 
 ```c
 printf("%c", 65);
 ```
 
-produz:
+mostra:
 
 ```text
 A
@@ -1283,128 +1380,52 @@ Enquanto:
 printf("%d", 65);
 ```
 
-produz:
+mostra:
 
 ```text
 65
 ```
 
-O valor é o mesmo; o formato de impressão muda.
+> O valor é o mesmo. **O que muda é o formato de impressão.**
 
 ---
 
-# 36. Atenção ao imprimir bytes como `%c`
+## ⚠️ Nem todo byte é uma letra
 
-No exercício:
+Existem 256 valores possíveis de byte, mas nem todos representam caracteres imprimíveis. Alguns correspondem a:
 
-```c
-printf("%c: %d\n", i, contador[i]);
-```
-
-isso mostra o byte como caractere.
-
-Mas nem todos os 256 valores representam letras imprimíveis.
-
-Alguns representam:
-
-* controle;
-* quebra de linha;
-* tabulação;
+* caracteres de controle;
+* `\n` (quebra de linha);
+* `\t` (tabulação);
 * outros valores não visíveis.
 
-Por isso, se o exercício pede **apenas letras**, pode ser necessário filtrar os valores para imprimir somente os caracteres desejados.
+Por isso, se o exercício pede **apenas letras**, precisamos filtrar o que será impresso.
 
 ---
 
-# 37. Arquivo binário com estruturas
+<a id="18"></a>
 
-Podemos gravar diretamente uma estrutura:
+# 📍 18. `fseek()`, `ftell()` e acesso direto
 
-```c
-fwrite(&p, sizeof(Pessoa), 1, f);
-```
+Essas funções são a base do **acesso direto** aos arquivos.
 
-ou várias:
-
-```c
-fwrite(p, sizeof(Pessoa), 1000, f);
-```
-
-Nesse caso, o arquivo contém os bytes da representação da estrutura na memória.
-
-Isso é muito útil para trabalhar com **registros**.
-
-Por exemplo:
-
-```text
-pessoas.dat
-
-[Pessoa 0]
-[Pessoa 1]
-[Pessoa 2]
-...
-```
-
-Cada registro possui tamanho:
-
-```c
-sizeof(Pessoa)
-```
-
-Isso permite localizar um registro pelo seu número.
-
----
-
-# 38. Por que arquivos binários são importantes em Estrutura de Arquivos?
-
-Porque podemos organizar um arquivo como uma sequência de **registros de tamanho conhecido**.
-
-Por exemplo:
-
-```text
-Arquivo:
-
-registro 0
-registro 1
-registro 2
-registro 3
-registro 4
-...
-```
-
-Se cada registro tiver 100 bytes:
-
-```text
-registro 0 → posição 0
-registro 1 → posição 100
-registro 2 → posição 200
-registro 3 → posição 300
-```
-
-Isso permite usar funções como:
-
-```c
-fseek()
-ftell()
-```
-
-e posteriormente fazer coisas como **acesso direto e busca binária em arquivos**.
-
----
-
-# 39. `fseek()` e `ftell()` — ideia inicial
-
-`ftell()` informa a posição atual dentro do arquivo.
+## `ftell()`
 
 ```c
 long pos = ftell(f);
 ```
 
-`fseek()` muda a posição:
+Informa a **posição atual** dentro do arquivo.
+
+---
+
+## `fseek()`
 
 ```c
 fseek(f, posicao, SEEK_SET);
 ```
+
+**Move** a posição atual.
 
 Por exemplo:
 
@@ -1416,15 +1437,89 @@ significa:
 
 > Vá para o byte 300 do arquivo.
 
-Isso é diferente de ler tudo desde o começo.
+---
 
-É chamado de **acesso direto**.
+## ⚡ Acesso direto
+
+Sem acesso direto (leitura sequencial):
+
+```text
+começo
+  ↓
+registro 1
+  ↓
+registro 2
+  ↓
+registro 3
+  ↓
+registro 4
+```
+
+Com `fseek()`:
+
+```text
+começo ───────────────────────► registro 4
+                                 ↑
+                              fseek()
+```
+
+Podemos pular **diretamente** para determinada posição, sem ler tudo desde o começo.
 
 ---
 
-# 40. Relação com busca binária
+<a id="19"></a>
 
-Em um arquivo de registros ordenados, podemos calcular:
+# 🔎 19. Registros e busca binária
+
+## Por que arquivos binários importam
+
+Podemos organizar um arquivo como uma sequência de **registros de tamanho conhecido**:
+
+```text
+pessoas.dat
+
+[Pessoa 0]
+[Pessoa 1]
+[Pessoa 2]
+...
+```
+
+Cada registro possui tamanho `sizeof(Pessoa)`.
+
+Se cada registro tiver 100 bytes:
+
+```text
+registro 0 → posição 0
+registro 1 → posição 100
+registro 2 → posição 200
+registro 3 → posição 300
+```
+
+Ou seja: **a posição de qualquer registro pode ser calculada**:
+
+```text
+posicao = numero_do_registro * sizeof(Registro)
+```
+
+Isso permite localizar um registro pelo seu número usando `fseek()`.
+
+---
+
+## Busca binária em arquivo
+
+Se temos um arquivo ordenado:
+
+```text
+[registro 0]
+[registro 1]
+[registro 2]
+[registro 3]
+[registro 4]
+[registro 5]
+[registro 6]
+```
+
+podemos calcular:
 
 ```text
 início
@@ -1432,304 +1527,228 @@ fim
 meio
 ```
 
-e usar:
-
-```c
-fseek()
-```
-
-para ir diretamente ao registro do meio.
-
-Assim podemos fazer uma busca binária sem precisar ler o arquivo inteiro.
-
-Exemplo conceitual:
+e usar `fseek()` para ir diretamente ao registro do meio — **sem ler o arquivo inteiro**.
 
 ```text
-Arquivo ordenado por CEP
+            ARQUIVO ORDENADO
+                    │
+                    ▼
+              ┌───────────┐
+              │ busca     │
+              │ binária   │
+              └─────┬─────┘
+                    │
+                  fseek()
+                    │
+                    ▼
+            registro desejado
+```
 
+Exemplo conceitual com arquivo ordenado por CEP:
+
+```text
 [00001]
 [00002]
 [00003]
-[00004]
+[00004]  ← meio
 [00005]
 [00006]
 [00007]
 
-              ↑
-             meio
-
 fseek() → vai diretamente até o registro
 ```
 
-Isso conecta a parte de **manipulação de arquivos** com a parte de **busca binária e ordenação**.
-
----
-
-# 41. Visão geral do que estou aprendendo
-
-## Manipulação básica
+Isso conecta toda a matéria:
 
 ```text
-fopen()
-   ↓
-abre arquivo
-
-fgetc() / fread()
-   ↓
-lê
-
-fputc() / fwrite()
-   ↓
-escreve
-
-fclose()
-   ↓
-fecha
-```
-
-## Memória
-
-```text
-struct
-arrays
-ponteiros
-sizeof
-memset
-```
-
-## Arquivos binários
-
-```text
-bytes
-registros
-fread
-fwrite
-```
-
-## Acesso direto
-
-```text
-fseek
-ftell
-```
-
-## Algoritmos sobre arquivos
-
-```text
-ordenação
-      ↓
-arquivo ordenado
-      ↓
-busca binária
+Manipulação de arquivos
+          ↓
+Arquivos binários
+          ↓
+Registros
+          ↓
+Acesso direto
+          ↓
+Ordenação
+          ↓
+Busca binária
 ```
 
 ---
 
-# 42. O que realmente preciso saber de cada função
+<a id="20"></a>
 
-### `fopen`
+# 🧠 20. Mapa mental e resumo final
 
-```c
-FILE *f = fopen("arquivo", "rb");
-```
-
-> Abre o arquivo e retorna um `FILE *`.
-
-### `fclose`
-
-```c
-fclose(f);
-```
-
-> Fecha o arquivo aberto.
-
-### `fgetc`
-
-```c
-c = fgetc(f);
-```
-
-> Lê um byte/caractere.
-
-### `fputc`
-
-```c
-fputc(c, f);
-```
-
-> Escreve um byte/caractere.
-
-### `fread`
-
-```c
-fread(destino, tamanho, quantidade, f);
-```
-
-> Lê um bloco do arquivo para a memória.
-
-### `fwrite`
-
-```c
-fwrite(origem, tamanho, quantidade, f);
-```
-
-> Grava um bloco da memória no arquivo.
-
-### `fseek`
-
-```c
-fseek(f, posicao, SEEK_SET);
-```
-
-> Move a posição atual dentro do arquivo.
-
-### `ftell`
-
-```c
-ftell(f);
-```
-
-> Descobre a posição atual dentro do arquivo.
-
----
-
-# 43. Mapa mental
+## Visão geral da matéria
 
 ```text
                  ESTRUTURA DE ARQUIVOS
+                          │
+          ┌───────────────┴───────────────┐
+          │                               │
+       MEMÓRIA                         ARQUIVO
+          │                               │
+     ┌────┴────┐                     ┌────┴────┐
+     │         │                     │         │
+   struct    array                 texto    binário
+     │         │                               │
+     └────┬────┘                            registros
+          │                                     │
+       ponteiros                           fread/fwrite
+          │                                     │
+        sizeof                                  │
+          │                                     │
+        memset                                  │
+          │                                     │
+          └──────────────┬──────────────────────┘
                          │
-             ┌───────────┴───────────┐
-             │                       │
-          MEMÓRIA                 ARQUIVO
-             │                       │
-        ┌────┴────┐             ┌────┴────┐
-        │         │             │         │
-      struct    array          texto    binário
-        │         │                       │
-        └────┬────┘                       │
-             │                            │
-          ponteiros                   registros
-             │                            │
-          sizeof                     fread/fwrite
-             │                            │
-          memset                         │
-             │                            │
-             └────────────┬───────────────┘
-                          │
-                     acesso direto
-                          │
-                    fseek / ftell
-                          │
-                  ┌───────┴───────┐
-                  │               │
-              ordenação      busca binária
+                   acesso direto
+                         │
+                   fseek / ftell
+                         │
+                ┌────────┴────────┐
+                │                 │
+            ordenação       busca binária
 ```
 
 ---
 
-# 44. As principais coisas que não posso confundir
+## 📚 O que decorar de cada função
+
+| Função     | O que faz                      |
+| ---------- | ------------------------------ |
+| `fopen()`  | Abre um arquivo (retorna `FILE *`) |
+| `fclose()` | Fecha um arquivo               |
+| `fgetc()`  | Lê 1 byte                      |
+| `fputc()`  | Escreve 1 byte                 |
+| `fread()`  | Lê vários itens (arquivo → memória) |
+| `fwrite()` | Escreve vários itens (memória → arquivo) |
+| `fseek()`  | Move a posição no arquivo      |
+| `ftell()`  | Informa a posição atual        |
+| `memset()` | Preenche uma região da memória |
+| `sizeof()` | Informa o tamanho em bytes     |
+| `strcpy()` | Copia uma string               |
+
+### Assinaturas essenciais
+
+```c
+FILE *f = fopen("arquivo", "rb");
+fclose(f);
+
+c = fgetc(f);
+fputc(c, f);
+
+fread(destino, tamanho, quantidade, f);
+fwrite(origem,  tamanho, quantidade, f);
+
+fseek(f, posicao, SEEK_SET);
+ftell(f);
+```
+
+---
+
+## ⚠️ As principais coisas que não posso confundir
 
 ### `FILE *f`
 
 `f` é um **ponteiro para `FILE`**.
 
-### `f`
-
-É o endereço armazenado no ponteiro.
-
-### `*f`
-
-É acessar o `FILE` naquele endereço.
-
-### `fopen()`
-
-Retorna um `FILE *`.
-
-### `fclose()`
-
-Recebe um `FILE *`.
-
-Por isso:
-
-```c
-fclose(f);
+```text
+f  ─────────► FILE
 ```
 
-e não:
+* `f` → o endereço armazenado no ponteiro
+* `*f` → acessar o `FILE` naquele endereço
 
-```c
-fclose(*f);
-```
+### `fopen()` retorna `FILE *`
 
----
+Por isso: `f = fopen(...)` ✅ e não `*f = fopen(...)` ❌
 
-### `fwrite`
+### `fclose()` recebe `FILE *`
+
+Por isso: `fclose(f);` ✅ e não `fclose(*f);` ❌
+
+### Direção dos dados
 
 ```text
-MEMÓRIA → ARQUIVO
+fread
+ARQUIVO ─────────► MEMÓRIA
+
+fwrite
+MEMÓRIA ─────────► ARQUIVO
 ```
 
-### `fread`
+### Um byte x vários itens
 
 ```text
-ARQUIVO → MEMÓRIA
+fgetc  → 1 byte
+fputc  → 1 byte
+
+fread  → vários itens
+fwrite → vários itens
 ```
-
-### `fgetc`
-
-Lê **um byte por vez**.
-
-### `fread`
-
-Lê **vários itens de uma vez**.
-
-### `fputc`
-
-Escreve **um byte por vez**.
-
-### `fwrite`
-
-Escreve **vários itens de uma vez**.
 
 ### `EOF`
 
-Não é um caractere comum do arquivo.
-
-É um valor especial usado para indicar que a leitura chegou ao fim.
+Não é um caractere comum do arquivo. É um valor especial que indica fim de leitura.
 
 ### `int c`
 
-`fgetc()` usa `int` porque precisa conseguir representar tanto os valores dos bytes quanto `EOF`.
+`fgetc()` usa `int` porque precisa representar tanto os valores dos bytes quanto `EOF`.
 
-### `sizeof(Pessoa)`
+### `sizeof(Pessoa)` x `1000 * sizeof(Pessoa)`
 
-É o tamanho de uma `Pessoa` em bytes.
+* `sizeof(Pessoa)` → tamanho de **uma** Pessoa em bytes
+* `1000 * sizeof(Pessoa)` → tamanho total de **1000** Pessoas em bytes
 
-### `1000 * sizeof(Pessoa)`
+### Retorno do `fread`
 
-É o tamanho total de 1000 Pessoas em bytes.
+É a quantidade de **itens**, não de bytes.
 
-### `memset`
+### `argc` / `argv`
 
-Manipula/preenche diretamente uma região da memória.
-
-### `Pessoa p[1000]`
-
-Array contendo 1000 estruturas `Pessoa`.
+* `argc` → quantidade de argumentos (inclui o nome do programa)
+* `argv` → array com os argumentos
 
 ---
 
-# 45. Frase para lembrar `fread` e `fwrite`
+## 🎯 Macetes finais
 
 ```text
-fread:
-ARQUIVO → MEMÓRIA
-
-fwrite:
-MEMÓRIA → ARQUIVO
+┌────────────────────────────────────────────┐
+│              ARQUIVO                       │
+│                                            │
+│  fopen() → abre                            │
+│     ↓                                      │
+│  fread/fgetc → lê                          │
+│     ↓                                      │
+│  fwrite/fputc → escreve                    │
+│     ↓                                      │
+│  fclose() → fecha                          │
+└────────────────────────────────────────────┘
 ```
 
-E:
+### Ponteiro
+
+```text
+int *p
+
+p  → endereço
+*p → valor naquele endereço
+```
+
+### Modos
+
+```text
+r → read
+w → write
+a → append
++ → leitura e escrita
+b → binary
+```
+
+### Parâmetros de `fread` / `fwrite`
 
 ```text
 fread(onde colocar, tamanho de cada item, quantidade, arquivo)
@@ -1745,3 +1764,31 @@ TAMANHO?
 QUANTOS?
 QUAL ARQUIVO?
 ```
+
+---
+
+# 🚀 Por que isso importa?
+
+Manipulação de arquivos não é apenas "abrir um `.txt`".
+
+Ela é a base para trabalhar com **grandes quantidades de dados armazenados permanentemente**.
+
+A partir desses conceitos aparecem:
+
+```text
+arquivos
+   ↓
+registros
+   ↓
+arquivos binários
+   ↓
+acesso direto
+   ↓
+índices
+   ↓
+ordenação
+   ↓
+busca binária
+```
+
+Ou seja: os primeiros exercícios parecem simples, mas estão preparando o terreno para a parte mais importante de **Estrutura de Arquivos**.
