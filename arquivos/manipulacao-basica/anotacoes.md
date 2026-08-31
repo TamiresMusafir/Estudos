@@ -1293,6 +1293,7 @@ Um byte possui **8 bits**:
 
 ```text
 1 byte = 8 bits
+```
 
 ```text
 0 ─────────────────────────────── 255
