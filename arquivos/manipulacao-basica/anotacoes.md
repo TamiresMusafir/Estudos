@@ -843,8 +843,8 @@ fwrite(
 Visualmente:
 
 ```text
-                tamanho        quantidade
-                    ↓               ↓
+                          tamanho        quantidade
+                              ↓               ↓
 
 fwrite(          p,       sizeof(Pessoa),   1000,   f);
                  ↑                                  ↑
