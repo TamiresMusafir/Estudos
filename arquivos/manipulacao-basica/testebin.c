@@ -45,22 +45,11 @@ int main(){
             1000,           // Quantidade de Pessoas que serão gravadas.
             f               // Arquivo onde os dados serão escritos.
     );
-                            // Portanto:
-                            //
-                            // fwrite(p, sizeof(Pessoa), 1000, f);
-                            //
-                            // significa:
-                            //
-                            // "Grave 1000 estruturas Pessoa no arquivo f,
-                            // cada uma ocupando sizeof(Pessoa) bytes."
-                            //
-                            // Mesmo que só tenhamos preenchido p[0],
-                            // as outras 999 Pessoas também são gravadas.
-                            //
-                            // Como usamos memset(), essas outras posições
-                            // estão zeradas.
 
-
+    // fwrite(p, sizeof(Pessoa), 1000, f) significa:
+    // "Grave 1000 estruturas Pessoa no arquivo f, cada uma ocupando sizeof(Pessoa) bytes."
+    // Mesmo que só tenhamos preenchido p[0], as outras 999 Pessoas também são gravadas.
+    // Como usamos memset(), essas outras posições estão zeradas.
 
     fclose(f);              // Fecha o arquivo depois de terminar a escrita.
     return 0;               // Programa terminou com sucesso.
