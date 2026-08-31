@@ -1295,6 +1295,9 @@ Um byte possui **8 bits**:
 1 byte = 8 bits
 ```
 
+**byte → 8 bits → 2⁸ possibilidades → 256 valores → array com 256 posições → `contador[c]++`**.
+
+
 ```text
 0 ─────────────────────────────── 255
 ```
