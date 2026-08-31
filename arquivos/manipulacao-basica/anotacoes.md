@@ -1287,6 +1287,13 @@ count = 3
 
 Um arquivo pode conter **256 valores diferentes de byte**:
 
+### 💡 Por que 256?
+
+Um byte possui **8 bits**:
+
+```text
+1 byte = 8 bits
+
 ```text
 0 ─────────────────────────────── 255
 ```
