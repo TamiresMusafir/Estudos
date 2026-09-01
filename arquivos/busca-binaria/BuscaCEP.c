@@ -75,7 +75,7 @@ int main(int argc, char** argv){
             // %.72s → imprime no máximo 72 caracteres
             // %.2s  → imprime no máximo 2 caracteres
             // %.8s  → imprime no máximo 8 caracteres
-            printf("%.72s\n%.72s\n%.72s\n%.72s\n%.2s\n%.8s\n", e.logradouro, e.bairro,e.cidade, e.uf, e.sigla, e.cep             );
+            printf("%.72s\n%.72s\n%.72s\n%.72s\n%.2s\n%.8s\n", e.logradouro, e.bairro,e.cidade, e.uf, e.sigla, e.cep);
 
             break;  // Para a busca porque já encontramos o CEP
         }
