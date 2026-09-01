@@ -1,6 +1,8 @@
-// BUSCA SEQUENCIAL EM ARQUIVO
-// O programa lê os registros um por um, do início ao fim,
-// até encontrar o CEP procurado.
+// BUSCA NO ARQUIVO A PARTIR DO MEIO
+// O programa calcula o tamanho do arquivo, encontra o registro do meio,
+// posiciona a leitura nele com fseek e começa a verificar os registros.
+// ATENÇÃO: ainda não é uma busca binária completa, pois depois do meio
+// o programa continua lendo os próximos registros sequencialmente.
 
 #include <stdio.h>      // printf(), fprintf(), FILE, fopen(), fread(), fclose()
 #include <string.h>     // strncmp()
