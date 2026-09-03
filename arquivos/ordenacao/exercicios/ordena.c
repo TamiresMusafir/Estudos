@@ -4,7 +4,7 @@
 
 typedef struct _Endereco Endereco;
 
-struct _Endereco{
+struct _Endereco {
     char logradouro[72];
     char bairro[72];
     char cidade[72];
@@ -16,33 +16,28 @@ struct _Endereco{
 
 
 /*
-    O índice guarda somente:
+    Índice do CEP.
 
-    CEP      → posição do registro no arquivo
-
-    Exemplo:
-
-    22222222 → 534821
+    Guarda:
+    - cep      → o CEP do endereço
+    - posicao  → onde esse endereço está no cep.dat
 */
-typedef struct _Indice Indice;
-
-struct _Indice{
+struct indiceCep {
     char cep[8];
     long posicao;
 };
 
+typedef struct indiceCep IndiceCep;
+
 
 /*
     Compara dois índices pelo CEP.
-
-    O qsort() chama essa função para saber
-    qual CEP vem primeiro.
 */
 int compara(const void *a, const void *b)
 {
     return strncmp(
-        ((Indice*)a)->cep,
-        ((Indice*)b)->cep,
+        ((IndiceCep*)a)->cep,
+        ((IndiceCep*)b)->cep,
         8
     );
 }
@@ -51,11 +46,10 @@ int compara(const void *a, const void *b)
 int main(int argc, char **argv)
 {
     FILE *f;
-    FILE *indiceArquivo;
 
     Endereco e;
 
-    Indice *indice;
+    IndiceCep *indice;
 
     long tamanhoBytes;
     long qtd;
@@ -63,11 +57,11 @@ int main(int argc, char **argv)
 
 
     /*
-        O programa espera:
+        O programa recebe o CEP que queremos procurar.
+
+        Exemplo:
 
         ./indice 22222222
-
-        argv[1] = CEP procurado
     */
     if(argc != 2)
     {
@@ -89,8 +83,8 @@ int main(int argc, char **argv)
 
 
     /*
-        Vai para o final para descobrir
-        o tamanho do arquivo.
+        Vai para o final do arquivo para descobrir
+        seu tamanho.
     */
     fseek(f, 0, SEEK_END);
 
@@ -98,24 +92,20 @@ int main(int argc, char **argv)
 
 
     /*
-        Descobre quantos Enderecos existem.
+        Descobre quantos registros Endereco existem.
     */
     qtd = tamanhoBytes / sizeof(Endereco);
 
 
     /*
-        Reserva memória para o índice.
+        Reserva memória para TODOS os elementos do índice.
 
-        Não estamos reservando memória para Endereco.
+        Cada elemento possui:
 
-        Estamos reservando memória para:
-
-        CEP + posição
-        CEP + posição
-        CEP + posição
-        ...
+        char cep[8]
+        long posicao
     */
-    indice = malloc(qtd * sizeof(Indice));
+    indice = malloc(qtd * sizeof(IndiceCep));
 
     if(indice == NULL)
     {
@@ -126,28 +116,29 @@ int main(int argc, char **argv)
 
 
     /*
-        Voltamos para o começo do arquivo.
+        Voltamos para o início do arquivo.
     */
     rewind(f);
 
 
     /*
-        Percorremos todos os Enderecos do arquivo.
+        Percorremos todos os registros do cep.dat.
     */
     for(i = 0; i < qtd; i++)
     {
         /*
-            Lê um Endereco completo.
+            Lê um Endereco completo do arquivo
+            e coloca dentro de e.
         */
         fread(&e, sizeof(Endereco), 1, f);
 
 
         /*
-            Coloca no índice:
+            Cria o índice correspondente:
 
-            o CEP do Endereco
+            CEP do endereço
             +
-            a posição dele no arquivo
+            posição do endereço no arquivo
         */
         strncpy(indice[i].cep, e.cep, 8);
 
@@ -156,60 +147,30 @@ int main(int argc, char **argv)
 
 
     /*
-        Agora temos algo como:
+        Agora ordenamos o índice pelo CEP.
+
+        Exemplo antes:
 
         30000000 → 0
         10000000 → 1
         50000000 → 2
-        20000000 → 3
 
-        Vamos ordenar pelo CEP.
+        Depois:
+
+        10000000 → 1
+        30000000 → 0
+        50000000 → 2
     */
     qsort(
         indice,
         qtd,
-        sizeof(Indice),
+        sizeof(IndiceCep),
         compara
     );
 
 
     /*
-        Cria o arquivo do índice.
-    */
-    indiceArquivo = fopen("indice.dat", "wb");
-
-    if(indiceArquivo == NULL)
-    {
-        fprintf(stderr, "Erro ao criar indice.dat\n");
-
-        free(indice);
-        fclose(f);
-
-        return 1;
-    }
-
-
-    /*
-        Salva o índice no arquivo.
-
-        Memória → indice.dat
-    */
-    fwrite(
-        indice,
-        sizeof(Indice),
-        qtd,
-        indiceArquivo
-    );
-
-    fclose(indiceArquivo);
-
-
-    /*
-        Agora fazemos a busca binária
-        pelo CEP informado pelo usuário.
-
-        A busca é feita NO ÍNDICE,
-        e não diretamente nos Enderecos.
+        Agora fazemos a busca binária NO ÍNDICE.
     */
 
     long inicio = 0;
@@ -221,9 +182,10 @@ int main(int argc, char **argv)
 
 
         /*
-            Verifica o CEP que está no meio do índice.
+            Compara o CEP que o usuário passou
+            com o CEP que está no meio do índice.
         */
-        int comparacao = strncmp(
+        int resultado = strncmp(
             argv[1],
             indice[meio].cep,
             8
@@ -231,22 +193,20 @@ int main(int argc, char **argv)
 
 
         /*
-            Encontrou o CEP!
+            Encontrou!
         */
-        if(comparacao == 0)
+        if(resultado == 0)
         {
             /*
-                O índice nos diz onde está
-                o Endereco dentro do cep.dat.
+                O índice nos diz a posição
+                do Endereco dentro do cep.dat.
             */
             long posicao = indice[meio].posicao;
 
 
             /*
-                Voltamos ao cep.dat.
-
-                Vamos para a posição encontrada
-                pelo índice.
+                Agora vamos até essa posição
+                dentro do arquivo original.
             */
             fseek(
                 f,
@@ -267,7 +227,7 @@ int main(int argc, char **argv)
 
 
             /*
-                Mostramos o endereço.
+                Mostramos o resultado.
             */
             printf(
                 "%.72s\n"
@@ -289,11 +249,11 @@ int main(int argc, char **argv)
 
 
         /*
-            CEP procurado é maior.
+            CEP procurado é maior que o CEP do meio.
 
             Então procuramos na metade direita.
         */
-        else if(comparacao > 0)
+        else if(resultado > 0)
         {
             inicio = meio + 1;
         }
@@ -311,11 +271,7 @@ int main(int argc, char **argv)
     }
 
 
-    /*
-        Libera a memória do índice.
-    */
     free(indice);
-
     fclose(f);
 
     return 0;
