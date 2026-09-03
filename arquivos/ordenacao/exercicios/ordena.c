@@ -1,31 +1,322 @@
-### Criação e pesquisa utilizando arquivo de índice
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-1. **Abrir o arquivo de dados** e descobrir a quantidade de registros existentes.
+typedef struct _Endereco Endereco;
 
-2. **Alocar memória** para armazenar todos os registros, utilizando `sizeof` para determinar o espaço necessário.
-
-3. Fazer uma **leitura sequencial do arquivo**:
-
-   * Ler cada registro do arquivo.
-   * Guardar os registros no `array` criado.
-   * Armazenar também as informações necessárias para o índice, como o **CEP** e o **endereço/posição do registro no arquivo**.
-
-4. **Ordenar o array de índice pelo CEP**, para que seja possível realizar uma busca binária.
-
-5. **Criar e salvar um arquivo de índice**, contendo, para cada registro, o CEP e sua posição/endereço correspondente no arquivo de dados.
-
-6. Criar um segundo programa para realizar a **pesquisa por CEP**:
-
-   * Abrir o arquivo de índice.
-   * Realizar uma **busca binária no arquivo de índice** pelo CEP informado.
-   * Encontrar, no índice, a posição/endereço correspondente ao registro.
-   * Utilizar `fseek` no **arquivo de dados principal** para ir diretamente até essa posição.
-   * Ler o registro associado àquele CEP e exibi-lo.
-
-### Objetivo
-
-O arquivo de dados principal **não será pesquisado diretamente de forma sequencial**. A pesquisa será feita primeiro no **arquivo de índice ordenado por CEP**, utilizando busca binária. Depois que o registro for localizado no índice, seu endereço será utilizado com `fseek` para acessar diretamente o registro correspondente no arquivo de dados.
-struct indiceCep{
-	char cep[8];
-	long pos;
+struct _Endereco{
+    char logradouro[72];
+    char bairro[72];
+    char cidade[72];
+    char uf[72];
+    char sigla[2];
+    char cep[8];
+    char lixo[2];
 };
+
+
+/*
+    O índice guarda somente:
+
+    CEP      → posição do registro no arquivo
+
+    Exemplo:
+
+    22222222 → 534821
+*/
+typedef struct _Indice Indice;
+
+struct _Indice{
+    char cep[8];
+    long posicao;
+};
+
+
+/*
+    Compara dois índices pelo CEP.
+
+    O qsort() chama essa função para saber
+    qual CEP vem primeiro.
+*/
+int compara(const void *a, const void *b)
+{
+    return strncmp(
+        ((Indice*)a)->cep,
+        ((Indice*)b)->cep,
+        8
+    );
+}
+
+
+int main(int argc, char **argv)
+{
+    FILE *f;
+    FILE *indiceArquivo;
+
+    Endereco e;
+
+    Indice *indice;
+
+    long tamanhoBytes;
+    long qtd;
+    long i;
+
+
+    /*
+        O programa espera:
+
+        ./indice 22222222
+
+        argv[1] = CEP procurado
+    */
+    if(argc != 2)
+    {
+        fprintf(stderr, "USO: %s [CEP]\n", argv[0]);
+        return 1;
+    }
+
+
+    /*
+        Abre o arquivo original.
+    */
+    f = fopen("cep.dat", "rb");
+
+    if(f == NULL)
+    {
+        fprintf(stderr, "Erro ao abrir cep.dat\n");
+        return 1;
+    }
+
+
+    /*
+        Vai para o final para descobrir
+        o tamanho do arquivo.
+    */
+    fseek(f, 0, SEEK_END);
+
+    tamanhoBytes = ftell(f);
+
+
+    /*
+        Descobre quantos Enderecos existem.
+    */
+    qtd = tamanhoBytes / sizeof(Endereco);
+
+
+    /*
+        Reserva memória para o índice.
+
+        Não estamos reservando memória para Endereco.
+
+        Estamos reservando memória para:
+
+        CEP + posição
+        CEP + posição
+        CEP + posição
+        ...
+    */
+    indice = malloc(qtd * sizeof(Indice));
+
+    if(indice == NULL)
+    {
+        fprintf(stderr, "Erro ao alocar memoria\n");
+        fclose(f);
+        return 1;
+    }
+
+
+    /*
+        Voltamos para o começo do arquivo.
+    */
+    rewind(f);
+
+
+    /*
+        Percorremos todos os Enderecos do arquivo.
+    */
+    for(i = 0; i < qtd; i++)
+    {
+        /*
+            Lê um Endereco completo.
+        */
+        fread(&e, sizeof(Endereco), 1, f);
+
+
+        /*
+            Coloca no índice:
+
+            o CEP do Endereco
+            +
+            a posição dele no arquivo
+        */
+        strncpy(indice[i].cep, e.cep, 8);
+
+        indice[i].posicao = i;
+    }
+
+
+    /*
+        Agora temos algo como:
+
+        30000000 → 0
+        10000000 → 1
+        50000000 → 2
+        20000000 → 3
+
+        Vamos ordenar pelo CEP.
+    */
+    qsort(
+        indice,
+        qtd,
+        sizeof(Indice),
+        compara
+    );
+
+
+    /*
+        Cria o arquivo do índice.
+    */
+    indiceArquivo = fopen("indice.dat", "wb");
+
+    if(indiceArquivo == NULL)
+    {
+        fprintf(stderr, "Erro ao criar indice.dat\n");
+
+        free(indice);
+        fclose(f);
+
+        return 1;
+    }
+
+
+    /*
+        Salva o índice no arquivo.
+
+        Memória → indice.dat
+    */
+    fwrite(
+        indice,
+        sizeof(Indice),
+        qtd,
+        indiceArquivo
+    );
+
+    fclose(indiceArquivo);
+
+
+    /*
+        Agora fazemos a busca binária
+        pelo CEP informado pelo usuário.
+
+        A busca é feita NO ÍNDICE,
+        e não diretamente nos Enderecos.
+    */
+
+    long inicio = 0;
+    long fim = qtd - 1;
+
+    while(inicio <= fim)
+    {
+        long meio = (inicio + fim) / 2;
+
+
+        /*
+            Verifica o CEP que está no meio do índice.
+        */
+        int comparacao = strncmp(
+            argv[1],
+            indice[meio].cep,
+            8
+        );
+
+
+        /*
+            Encontrou o CEP!
+        */
+        if(comparacao == 0)
+        {
+            /*
+                O índice nos diz onde está
+                o Endereco dentro do cep.dat.
+            */
+            long posicao = indice[meio].posicao;
+
+
+            /*
+                Voltamos ao cep.dat.
+
+                Vamos para a posição encontrada
+                pelo índice.
+            */
+            fseek(
+                f,
+                posicao * sizeof(Endereco),
+                SEEK_SET
+            );
+
+
+            /*
+                Lemos o Endereco completo.
+            */
+            fread(
+                &e,
+                sizeof(Endereco),
+                1,
+                f
+            );
+
+
+            /*
+                Mostramos o endereço.
+            */
+            printf(
+                "%.72s\n"
+                "%.72s\n"
+                "%.72s\n"
+                "%.72s\n"
+                "%.2s\n"
+                "%.8s\n",
+                e.logradouro,
+                e.bairro,
+                e.cidade,
+                e.uf,
+                e.sigla,
+                e.cep
+            );
+
+            break;
+        }
+
+
+        /*
+            CEP procurado é maior.
+
+            Então procuramos na metade direita.
+        */
+        else if(comparacao > 0)
+        {
+            inicio = meio + 1;
+        }
+
+
+        /*
+            CEP procurado é menor.
+
+            Então procuramos na metade esquerda.
+        */
+        else
+        {
+            fim = meio - 1;
+        }
+    }
+
+
+    /*
+        Libera a memória do índice.
+    */
+    free(indice);
+
+    fclose(f);
+
+    return 0;
+}
