@@ -1,0 +1,18 @@
+tb = qr/n;
+resto = qr%n;
+aloca (tb+1)*300 em bug
+for i = 0
+  le (buf,(tb+(i<resto?1:0))*300
+QSORT
+ESCREVE (BUF, )
+
+char nome[80]
+
+sprintf(nome, "b%d.dat", i);
+
+snprintf(nome, 80, "b%d.dat", i);
+
+FILE *f = foopen(nome, "wb");
+
+8 arquivos ordenados
+
