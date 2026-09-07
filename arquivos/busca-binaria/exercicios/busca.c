@@ -19,20 +19,20 @@ int main(int argc, char **argv){
     int qt;
     int c;
 
-if(argc != 2){
-    fprintf(stderr, "USO: %s [CEP]", argv[0]);
-    return 1;
-}
+	if(argc != 2){
+		fprintf(stderr, "USO: %s [CEP]", argv[0]);
+		return 1;
+	}
 
-printf("Tamanho da estrutura: %ld\n\n", sizeof(Endereco));
-f = fopen("cep_ordenado.dat", "rb");
-fseek(f, 0, SEEK_END);
-long tamanhoBytes = ftell(f);
-long tamanhoRegistros = tamanhoBytes/sizeof(Endereco);
-long inicio = 0;
-long fim = tamanhoRegistros-1;
+	printf("Tamanho da estrutura: %ld\n\n", sizeof(Endereco));
+	f = fopen("cep_ordenado.dat", "rb");
+	fseek(f, 0, SEEK_END);
+	long tamanhoBytes = ftell(f);
+	long tamanhoRegistros = tamanhoBytes/sizeof(Endereco);
+	long inicio = 0;
+	long fim = tamanhoRegistros-1;
 
-while(inicio <= fim){
+	while(inicio <= fim){
         long meio = (inicio+fim)/2;
         fseek(f,meio*sizeof(Endereco),SEEK_SET); // salto de 300
 		fread(&e, sizeof(Endereco), 1, f);

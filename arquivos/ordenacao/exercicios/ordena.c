@@ -100,15 +100,12 @@ int main(int argc, char **argv){
             );
 
             break;
-        }
-
-        else if(resultado > 0){
+        }else if(resultado > 0){
             inicio = meio + 1;
         }else{
             fim = meio - 1;
         }
     }
-
 
     free(indice);
     fclose(f);
