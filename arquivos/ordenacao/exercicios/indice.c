@@ -48,11 +48,9 @@ int main(int argc, char **argv){
     }
 
     fseek(f, 0, SEEK_END);
-
+    
     tamanhoBytes = ftell(f);
-
     qtd = tamanhoBytes / sizeof(Endereco);
-
     indice = malloc(qtd * sizeof(IndiceCep));
 
     if(indice == NULL){

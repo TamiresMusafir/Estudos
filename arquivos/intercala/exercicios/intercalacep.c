@@ -7,8 +7,7 @@
 
 typedef struct _Endereco Endereco;
  
-struct _Endereco
-{
+struct _Endereco{
     char logradouro[72];
     char bairro[72];
     char cidade[72];
@@ -18,10 +17,10 @@ struct _Endereco
     char lixo[2];
 };
  
-int compara(const void *e1, const void *e2)
-{
+int compara(const void *e1, const void *e2){
     return strncmp(((Endereco*)e1)->cep,((Endereco*)e2)->cep,8);
 }
+
 int IntercalaArquivos(const void *e1,const void *e2, ){
     while(!feof(a) && !feof(b))
     {
