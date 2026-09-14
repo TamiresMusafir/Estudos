@@ -95,20 +95,16 @@ int main(int argc, char **argv){
     int quantidadeIntercala = PARTES;
     int arquivoNome = 8;
 
-    while(quantidadeIntercala>1){
+    for(int i = 0; i < (quantidadeIntercala-1)*2; i+=2){
+        char nome1[20];
+        char nome2[20];
+        char nome3[20];
 
-        for(int i = 0; i < quantidadeIntercala; i+=2){
-            char nome1[20];
-            char nome2[20];
-            char nome3[20];
+        sprintf(nome1, "cep_%d.dat", i);
+        sprintf(nome2, "cep_%d.dat", i+1);
+        sprintf(nome3, "cep_%d.dat", arquivoNome);
 
-            sprintf(nome1, "cep_%d.dat", i);
-            sprintf(nome2, "cep_%d.dat", i+1);
-            sprintf(nome3, "cep_%d.dat", arquivoNome);
-
-            intercala(nome1, nome2, nome3);
-            arquivoNome++;
-        }
-        quantidadeIntercala/=2;
+        intercala(nome1, nome2, nome3);
+        arquivoNome++;
     }
 }
