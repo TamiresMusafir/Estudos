@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PARTES 8
+#define PARTES 3
 
 struct Endereco{
     char logradouro[72];
@@ -42,7 +42,7 @@ void intercala(char *arqA, char *arqB, char *arqSaida){
     }
 
     while(!feof(a)){
-        frwrite(&ea, sizeof(Endereco), 1, saida);
+        fwrite(&ea, sizeof(Endereco), 1, saida);
         fread(&ea, sizeof(Endereco), 1, a);
     }
 
@@ -71,7 +71,7 @@ int main(int argc, char **argv){
 
     rewind(cep);
 
-    e = malloc((divisao + resto)*sizeof(Endereco));
+    e = (Endereco*) malloc((divisao + resto)*sizeof(Endereco));
 
     for(int i = 0; i < PARTES; i++){
         long quantidadeParte;
@@ -93,7 +93,7 @@ int main(int argc, char **argv){
     }
 
     int quantidadeIntercala = PARTES;
-    int arquivoNome = 8;
+    int arquivoNome = PARTES;
 
     for(int i = 0; i < (quantidadeIntercala-1)*2; i+=2){
         char nome1[20];
