@@ -1,70 +1,114 @@
-# Ordenação e Índice de Arquivos com `qsort` — C
+# Ordenação e Indexação de Arquivos Binários em C
 
-## Sumário
+Este material cobre as técnicas básicas para trabalhar com **arquivos binários de registros de tamanho fixo** em C:
 
-1. [Objetivo do programa](#1-objetivo-do-programa)
-2. [A struct `Endereco`](#2-a-struct-endereco)
-3. [`Endereco` x `Endereco *e`](#3-endereco-x-endereco-e)
-4. [`.` x `->`](#4--x--)
-5. [`&` e `*`](#5--e-)
-6. [`malloc`](#6-malloc)
-7. [`fseek`, `ftell` e `rewind`](#7-fseek-ftell-e-rewind)
-8. [`fread`](#8-fread)
-9. [`qsort`](#9-qsort)
-10. [A função `compara`](#10-a-função-compara)
-11. [De onde vêm `e1` e `e2`](#11-de-onde-vêm-e1-e-e2)
-12. [`fwrite`](#12-fwrite)
-13. [`free`](#13-free)
-14. [Índice de CEP](#14-índice-de-cep)
-15. [`Endereco e` no índice](#15-endereco-e-no-índice)
-16. [`IndiceCep *indice`](#16-indicecep-indice)
-17. [Criando o índice](#17-criando-o-índice)
-18. [Ordenando o índice](#18-ordenando-o-índice)
-19. [Busca binária no índice](#19-busca-binária-no-índice)
-20. [Usando a posição encontrada](#20-usando-a-posição-encontrada)
-21. [Fluxo completo do índice](#21-fluxo-completo-do-índice)
-22. [Resumo dos conceitos](#22-resumo-dos-conceitos)
-23. [Código completo comentado — ordenação](#23-código-completo-comentado--ordenação)
-24. [Código completo comentado — índice](#24-código-completo-comentado--índice)
+- carregar um arquivo inteiro na memória e ordenar com `qsort`;
+- construir um **índice** (chave → posição) para localizar registros sem varrer o arquivo;
+- acessar um registro diretamente com `fseek`.
+
+Os exemplos usam uma struct `Endereco` e o campo `cep` como chave, mas **tudo aqui vale para qualquer registro de tamanho fixo e qualquer campo usado como chave** — basta trocar o tipo e a função de comparação.
 
 ---
 
-# 1. Objetivo do programa
+## Sumário
 
-O programa de ordenação:
+**Parte I — Fundamentos**
+1. [As duas tarefas](#1-as-duas-tarefas)
+2. [Registro de tamanho fixo](#2-registro-de-tamanho-fixo)
+3. [`Tipo x;` x `Tipo *x;` — quando usar cada um](#3-tipo-x-x-tipo-x--quando-usar-cada-um)
+4. [`.` x `->`](#4--x--)
+5. [`&` e `*`](#5--e-)
+6. [`malloc` e `free`](#6-malloc-e-free)
 
-1. Abre o arquivo `cep.dat`;
-2. Descobre quantos registros existem;
-3. Reserva memória suficiente para armazenar todos eles;
-4. Lê todos os registros para a memória;
-5. Ordena os registros pelo CEP usando `qsort`;
-6. Cria o arquivo `cep-ordenado.dat`;
-7. Grava os registros ordenados nesse novo arquivo;
-8. Libera a memória.
+**Parte II — Navegando no arquivo**
 
-Fluxo:
+7. [`fseek`, `ftell` e `rewind`](#7-fseek-ftell-e-rewind)
+8. [`fread`](#8-fread)
+9. [`fwrite`](#9-fwrite)
+
+**Parte III — Ordenação**
+
+10. [`qsort`](#10-qsort)
+11. [A função de comparação](#11-a-função-de-comparação)
+12. [De onde vêm os parâmetros da comparação](#12-de-onde-vêm-os-parâmetros-da-comparação)
+
+**Parte IV — Índice**
+
+13. [O que é um índice](#13-o-que-é-um-índice)
+14. [A struct do índice](#14-a-struct-do-índice)
+15. [Construindo o índice](#15-construindo-o-índice)
+16. [Ordenando o índice](#16-ordenando-o-índice)
+17. [Busca binária](#17-busca-binária)
+18. [Acesso direto com `fseek`](#18-acesso-direto-com-fseek)
+19. [Fluxo completo](#19-fluxo-completo)
+
+**Parte V — Referência**
+
+20. [Resumo dos conceitos](#20-resumo-dos-conceitos)
+21. [Código comentado — ordenação](#21-código-comentado--ordenação)
+22. [Código comentado — índice](#22-código-comentado--índice)
+23. [A ideia mais importante](#23-a-ideia-mais-importante)
+
+---
+
+# Parte I — Fundamentos
+
+## 1. As duas tarefas
+
+### Ordenar o arquivo inteiro
 
 ```text
-cep.dat
+arquivo original
    ↓
-fread()
+fread()        carrega tudo na memória
    ↓
-Registros na memória
+qsort()        organiza pela chave
    ↓
-qsort()
-   ↓
-Registros ordenados pelo CEP
-   ↓
-fwrite()
-   ↓
-cep-ordenado.dat
+fwrite()       salva em um novo arquivo
 ```
 
 > **`fread` carrega → `qsort` organiza → `fwrite` salva.**
 
+O programa faz, em ordem:
+
+1. Abre o arquivo original;
+2. Descobre quantos registros existem;
+3. Reserva memória suficiente para armazenar **todos** eles;
+4. Lê todos os registros para a memória;
+5. Ordena os registros pela chave usando `qsort`;
+6. Cria o arquivo de saída;
+7. Grava os registros ordenados nesse novo arquivo;
+8. Libera a memória.
+
+Exige memória para **todos** os registros ao mesmo tempo.
+
+### Indexar o arquivo
+
+```text
+arquivo original
+   ↓
+lê UM registro por vez
+   ↓
+guarda (chave → posição) na memória
+   ↓
+qsort() no índice
+   ↓
+busca binária → fseek → lê só o registro desejado
+```
+
+Exige memória apenas para o **índice**, que é muito menor que o arquivo. O arquivo original não é alterado.
+
 ---
 
-# 2. A struct `Endereco`
+## 2. Registro de tamanho fixo
+
+Um arquivo binário de registros fixos é apenas uma sequência de structs gravadas uma após a outra:
+
+```text
+[registro 0][registro 1][registro 2][registro 3]...
+```
+
+A struct define o formato de **um** registro:
 
 ```c
 typedef struct _Endereco Endereco;
@@ -81,13 +125,10 @@ struct _Endereco
 };
 ```
 
-A `struct` define o formato de **um registro**.
-
 Cada `Endereco` possui:
 
 ```text
 Endereco
-
 ├── logradouro
 ├── bairro
 ├── cidade
@@ -97,63 +138,69 @@ Endereco
 └── lixo
 ```
 
-O `typedef` permite usar:
+O `typedef` permite escrever `Endereco` em vez de `struct _Endereco`.
 
-```c
-Endereco
+Como todos os registros têm o mesmo tamanho, duas contas resolvem quase tudo:
+
+```text
+quantidade de registros = tamanho do arquivo / sizeof(Tipo)
+
+byte do registro N      = N * sizeof(Tipo)
 ```
 
-em vez de:
-
-```c
-struct _Endereco
-```
+É exatamente isso que permite ordenar com `qsort` e pular direto para um registro com `fseek`.
 
 ---
 
-# 3. `Endereco` x `Endereco *e`
+## 3. `Tipo x;` x `Tipo *x;` — quando usar cada um
 
-## `Endereco e`
+Esta é a decisão que mais confunde no começo. A regra prática é:
+
+```text
+Preciso de UM item por vez, que vai ser descartado/substituído?
+    → variável normal:   Endereco e;
+
+Preciso de VÁRIOS itens ao mesmo tempo, e a quantidade só é
+conhecida em tempo de execução?
+    → ponteiro + malloc: Endereco *e;
+```
+
+### `Endereco e;` — a struct de verdade
 
 ```c
 Endereco e;
 ```
 
-Aqui `e` é uma **struct de verdade**.
-
-Ela possui espaço para **um único `Endereco`**.
+Aqui `e` **é** uma struct de verdade. Ela possui espaço para **um único** `Endereco`, já reservado pelo compilador.
 
 ```text
 e
-
 ┌─────────────────────┐
 │ logradouro          │
-│ bairro              │
-│ cidade              │
-│ uf                  │
-│ sigla               │
-│ cep                 │
-│ lixo                │
+│ bairro               │
+│ cidade               │
+│ uf                   │
+│ sigla                │
+│ cep                  │
+│ lixo                 │
 └─────────────────────┘
 ```
 
-Para acessar seus campos:
+Para acessar seus campos, usa-se ponto:
 
 ```c
 e.cep
 ```
 
----
+Use quando o dado é **temporário**: você lê, aproveita e sobrescreve com o próximo.
 
-## `Endereco *e`
+### `Endereco *e;` — um endereço
 
 ```c
 Endereco *e;
 ```
 
-Aqui `e` é um **ponteiro**.
-
-Ele guarda o endereço de memória onde existe um `Endereco`.
+Aqui `e` é um **ponteiro** — uma variável que guarda o endereço de memória onde existe um (ou vários) `Endereco`, e não o registro em si.
 
 ```text
 e
@@ -163,24 +210,39 @@ e
 1000
 
 ┌─────────────────────┐
-│ Endereco            │
-│ cep = "20040000"    │
+│ Endereco             │
+│ cep = "20040000"     │
 └─────────────────────┘
 ```
 
-Por isso:
+Por isso, para acessar um campo através do ponteiro, usa-se seta:
 
 ```c
 e->cep
 ```
 
-é usado para acessar o CEP através do ponteiro.
+Sozinho, o ponteiro não aponta para lugar nenhum útil. Ele só serve depois que alguém lhe dá um endereço válido — normalmente o `malloc`:
 
----
+```c
+e = malloc(qtd * sizeof(Endereco));
+```
 
-## Importante
+Com vários registros no bloco, o acesso por índice também funciona:
 
-`Endereco e` e `Endereco *e` não significam a mesma coisa.
+```text
+e
+↓
+1000
+┌────────────┬────────────┬────────────┐
+│ Endereco 0 │ Endereco 1 │ Endereco 2 │
+└────────────┴────────────┴────────────┘
+```
+
+```c
+e[3].cep      /* quarto registro do bloco */
+```
+
+### Importante: não são a mesma coisa
 
 ```text
 Endereco e
@@ -191,181 +253,174 @@ Endereco *e
   que aponta para um ou mais Enderecos
 ```
 
-No programa de ordenação usamos:
+### Por que não usar um array fixo?
 
 ```c
-Endereco *e;
+Endereco e[1000];   /* e se o arquivo tiver 1.000.000 de registros? */
 ```
 
-porque queremos guardar **todos os registros na memória ao mesmo tempo**.
+A quantidade de registros só é conhecida **depois** de abrir o arquivo e medir seu tamanho. Por isso `malloc`.
 
-No programa de índice usamos:
+### Exemplo real: os dois juntos no programa do índice
+
+O programa do índice usa **as duas formas ao mesmo tempo**, e cada uma pelo motivo certo:
 
 ```c
-Endereco e;
+FILE *f;
+
+Endereco e;              /* UM registro por vez → variável normal   */
+IndiceCep *indice;       /* TODAS as entradas   → ponteiro + malloc */
+
+f = fopen("cep.dat", "rb");
+
+indice = malloc(qtd * sizeof(IndiceCep));
+
+for(i = 0; i < qtd; i++)
+{
+    fread(&e, sizeof(Endereco), 1, f);   /* &e: e é struct → precisa do & */
+
+    strncpy(indice[i].cep, e.cep, 8);    /* e.cep: ponto  → e é struct    */
+
+    indice[i].posicao = i;               /* indice[i]: índice no bloco    */
+}
 ```
 
-porque queremos ler **um registro por vez**.
+O que acontece com `e` a cada volta do laço:
+
+```text
+1ª volta:  arquivo → registro 0 → e
+2ª volta:  arquivo → registro 1 → e   (apaga o anterior)
+3ª volta:  arquivo → registro 2 → e   (apaga o anterior)
+```
+
+`e` é reaproveitado porque o conteúdo antigo já não é mais necessário — o que interessa (a chave e a posição) já foi copiado para o índice. Uma única struct basta, e por isso `Endereco e` **não** precisa de `malloc`.
+
+Já `indice` precisa manter **todas** as entradas vivas ao mesmo tempo, porque no final vamos ordená-las e fazer busca binária nelas. Por isso é ponteiro com `malloc`.
+
+### O mesmo padrão em outro contexto: intercalação de arquivos
+
+Numa intercalação de dois arquivos já ordenados, o mesmo padrão se repete: nenhum registro precisa ficar guardado, só o "atual" de cada arquivo.
+
+```c
+FILE *a, *b, *saida;
+Endereco ea, eb;          /* um registro atual de cada arquivo */
+
+a     = fopen(arqA, "rb");
+b     = fopen(arqB, "rb");
+saida = fopen(arqSaida, "wb");
+
+fread(&ea, sizeof(Endereco), 1, a);
+fread(&eb, sizeof(Endereco), 1, b);
+```
+
+Nenhum `malloc` aqui: `ea` e `eb` são structs normais, porque a cada comparação um deles é escrito na saída e imediatamente substituído pelo próximo registro do mesmo arquivo — exatamente o mesmo raciocínio do `Endereco e` do índice.
+
+`FILE *a, *b, *saida` **são** ponteiros — mas não porque precisem de `malloc`: quem devolve o endereço da estrutura interna do arquivo é o `fopen`, não você. Por isso `FILE *` nunca leva `malloc`/`free`, só `fopen`/`fclose`.
+
+### Resumo da decisão
+
+```text
+Endereco e;          → 1 registro, temporário, sem malloc, usa .  e &e
+Endereco *e;         → N registros, com malloc,  usa ->  ou e[i]
+FILE *f;             → ponteiro devolvido pelo fopen, nunca malloc/free
+```
 
 ---
 
-# 4. `.` x `->`
+## 4. `.` x `->`
 
 Regra para decorar:
 
 ```text
-Tenho a struct:
-
-    e.cep
-
-Tenho um ponteiro para a struct:
-
-    e->cep
+Tenho a struct        →  e.cep
+Tenho um ponteiro     →  e->cep
 ```
 
 Exemplo:
 
 ```c
 Endereco e;
-
-e.cep;
+e.cep;          /* usamos . porque e é a própria struct */
 ```
-
-Usamos `.` porque `e` é a própria struct.
-
-Já:
 
 ```c
 Endereco *e;
-
-e->cep;
+e->cep;         /* usamos -> porque e é um ponteiro      */
+e[0].cep;       /* equivalente ao acima                  */
 ```
 
-Usamos `->` porque `e` é um ponteiro.
+`e->cep` é apenas um atalho para `(*e).cep`.
 
 ---
 
-# 5. `&` e `*`
+## 5. `&` e `*`
 
-## `&` — endereço
+### `&` — endereço de
 
-O operador `&` significa:
-
-> Pegue o endereço de uma variável.
-
-Se temos:
+O operador `&` significa: *pegue o endereço de uma variável.*
 
 ```c
 Endereco e;
 ```
 
-então:
-
-```c
-&e
-```
-
-é o endereço de `e`.
-
 ```text
-e  → a própria struct
-
-&e → endereço da struct
+e   → a própria struct
+&e  → endereço da struct
 ```
 
-Por isso:
+Por isso, quando a variável é uma struct normal, o `fread` recebe `&e`: ele precisa saber **onde** colocar os bytes lidos.
 
 ```c
 fread(&e, sizeof(Endereco), 1, f);
 ```
 
-pode ser usado quando `e` é uma struct normal.
+Quando a variável já é um ponteiro, o `&` não é usado — o valor dela já é um endereço:
 
----
+```c
+fread(e, sizeof(Endereco), qtd, f);
+```
 
-## `*` — acessar o conteúdo apontado
+### `*` — acessar o conteúdo apontado
 
-Se:
+Se `e` é um ponteiro:
 
 ```c
 Endereco *e;
 ```
 
-então `e` guarda um endereço.
+então `*e` significa: *acesse o `Endereco` que está naquele endereço.*
 
-```c
-*e
-```
-
-significa:
-
-> Acesse o `Endereco` que está naquele endereço.
-
-Resumo:
+### Resumo
 
 ```text
 Endereco e
-
 e   → struct
 &e  → endereço da struct
-```
 
-```text
 Endereco *e
-
 e   → endereço
 *e  → struct naquele endereço
 ```
 
 ---
 
-# 6. `malloc`
+## 6. `malloc` e `free`
 
 ```c
-e = (Endereco*) malloc(qtd * sizeof(Endereco));
+e = malloc(qtd * sizeof(Endereco));
 ```
 
-`malloc` serve para **reservar memória dinamicamente**.
+`malloc` serve para **reservar memória dinamicamente**. Não sabemos previamente quantos registros existem no arquivo — ele pode ter 1.000, 50.000 ou 1.000.000 de registros — por isso não fazemos um array fixo. Primeiro descobrimos a quantidade medindo o arquivo, depois reservamos exatamente o espaço necessário.
 
-Não sabemos previamente quantos registros existem no arquivo.
+### O que o `malloc` retorna?
 
-Por isso não fazemos simplesmente:
-
-```c
-Endereco e[1000];
-```
-
-O arquivo pode ter 1.000, 50.000 ou 1.000.000 registros.
-
-Primeiro descobrimos:
-
-```c
-qtd = posicao / sizeof(Endereco);
-```
-
-Depois reservamos exatamente o espaço necessário:
-
-```c
-malloc(qtd * sizeof(Endereco));
-```
-
----
-
-## O que o `malloc` retorna?
-
-O `malloc` retorna um **endereço de memória**.
-
-Por exemplo:
+`malloc` reserva um bloco de memória e devolve o **endereço do início** desse bloco.
 
 ```text
 malloc(...)
-
    ↓
-
-1000
+ 1000
 ```
-
-Então:
 
 ```c
 e = malloc(...);
@@ -375,498 +430,50 @@ faz:
 
 ```text
 e
-
 ↓
-
 1000
-
 ┌──────────┬──────────┬──────────┐
 │ Endereco │ Endereco │ Endereco │
 └──────────┴──────────┴──────────┘
 ```
 
-Nesse momento, temos espaço reservado, mas ainda não colocamos os dados do arquivo.
+Nesse momento, o espaço está reservado, mas ainda vazio — quem o preenche é o `fread`.
 
----
-
-## `(Endereco*)` é casting?
-
-Sim.
+### O casting `(Endereco*)`
 
 ```c
-(Endereco*) malloc(...)
+e = (Endereco*) malloc(qtd * sizeof(Endereco));
 ```
 
-é um **casting**.
+Isso é um **casting**. O `malloc` retorna `void *`, um ponteiro genérico. O casting diz: *"trate esse endereço como um ponteiro para `Endereco`."*
 
-O `malloc` retorna um `void *`, ou seja, um ponteiro genérico.
-
-O casting diz:
-
-> "Trate esse endereço como um ponteiro para `Endereco`."
-
-Em C, o casting não é necessário:
+Em C o casting é **opcional** — a conversão é automática:
 
 ```c
-e = malloc(qtd * sizeof(Endereco));
+e = malloc(qtd * sizeof(Endereco));   /* também funciona */
 ```
 
-já funciona.
+### Verificar o retorno
 
----
-
-# 7. `fseek`, `ftell` e `rewind`
-
-O programa faz:
+`malloc` devolve `NULL` se não conseguir reservar a memória. Vale sempre checar:
 
 ```c
-fseek(f, 0, SEEK_END);
-
-posicao = ftell(f);
-```
-
-## `fseek`
-
-```c
-fseek(f, 0, SEEK_END);
-```
-
-Move a posição atual do arquivo para o final.
-
-```text
-[registro][registro][registro][registro]
-
-                                      ↑
-                                    posição
-```
-
----
-
-## `ftell`
-
-```c
-posicao = ftell(f);
-```
-
-Informa a posição atual.
-
-Como estamos no final do arquivo, essa posição representa o tamanho do arquivo em bytes.
-
----
-
-## `rewind`
-
-Depois de descobrir o tamanho, a posição do arquivo continua no final.
-
-Por isso:
-
-```c
-rewind(f);
-```
-
-volta para o começo.
-
-```text
-Antes:
-
-[registro][registro][registro]
-
-                            ↑
-                          final
-
-
-Depois do rewind:
-
-[registro][registro][registro]
-
- ↑
-começo
-```
-
-Isso é necessário porque o próximo comando será:
-
-```c
-fread(...)
-```
-
-e o `fread` começa a ler **da posição atual do arquivo**.
-
-Resumo:
-
-```text
-fseek  → vai para o final
-
-ftell  → descobre o tamanho
-
-rewind → volta para o começo
-
-fread  → lê os registros
-```
-
----
-
-# 8. `fread`
-
-A chamada:
-
-```c
-fread(e, sizeof(Endereco), qtd, f);
-```
-
-possui quatro parâmetros:
-
-```text
-fread(
-
-    onde,
-
-    tamanho de cada elemento,
-
-    quantidade,
-
-    arquivo
-
-);
-```
-
-## `e`
-
-Onde os dados serão colocados.
-
-Como `e` é um ponteiro, ele contém o endereço da memória reservada pelo `malloc`.
-
-## `sizeof(Endereco)`
-
-Tamanho de **um** `Endereco`.
-
-O `fread` precisa saber isso para saber onde termina um registro e começa o próximo.
-
-## `qtd`
-
-Quantidade de `Enderecos` que queremos ler.
-
-## `f`
-
-Arquivo de onde os dados serão lidos.
-
----
-
-## Exemplo
-
-Se:
-
-```text
-sizeof(Endereco) = 300
-
-qtd = 3
-```
-
-então:
-
-```c
-fread(e, sizeof(Endereco), qtd, f);
-```
-
-significa:
-
-```text
-300 bytes → Endereco 0
-
-300 bytes → Endereco 1
-
-300 bytes → Endereco 2
-```
-
----
-
-## O que acontece na memória?
-
-Antes do `fread`:
-
-```text
-e
-
-↓
-
-┌──────────┬──────────┬──────────┐
-│  vazio   │  vazio   │  vazio   │
-└──────────┴──────────┴──────────┘
-```
-
-Depois:
-
-```text
-e
-
-↓
-
-┌────────────┬────────────┬────────────┐
-│ Endereco 0 │ Endereco 1 │ Endereco 2 │
-│ CEP = ...  │ CEP = ...  │ CEP = ...  │
-└────────────┴────────────┴────────────┘
-```
-
-O `fread` coloca **o registro inteiro**, não apenas o CEP.
-
----
-
-## Retorno do `fread`
-
-`fread` retorna quantos elementos conseguiu ler.
-
-Por isso:
-
-```c
-if(fread(e, sizeof(Endereco), qtd, f) == qtd)
-```
-
-significa:
-
-> "A quantidade de elementos que consegui ler é igual à quantidade que esperava?"
-
-Se sim:
-
-```c
-printf("Lido = OK\n");
-```
-
----
-
-# 9. `qsort`
-
-```c
-qsort(e, qtd, sizeof(Endereco), compara);
-```
-
-O `qsort` ordena os elementos que começam no endereço `e`.
-
-Os parâmetros são:
-
-```text
-qsort(
-
-    onde estão os elementos,
-
-    quantidade,
-
-    tamanho de cada elemento,
-
-    função de comparação
-
-);
-```
-
-Portanto:
-
-```c
-qsort(e, qtd, sizeof(Endereco), compara);
-```
-
-significa:
-
-> "Ordene os `qtd` Enderecos que começam em `e`, sabendo que cada um possui `sizeof(Endereco)` bytes, usando `compara` para decidir a ordem."
-
----
-
-# 10. A função `compara`
-
-```c
-int compara(const void *e1, const void *e2)
+if(e == NULL)
 {
-    return strncmp(
-        ((Endereco*)e1)->cep,
-        ((Endereco*)e2)->cep,
-        8
-    );
+    fprintf(stderr, "Erro ao alocar memoria\n");
+    return 1;
 }
 ```
 
-A função recebe dois elementos:
+### `free`
 
-```text
-e1 → primeiro elemento
-
-e2 → segundo elemento
-```
-
-Mas o `qsort` é genérico e trabalha com `void *`.
-
-Por isso fazemos o casting:
-
-```c
-(Endereco*)e1
-```
-
-e:
-
-```c
-(Endereco*)e2
-```
-
-Isso significa:
-
-> "Trate esse endereço como um ponteiro para `Endereco`."
-
-Então:
-
-```c
-((Endereco*)e1)->cep
-```
-
-significa:
-
-```text
-e1
- ↓
-ponteiro para Endereco
- ↓
-acessa o campo cep
-```
-
-Depois:
-
-```c
-strncmp(..., ..., 8)
-```
-
-compara os 8 caracteres dos dois CEPs.
-
----
-
-## O que `compara` retorna?
-
-```text
-resultado < 0
-→ primeiro CEP vem antes
-
-resultado = 0
-→ CEPs iguais
-
-resultado > 0
-→ primeiro CEP vem depois
-```
-
-O `qsort` usa esse resultado para saber como organizar os registros.
-
----
-
-# 11. De onde vêm `e1` e `e2`?
-
-Nós não criamos `e1` e `e2` no `main`.
-
-Eles são **parâmetros da função `compara`**:
-
-```c
-int compara(const void *e1, const void *e2)
-```
-
-Quem chama `compara` é o próprio `qsort`.
-
-Conceitualmente, ele pode fazer algo como:
-
-```c
-compara(&e[0], &e[1]);
-```
-
-Depois:
-
-```c
-compara(&e[2], &e[5]);
-```
-
-e assim por diante.
-
-O `qsort` decide quais elementos precisa comparar.
-
-Nós apenas fornecemos a função:
-
-```c
-qsort(e, qtd, sizeof(Endereco), compara);
-```
-
----
-
-## `compara` x `compara()`
-
-```c
-qsort(..., compara);
-```
-
-→ entrega a função para o `qsort`.
-
-```c
-compara();
-```
-
-→ executa a função.
-
-Queremos que o `qsort` execute a função quando precisar.
-
----
-
-# 12. `fwrite`
-
-Depois que o `qsort` terminou:
-
-```c
-fwrite(e, sizeof(Endereco), qtd, saida);
-```
-
-faz o caminho contrário do `fread`.
-
-```text
-fread:
-
-arquivo → memória
-
-fwrite:
-
-memória → arquivo
-```
-
-Os parâmetros são:
-
-```text
-fwrite(
-
-    de onde pegar,
-
-    tamanho de cada elemento,
-
-    quantidade,
-
-    arquivo
-
-);
-```
-
-Então:
-
-```c
-fwrite(e, sizeof(Endereco), qtd, saida);
-```
-
-significa:
-
-> "Pegue os `qtd` Enderecos que estão na memória começando em `e` e grave no arquivo `saida`."
-
----
-
-# 13. `free`
-
-Depois de terminar:
+Toda memória de `malloc` deve ser devolvida no final:
 
 ```c
 free(e);
 ```
 
-libera a memória que foi reservada pelo:
-
-```c
-malloc(...)
-```
-
-Fluxo:
+Ciclo completo:
 
 ```text
 malloc
@@ -892,15 +499,333 @@ libera a memória
 
 ---
 
-# 14. Índice de CEP
+# Parte II — Navegando no arquivo
 
-Agora temos um segundo programa/tarefa:
+## 7. `fseek`, `ftell` e `rewind`
 
-> Criar um índice para o arquivo `cep.dat`.
+Todo arquivo aberto tem uma **posição atual de leitura/escrita**, que avança sozinha a cada operação.
 
-Um índice funciona como um **atalho para encontrar um registro**.
+### Descobrindo o tamanho
 
-Imagine que o arquivo seja:
+```c
+fseek(f, 0, SEEK_END);
+
+posicao = ftell(f);
+```
+
+**`fseek`** move a posição atual do arquivo para o final:
+
+```text
+[registro][registro][registro][registro]
+
+                                      ↑
+                                    posição
+```
+
+**`ftell`** informa a posição atual. Como estamos no final do arquivo, essa posição representa o tamanho do arquivo em bytes.
+
+Daí:
+
+```c
+qtd = posicao / sizeof(Endereco);
+```
+
+### `rewind`
+
+Depois de descobrir o tamanho, a posição do arquivo continua no final. Por isso:
+
+```c
+rewind(f);
+```
+
+volta para o começo.
+
+```text
+Antes:
+[registro][registro][registro]
+                            ↑
+                          final
+
+Depois do rewind:
+[registro][registro][registro]
+ ↑
+começo
+```
+
+Isso é necessário porque o próximo comando normalmente é `fread(...)`, e o `fread` começa a ler **da posição atual do arquivo**. Sem o `rewind`, ele não leria nada — já estaria no fim.
+
+### `fseek` para acesso direto
+
+`fseek` também serve para pular direto a um registro, não só para medir o arquivo. Os pontos de referência são:
+
+```text
+SEEK_SET → a partir do início
+SEEK_CUR → a partir da posição atual
+SEEK_END → a partir do final
+```
+
+O deslocamento é sempre em **bytes**, nunca em número de registros:
+
+```c
+fseek(f, posicao * sizeof(Endereco), SEEK_SET);
+```
+
+### Resumo
+
+```text
+fseek  → move a posição no arquivo (em bytes)
+ftell  → descobre/informa a posição atual
+rewind → volta para o começo
+fread  → lê os registros
+```
+
+---
+
+## 8. `fread`
+
+A chamada:
+
+```c
+fread(e, sizeof(Endereco), qtd, f);
+```
+
+possui quatro parâmetros:
+
+```text
+fread(
+    onde,
+    tamanho de cada elemento,
+    quantidade,
+    arquivo
+);
+```
+
+**`e`** — onde os dados serão colocados. Se `e` for um ponteiro, ele já contém o endereço da memória reservada pelo `malloc`; se for uma struct normal, usa-se `&e`.
+
+**`sizeof(Endereco)`** — tamanho de **um** registro. O `fread` precisa saber isso para saber onde termina um registro e começa o próximo.
+
+**`qtd`** — quantidade de registros que se quer ler.
+
+**`f`** — arquivo de onde os dados serão lidos.
+
+Duas formas, conforme o destino:
+
+```c
+Endereco e;
+fread(&e, sizeof(Endereco), 1, f);      /* 1 registro numa struct  */
+
+Endereco *e = malloc(qtd * sizeof(Endereco));
+fread(e, sizeof(Endereco), qtd, f);     /* qtd registros no bloco  */
+```
+
+### Exemplo
+
+Se `sizeof(Endereco) = 300` e `qtd = 3`, então `fread(e, sizeof(Endereco), qtd, f)` significa:
+
+```text
+300 bytes → Endereco 0
+300 bytes → Endereco 1
+300 bytes → Endereco 2
+```
+
+### O que acontece na memória?
+
+Antes do `fread`:
+
+```text
+e
+↓
+┌──────────┬──────────┬──────────┐
+│  vazio   │  vazio   │  vazio   │
+└──────────┴──────────┴──────────┘
+```
+
+Depois:
+
+```text
+e
+↓
+┌────────────┬────────────┬────────────┐
+│ Endereco 0 │ Endereco 1 │ Endereco 2 │
+│ CEP = ...  │ CEP = ...  │ CEP = ...  │
+└────────────┴────────────┴────────────┘
+```
+
+O `fread` copia o **registro inteiro**, não apenas o campo que interessa. E ele continua sempre da posição atual — por isso chamadas sucessivas leem registros consecutivos, sem precisar dizer explicitamente "leia o próximo".
+
+### Retorno do `fread`
+
+`fread` retorna quantos elementos conseguiu ler de fato. É a forma confiável de detectar fim de arquivo ou erro:
+
+```c
+if(fread(e, sizeof(Endereco), qtd, f) == qtd)
+{
+    printf("Lido = OK\n");
+}
+```
+
+Ou seja: *"a quantidade de elementos que consegui ler é igual à quantidade que eu esperava?"*
+
+---
+
+## 9. `fwrite`
+
+Depois que os registros estão prontos na memória (ordenados ou não), `fwrite` faz o caminho contrário do `fread`:
+
+```c
+fwrite(e, sizeof(Endereco), qtd, saida);
+```
+
+```text
+fread   → arquivo → memória
+fwrite  → memória → arquivo
+```
+
+Os parâmetros seguem o mesmo padrão:
+
+```text
+fwrite(
+    de onde pegar,
+    tamanho de cada elemento,
+    quantidade,
+    arquivo
+);
+```
+
+Ou seja: *"pegue os `qtd` registros que estão na memória começando em `e` e grave no arquivo `saida`."*
+
+---
+
+# Parte III — Ordenação
+
+## 10. `qsort`
+
+```c
+qsort(e, qtd, sizeof(Endereco), compara);
+```
+
+Os parâmetros são:
+
+```text
+qsort(
+    onde estão os elementos,
+    quantidade,
+    tamanho de cada elemento,
+    função de comparação
+);
+```
+
+Ou seja: *"ordene os `qtd` elementos que começam em `e`, sabendo que cada um possui `sizeof(Endereco)` bytes, usando `compara` para decidir a ordem."*
+
+O `qsort` funciona com **qualquer tipo**. O que muda de um uso para outro são apenas três coisas: o bloco, o `sizeof` e a função de comparação.
+
+```c
+qsort(e,      qtd, sizeof(Endereco),  comparaEndereco);
+qsort(indice, qtd, sizeof(IndiceCep), comparaIndice);
+```
+
+> O tipo passado ao `sizeof` deve ser sempre o tipo dos elementos que estão sendo ordenados naquela chamada. Errar aqui corrompe os dados silenciosamente.
+
+---
+
+## 11. A função de comparação
+
+```c
+int compara(const void *e1, const void *e2)
+{
+    return strncmp(
+        ((Endereco*)e1)->cep,
+        ((Endereco*)e2)->cep,
+        8
+    );
+}
+```
+
+A função recebe dois elementos — `e1`, o primeiro; `e2`, o segundo. Mas o `qsort` é genérico e trabalha com `void *`, por isso é preciso o casting:
+
+```c
+(Endereco*)e1
+```
+
+Isso significa: *"trate esse endereço como um ponteiro para `Endereco`."* Então:
+
+```c
+((Endereco*)e1)->cep
+```
+
+significa:
+
+```text
+e1
+ ↓
+ponteiro para Endereco
+ ↓
+acessa o campo cep
+```
+
+Depois, `strncmp(..., ..., 8)` compara os 8 caracteres dos dois CEPs.
+
+### O que `compara` retorna?
+
+```text
+resultado < 0
+→ primeiro elemento vem antes
+
+resultado = 0
+→ elementos equivalentes
+
+resultado > 0
+→ primeiro elemento vem depois
+```
+
+`strncmp` já segue exatamente essa convenção, o que torna a comparação de campos `char[]` imediata. Para chaves numéricas, a lógica é a mesma, só que escrita manualmente:
+
+```c
+int comparaNumero(const void *a, const void *b)
+{
+    long x = ((Registro*)a)->valor;
+    long y = ((Registro*)b)->valor;
+
+    if(x < y) return -1;
+    if(x > y) return  1;
+    return 0;
+}
+```
+
+Para ordem **decrescente**, basta inverter os operandos.
+
+O `qsort` usa esse resultado para saber como organizar os registros.
+
+---
+
+## 12. De onde vêm os parâmetros da comparação
+
+Não criamos `e1` e `e2` no `main`. Eles são **parâmetros da função `compara`**, e quem os preenche é o próprio `qsort`. Conceitualmente ele faz algo como:
+
+```c
+compara(&e[0], &e[1]);
+compara(&e[2], &e[5]);
+...
+```
+
+O `qsort` decide sozinho quais elementos precisa comparar; nós apenas fornecemos a função:
+
+```c
+qsort(e, qtd, sizeof(Endereco), compara);   /* entrega a função para o qsort */
+compara();                                   /* executaria a função agora    */
+```
+
+Sem parênteses, o nome da função é apenas o endereço dela. Com parênteses, é uma chamada de fato. O `qsort` quer o endereço, para chamar quando precisar.
+
+---
+
+# Parte IV — Índice
+
+## 13. O que é um índice
+
+Um índice funciona como um **atalho para encontrar um registro**, sem precisar varrer o arquivo inteiro.
+
+Imagine que o arquivo original (não ordenado) seja:
 
 ```text
 cep.dat
@@ -919,71 +844,15 @@ CEP        posição
 55555555 → 2
 ```
 
-Esse índice guarda apenas as informações necessárias para localizar cada registro:
+Esse índice guarda apenas as informações necessárias para localizar cada registro: **chave → posição no arquivo**. Vantagens:
 
-```text
-CEP → posição no arquivo
-```
-
----
-
-# 15. `Endereco e` no índice
-
-No programa do índice usamos:
-
-```c
-Endereco e;
-```
-
-Isso significa que temos espaço para **um único `Endereco`**.
-
-Isso pode parecer estranho porque o arquivo possui muitos registros.
-
-Mas não precisamos guardar todos os `Endereco` na memória.
-
-Queremos apenas:
-
-```text
-ler um Endereco
-      ↓
-pegar seu CEP
-      ↓
-guardar o CEP no índice
-      ↓
-ler o próximo Endereco
-      ↓
-repetir
-```
-
-Então a mesma variável `e` é reutilizada.
-
-Exemplo:
-
-```text
-1ª leitura:
-
-arquivo → Endereco 0 → e
-
-
-2ª leitura:
-
-arquivo → Endereco 1 → e
-
-
-3ª leitura:
-
-arquivo → Endereco 2 → e
-```
-
-O conteúdo anterior de `e` é substituído pelo próximo registro.
-
-Por isso não precisamos de `malloc` para `Endereco`.
+- ocupa pouca memória (só chave + posição, não o registro inteiro);
+- pode ser ordenado sem tocar no arquivo original;
+- permite busca binária e acesso direto com `fseek`.
 
 ---
 
-# 16. `IndiceCep *indice`
-
-Criamos uma nova estrutura para representar uma entrada do índice:
+## 14. A struct do índice
 
 ```c
 struct indiceCep
@@ -999,26 +868,17 @@ Cada `IndiceCep` possui:
 
 ```text
 IndiceCep
-
-├── cep
-└── posicao
+├── cep      (a chave)
+└── posicao  (onde o registro está no arquivo)
 ```
 
-Agora precisamos guardar **vários `IndiceCep` ao mesmo tempo**.
-
-Por isso usamos:
+Como precisamos guardar **vários** `IndiceCep` ao mesmo tempo, usamos ponteiro:
 
 ```c
 IndiceCep *indice;
-```
 
-E:
-
-```c
 indice = malloc(qtd * sizeof(IndiceCep));
 ```
-
-Agora temos espaço para `qtd` entradas:
 
 ```text
 indice
@@ -1040,15 +900,11 @@ indice
 
 ```text
 Endereco e;
-
 → espaço para 1 Endereco
 → usado temporariamente
 → não precisa de malloc
-```
 
-```text
 IndiceCep *indice;
-
 → espaço para vários IndiceCep
 → precisa armazenar todos os índices
 → usa malloc
@@ -1056,23 +912,19 @@ IndiceCep *indice;
 
 ---
 
-# 17. Criando o índice
+## 15. Construindo o índice
 
-Depois de calcular `qtd`, fazemos:
+Depois de calcular `qtd`, reservamos o espaço e voltamos ao começo do arquivo:
 
 ```c
 IndiceCep *indice;
 
 indice = malloc(qtd * sizeof(IndiceCep));
-```
 
-Depois voltamos ao começo do arquivo:
-
-```c
 rewind(f);
 ```
 
-E começamos a percorrer todos os registros:
+E percorremos todos os registros:
 
 ```c
 for(i = 0; i < qtd; i++)
@@ -1087,122 +939,52 @@ for(i = 0; i < qtd; i++)
 
 Vamos entender linha por linha.
 
----
-
-## `for`
+### `for`
 
 ```c
 for(i = 0; i < qtd; i++)
 ```
 
-Percorre todas as posições.
+Percorre todas as posições. Se `qtd = 4`, temos `i = 0, 1, 2, 3`.
 
-Se:
+### `fread(&e, sizeof(Endereco), 1, f)`
 
-```text
-qtd = 4
-```
+Significa: *"leia 1 `Endereco` do arquivo e coloque dentro de `e`."* O `&e` é usado porque `fread` precisa do **endereço da variável** onde vai colocar os dados. O `1` significa que apenas um registro é lido nesta chamada.
 
-temos:
+O próximo `fread` continua de onde o anterior parou, porque o arquivo mantém uma posição de leitura que avança sozinha depois de cada leitura.
 
-```text
-i = 0
-i = 1
-i = 2
-i = 3
-```
+### `strncpy(indice[i].cep, e.cep, 8)`
 
----
-
-## `fread`
-
-```c
-fread(&e, sizeof(Endereco), 1, f);
-```
-
-Significa:
-
-> "Leia 1 `Endereco` do arquivo e coloque dentro de `e`."
-
-O `&e` é usado porque `fread` precisa do **endereço da variável onde vai colocar os dados**.
-
-O `1` significa:
-
-> leia apenas um `Endereco` nesta chamada.
-
-O próximo `fread` vai continuar de onde o anterior parou.
-
-Isso acontece porque o arquivo possui uma **posição atual de leitura**, que avança automaticamente depois de cada leitura.
-
----
-
-## `strncpy`
-
-```c
-strncpy(indice[i].cep, e.cep, 8);
-```
-
-Pega o CEP do `Endereco` que acabamos de ler:
-
-```c
-e.cep
-```
-
-e copia para o índice:
-
-```c
-indice[i].cep
-```
-
-Exemplo:
+Pega o CEP do `Endereco` recém-lido (`e.cep`) e copia para o índice (`indice[i].cep`):
 
 ```text
 e.cep
   ↓
 "22222222"
-
         ↓ copia
-
 indice[0].cep
   ↓
 "22222222"
 ```
 
----
+### `indice[i].posicao = i`
 
-## `indice[i].posicao = i`
-
-```c
-indice[i].posicao = i;
-```
-
-Guarda a posição daquele registro no arquivo original.
-
-Por exemplo:
+Guarda a posição **original** daquele registro no arquivo:
 
 ```text
 i = 0
-
 indice[0].cep = "22222222"
 indice[0].posicao = 0
-```
 
-Depois:
-
-```text
 i = 1
-
 indice[1].cep = "11111111"
 indice[1].posicao = 1
 ```
-
-E assim por diante.
 
 No final:
 
 ```text
 ÍNDICE
-
 ┌──────────┬─────────┐
 │ CEP      │ posição │
 ├──────────┼─────────┤
@@ -1212,31 +994,17 @@ No final:
 └──────────┴─────────┘
 ```
 
-A posição é a posição **original no `cep.dat`**.
+A posição é sempre a posição **original** no arquivo, mesmo que o índice depois seja reordenado.
 
 ---
 
-# 18. Ordenando o índice
-
-Depois de criar o índice:
+## 16. Ordenando o índice
 
 ```c
 qsort(indice, qtd, sizeof(IndiceCep), compara);
 ```
 
-Agora estamos ordenando **`IndiceCep`**, e não `Endereco`.
-
-Por isso:
-
-```c
-sizeof(IndiceCep)
-```
-
-e não:
-
-```c
-sizeof(Endereco)
-```
+Agora estamos ordenando **`IndiceCep`**, e não `Endereco`. Por isso `sizeof(IndiceCep)`, e não `sizeof(Endereco)`.
 
 A função `compara` também precisa comparar `IndiceCep`:
 
@@ -1251,29 +1019,7 @@ int compara(const void *a, const void *b)
 }
 ```
 
-O `qsort` recebe:
-
-```text
-indice
-   ↓
-onde começa o array
-
-qtd
-   ↓
-quantos elementos
-
-sizeof(IndiceCep)
-   ↓
-tamanho de cada elemento
-
-compara
-   ↓
-como decidir a ordem
-```
-
----
-
-## O resultado
+### O resultado
 
 Antes:
 
@@ -1293,51 +1039,22 @@ CEP        posição
 55555555 → 2
 ```
 
-Observe:
-
-**A posição não foi alterada.**
-
-Só mudamos a ordem das entradas do índice.
-
-A entrada:
-
-```text
-22222222 → 0
-```
-
-continua dizendo:
-
-> "O CEP 22222222 está na posição 0 do `cep.dat`."
+**A posição não foi alterada.** Só mudamos a ordem das entradas do índice. A entrada `22222222 → 0` continua dizendo *"o CEP 22222222 está na posição 0 do arquivo original"*. O arquivo em si nunca é tocado.
 
 ---
 
-# 19. Busca binária no índice
+## 17. Busca binária
 
-Depois de ordenar o índice, podemos procurar um CEP usando busca binária.
-
-Começamos:
+Depois de ordenar o índice, podemos procurar uma chave usando busca binária, que descarta metade dos candidatos a cada passo.
 
 ```c
 long inicio = 0;
 long fim = qtd - 1;
 ```
 
-Se temos 5 entradas:
+Se temos 5 entradas (posições 0 a 4): `inicio = 0`, `fim = 4`.
 
-```text
-posição:  0   1   2   3   4
-```
-
-então:
-
-```text
-inicio = 0
-fim = 4
-```
-
----
-
-## `while`
+### `while`
 
 ```c
 while(inicio <= fim)
@@ -1345,137 +1062,62 @@ while(inicio <= fim)
 
 Continua procurando enquanto ainda existir uma parte do índice para pesquisar.
 
----
-
-## `meio`
+### `meio`
 
 ```c
 long meio = (inicio + fim) / 2;
 ```
 
-Calcula a posição central.
+Calcula a posição central. Exemplo: `inicio = 0`, `fim = 4` → `meio = 2`.
 
-Exemplo:
-
-```text
-inicio = 0
-fim = 4
-
-meio = (0 + 4) / 2
-
-meio = 2
-```
-
----
-
-## Comparando o CEP
+### Comparando a chave
 
 ```c
-int resultado = strncmp(
-    argv[1],
-    indice[meio].cep,
-    8
-);
+int resultado = strncmp(argv[1], indice[meio].cep, 8);
 ```
 
-`argv[1]` é o CEP digitado pelo usuário.
+`argv[1]` é a chave digitada pelo usuário (por exemplo, `./programa 33333333` → `argv[1] = "33333333"`), e `indice[meio].cep` é a chave que está no meio do índice.
 
-Por exemplo:
-
-```text
-./programa 33333333
-```
-
-Então:
-
-```text
-argv[1] = "33333333"
-```
-
-E:
-
-```c
-indice[meio].cep
-```
-
-é o CEP que está no meio do índice.
-
----
-
-## Se `resultado == 0`
+### Os três casos
 
 ```c
 if(resultado == 0)
-```
-
-Os CEPs são iguais.
-
-Encontramos o CEP.
-
----
-
-## Se `resultado > 0`
-
-```c
+{
+    /* CEPs iguais: encontramos a chave */
+}
 else if(resultado > 0)
 {
+    /* a chave procurada é maior: procura na metade da direita */
     inicio = meio + 1;
 }
-```
-
-O CEP procurado é maior que o CEP do meio.
-
-Então procuramos na metade da direita.
-
----
-
-## Se `resultado < 0`
-
-```c
 else
 {
+    /* a chave procurada é menor: procura na metade da esquerda */
     fim = meio - 1;
 }
 ```
 
-O CEP procurado é menor que o CEP do meio.
+```text
+resultado == 0  → achou
+resultado >  0  → a chave é maior  → vai para a direita
+resultado <  0  → a chave é menor  → vai para a esquerda
+```
 
-Então procuramos na metade da esquerda.
+O laço termina quando `inicio` ultrapassa `fim`: nesse ponto, a chave não existe no índice.
+
+> Numa varredura sequencial, 1.000.000 de registros exigem até 1.000.000 de comparações. Na busca binária, cerca de 20.
 
 ---
 
-# 20. Usando a posição encontrada
+## 18. Acesso direto com `fseek`
 
-Quando encontramos:
-
-```c
-if(resultado == 0)
-```
-
-pegamos:
+Quando encontramos (`resultado == 0`), pegamos a posição guardada:
 
 ```c
 long posicao = indice[meio].posicao;
 ```
 
-Por exemplo:
-
-```text
-indice[meio]:
-
-CEP       = 33333333
-posicao   = 7
-```
-
-Então:
-
-```c
-posicao = 7;
-```
-
-Isso significa:
-
-> "O registro que eu quero está na posição 7 do `cep.dat`."
+Por exemplo, se `indice[meio].posicao = 7`, isso significa: *"o registro que eu quero está na posição 7 do arquivo original."*
 
 Agora usamos:
 
@@ -1483,22 +1125,7 @@ Agora usamos:
 fseek(f, posicao * sizeof(Endereco), SEEK_SET);
 ```
 
-O `fseek` trabalha com **bytes**, e não com número de registros.
-
-Se:
-
-```text
-sizeof(Endereco) = 300
-posicao = 7
-```
-
-então:
-
-```text
-7 × 300 = 2100 bytes
-```
-
-O `fseek` vai para o byte 2100:
+Lembrando que `fseek` trabalha com **bytes**, não com número de registros. Se `sizeof(Endereco) = 300` e `posicao = 7`, então `7 × 300 = 2100` bytes:
 
 ```text
 cep.dat
@@ -1518,9 +1145,7 @@ Depois:
 fread(&e, sizeof(Endereco), 1, f);
 ```
 
-lê esse `Endereco` para a variável temporária `e`.
-
-Agora podemos mostrar seus dados:
+lê esse registro para a variável temporária `e`. Agora podemos mostrar seus dados:
 
 ```c
 printf(
@@ -1540,229 +1165,143 @@ printf(
 );
 ```
 
+A precisão (`%.72s`, `%.8s`, etc.) é necessária porque os campos são `char[]` de tamanho fixo, sem garantia de terminador `'\0'` no fim — sem ela, o `printf` poderia ler além do campo.
+
 ---
 
-# 21. Fluxo completo do índice
+## 19. Fluxo completo
 
 ```text
                          cep.dat
-
                             │
-
                             ↓
-
                           fopen
-
                             │
-
                             ↓
-
-                    descobre qtd
-
+                  fseek/ftell → descobre qtd
                             │
-
                             ↓
-
                          malloc
-
                             │
-
                             ↓
-
                  cria espaço para
                   vários IndiceCep
-
                             │
-
                             ↓
-
                          rewind
-
                             │
-
                             ↓
-
                      começa o for
-
                             │
-
                             ↓
-
                  lê UM Endereco
-
                             │
-
                             ↓
-
                        Endereco e
-
                             │
-
                             ↓
-
                       pega e.cep
-
                             │
-
                             ↓
-
                   guarda no índice
-
                             │
-
                             ↓
-
                   guarda posição i
-
                             │
-
                             ↓
-
                     lê próximo
-
                             │
-
                             ↓
-
                     repete até qtd
-
                             │
-
                             ↓
-
                           qsort
-
                             │
-
                             ↓
-
                   índice ordenado
-                       pelo CEP
-
+                       pela chave
                             │
-
                             ↓
-
                     busca binária
-
                             │
-
                             ↓
-
                    encontra posição
-
                             │
-
                             ↓
-
                          fseek
-
                             │
-
                             ↓
-
                  vai direto ao registro
-
                             │
-
                             ↓
-
                          fread
-
                             │
-
                             ↓
-
                     Endereco e
-
                             │
-
                             ↓
-
                          printf
+                            │
+                            ↓
+                   free + fclose
 ```
 
 ---
 
-# 22. Resumo dos conceitos
+# Parte V — Referência
 
-## Ponteiros
+## 20. Resumo dos conceitos
+
+### Ponteiros
 
 ```text
 Endereco e
-
 → uma struct
 
 Endereco *e
-
-→ ponteiro para uma struct
+→ ponteiro para uma struct (ou várias)
 
 IndiceCep *indice
-
 → ponteiro para uma área com vários IndiceCep
 
 &e
-
 → endereço de uma variável
 
 *e
-
 → conteúdo apontado por e
 
 e.cep
-
 → acessa campo quando e é uma struct
 
 e->cep
-
 → acessa campo quando e é ponteiro
+
+e[i].cep
+→ acessa campo de um elemento de um bloco apontado
 ```
 
----
-
-## Memória
+### Memória
 
 ```text
-malloc()
-
-→ reserva memória
-
-free()
-
-→ libera memória
+malloc()  → reserva memória (verifique se retornou NULL)
+free()    → libera memória
 ```
 
----
-
-## Arquivos
+### Arquivos
 
 ```text
-fseek()
-
-→ move a posição no arquivo
-
-ftell()
-
-→ informa a posição
-
-rewind()
-
-→ volta para o começo
-
-fread()
-
-→ arquivo → memória
-
-fwrite()
-
-→ memória → arquivo
+fopen()   → abre        ("rb" leitura binária, "wb" escrita binária)
+fseek()   → move a posição no arquivo (em bytes)
+ftell()   → informa a posição
+rewind()  → volta para o começo
+fread()   → arquivo → memória
+fwrite()  → memória → arquivo
+fclose()  → fecha
 ```
 
----
+### Ordenação
 
-## Ordenação
-
-Para `Endereco`:
+Para os registros originais:
 
 ```c
 qsort(e, qtd, sizeof(Endereco), compara);
@@ -1774,15 +1313,12 @@ Para o índice:
 qsort(indice, qtd, sizeof(IndiceCep), compara);
 ```
 
-O tipo passado para `sizeof` deve ser o tipo dos elementos que estão sendo ordenados.
+O tipo passado para `sizeof` deve ser o tipo dos elementos que estão sendo ordenados naquela chamada.
 
----
-
-## Índice
+### Índice
 
 ```text
 IndiceCep
-
 ├── cep
 └── posicao
 ```
@@ -1790,24 +1326,14 @@ IndiceCep
 O índice funciona como:
 
 ```text
-CEP → posição no arquivo
+chave → posição no arquivo
 ```
 
-Exemplo:
-
-```text
-11111111 → 1
-22222222 → 0
-55555555 → 2
-```
-
-A busca binária encontra o CEP rapidamente no índice.
-
-Depois a `posicao` encontrada é usada pelo `fseek` para acessar diretamente o registro correspondente no `cep.dat`.
+Ordenar o índice **não** altera o arquivo original. A busca binária encontra a chave rapidamente; a `posicao` encontrada é usada pelo `fseek` para acessar diretamente o registro correspondente.
 
 ---
 
-# 23. Código completo comentado — ordenação
+## 21. Código comentado — ordenação
 
 ```c
 #include <stdio.h>
@@ -1863,6 +1389,12 @@ int main(int argc, char **argv)
     // Abre o arquivo original para leitura binária.
     f = fopen("cep.dat", "rb");
 
+    if(f == NULL)
+    {
+        fprintf(stderr, "Erro ao abrir o arquivo\n");
+        return 1;
+    }
+
 
     // Vai para o final do arquivo.
     fseek(f, 0, SEEK_END);
@@ -1878,6 +1410,13 @@ int main(int argc, char **argv)
 
     // Reserva memória suficiente para todos os registros.
     e = (Endereco*) malloc(qtd * sizeof(Endereco));
+
+    if(e == NULL)
+    {
+        fprintf(stderr, "Erro ao alocar memoria\n");
+        fclose(f);
+        return 1;
+    }
 
 
     // Volta para o começo do arquivo.
@@ -1905,8 +1444,9 @@ int main(int argc, char **argv)
     fwrite(e, sizeof(Endereco), qtd, saida);
 
 
-    // Fecha o arquivo de saída.
+    // Fecha os arquivos.
     fclose(saida);
+    fclose(f);
 
 
     // Libera a memória reservada pelo malloc.
@@ -1919,7 +1459,7 @@ int main(int argc, char **argv)
 
 ---
 
-# 24. Código completo comentado — índice
+## 22. Código comentado — índice
 
 ```c
 #include <stdio.h>
@@ -2013,7 +1553,8 @@ int main(int argc, char **argv)
     qtd = tamanhoBytes / sizeof(Endereco);
 
 
-    // Reserva memória para TODAS as entradas do índice.
+    // Reserva memória para TODAS as entradas do índice
+    // — o arquivo inteiro nunca é carregado na memória.
     indice = malloc(qtd * sizeof(IndiceCep));
 
     if(indice == NULL)
@@ -2046,7 +1587,7 @@ int main(int argc, char **argv)
     }
 
 
-    // Ordena o índice pelo CEP.
+    // Ordena o índice pelo CEP. O arquivo não é alterado.
     qsort(
         indice,
         qtd,
@@ -2082,7 +1623,7 @@ int main(int argc, char **argv)
             long posicao = indice[meio].posicao;
 
 
-            // Vai diretamente para esse registro.
+            // Vai diretamente para esse registro (em bytes).
             fseek(
                 f,
                 posicao * sizeof(Endereco),
@@ -2100,6 +1641,8 @@ int main(int argc, char **argv)
 
 
             // Mostra os dados do Endereco.
+            // Precisão no printf porque os campos são
+            // char[] de tamanho fixo, sem \0 garantido.
             printf(
                 "%.72s\n"
                 "%.72s\n"
@@ -2153,14 +1696,14 @@ int main(int argc, char **argv)
 
 ---
 
-## ⭐ A ideia mais importante
+## 23. A ideia mais importante
 
 O programa do índice trabalha com **dois tipos de informação diferentes**:
 
 ```text
 ┌──────────────────────────────┐
 │          cep.dat             │
-│                              │
+│                               │
 │  vários Enderecos no arquivo │
 └──────────────┬───────────────┘
                │
@@ -2168,19 +1711,19 @@ O programa do índice trabalha com **dois tipos de informação diferentes**:
                ↓
         ┌─────────────┐
         │ Endereco e  │
-        │             │
-        │ temporário  │
+        │              │
+        │ temporário   │
         └──────┬──────┘
                │
-               │ pega CEP
+               │ pega o CEP
                ↓
         ┌──────────────────────┐
         │   IndiceCep *indice  │
-        │                      │
-        │ CEP → posição        │
-        │ CEP → posição        │
-        │ CEP → posição        │
-        │ ...                  │
+        │                       │
+        │ CEP → posição         │
+        │ CEP → posição         │
+        │ CEP → posição         │
+        │ ...                   │
         └──────────────────────┘
                │
                │ qsort
@@ -2204,6 +1747,7 @@ O programa do índice trabalha com **dois tipos de informação diferentes**:
 Endereco e
 → UM registro temporário
 → lê, usa e substitui
+→ sem malloc
 
 IndiceCep *indice
 → VÁRIAS entradas do índice
@@ -2214,13 +1758,13 @@ IndiceCep *indice
 E o índice existe para transformar:
 
 ```text
-"Quero o CEP 33333333"
+"quero o CEP 33333333"
 ```
 
 em:
 
 ```text
-"Ele está na posição 7 do cep.dat"
+"ele está na posição 7 do cep.dat"
 ```
 
-Depois o `fseek` usa essa posição para chegar diretamente ao registro.
+Depois o `fseek` usa essa posição para chegar diretamente ao registro correspondente, sem precisar varrer o arquivo.
