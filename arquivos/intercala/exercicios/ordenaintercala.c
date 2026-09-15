@@ -107,4 +107,6 @@ int main(int argc, char **argv){
         intercala(nome1, nome2, nome3);
         arquivoNome++;
     }
+
+    free(e);
 }
