@@ -74,12 +74,10 @@ int main(int argc, char **argv){
     e = (Endereco*) malloc((divisao + resto)*sizeof(Endereco));
 
     for(int i = 0; i < PARTES; i++){
-        long quantidadeParte;
+        long quantidadeParte = divisao;;
 
-        if(i == 0){
-            quantidadeParte = divisao + resto;
-        }else{
-            quantidadeParte = divisao;
+        if(i < resto){
+            quantidadeParte++;
         }
 
         fread(e, sizeof(Endereco), quantidadeParte, cep);
