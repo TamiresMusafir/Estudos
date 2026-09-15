@@ -932,6 +932,7 @@ for (int i = 0; i < (quantidadeIntercala - 1) * 2; i += 2) // ❌ i < 12 → fal
 
 **Ordenação e busca**
 - [ ] `qsort`: `sizeof` e casting do tipo **daquela** chamada; função **sem parênteses**.
+- [ ] Ordem invertida: `fread(onde, TAMANHO, QTD, f)` × `qsort(onde, QTD, TAMANHO, compara)`. Trocar compila, mas dá errado.
 - [ ] Busca binária direta: arquivo **ordenado** e **um `fseek` por tentativa**.
 - [ ] Índice ordenado **não** muda `posicao` nem o arquivo.
 - [ ] Ordenação externa: `malloc(divisao + 1)`, resto nas primeiras partes, `fclose` em cada parte.
