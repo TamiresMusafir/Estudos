@@ -775,26 +775,11 @@ EOF      → VALOR devolvido por fgetc etc.      if (c == EOF)
 feof(f)  → FUNÇÃO que testa o indicador de fim  while (!feof(f))
 ```
 
-🎯 `feof()` só fica verdadeiro **depois** que uma leitura falha. O código acima funciona porque sempre **lê antes de testar**. O erro clássico é o padrão abaixo, que grava o **último registro duplicado**:
-
 ```c
-while (!feof(f)) {          // ❌
-    fread(&e, sizeof(e), 1, f);   // última volta: falha, e mantém o valor antigo
-    fwrite(&e, sizeof(e), 1, out); // ...e grava de novo
+while (!feof(f)) {         
+    fread(&e, sizeof(e), 1, f);  
+    fwrite(&e, sizeof(e), 1, out); 
 }
-```
-
-💻 Versão mais segura (testa o retorno do `fread`):
-
-```c
-int temA = fread(&ea, sizeof(Endereco), 1, a);
-int temB = fread(&eb, sizeof(Endereco), 1, b);
-while (temA && temB) {
-    if (compara(&ea, &eb) < 0) { fwrite(&ea, sizeof(Endereco), 1, saida); temA = fread(&ea, sizeof(Endereco), 1, a); }
-    else                       { fwrite(&eb, sizeof(Endereco), 1, saida); temB = fread(&eb, sizeof(Endereco), 1, b); }
-}
-while (temA) { fwrite(&ea, sizeof(Endereco), 1, saida); temA = fread(&ea, sizeof(Endereco), 1, a); }
-while (temB) { fwrite(&eb, sizeof(Endereco), 1, saida); temB = fread(&eb, sizeof(Endereco), 1, b); }
 ```
 
 ### 🎯 Quantas intercalações? `PARTES - 1`
@@ -819,7 +804,7 @@ for (int i = 0; i < (PARTES - 1) * 2; i += 2) {
 - Saída `PARTES + i/2` → 8, 9, 10, 11, 12, 13, 14.
 
 ⚠️ **Armadilha:** com `quantidadeIntercala = PARTES - 1`, a condição certa é
-`i < quantidadeIntercala * 2`. Escrever `i < (quantidadeIntercala - 1) * 2` faz **uma intercalação a menos** e sobram 2 arquivos.
+`i < quantidadeIntercala * 2`. Escrever `i < (quantidadeIntercala - 1) * 2` faz **uma intercalação a menos** e sobram 2 arquivos. NÃO REPETIR DUAS VEZES!
 
 ### 💻 Tabela das 7 intercalações (8 partes)
 
