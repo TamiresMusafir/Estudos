@@ -776,9 +776,9 @@ feof(f)  → FUNÇÃO que testa o indicador de fim  while (!feof(f))
 ```
 
 ```c
-while (!feof(f)) {         
-    fread(&e, sizeof(e), 1, f);  
-    fwrite(&e, sizeof(e), 1, out); 
+while (!feof(f)) {                 // ❌ testa antes de ler
+    fread(&e, sizeof(e), 1, f);    // na última volta falha...
+    fwrite(&e, sizeof(e), 1, out); // ...e grava o último registro duplicado
 }
 ```
 
