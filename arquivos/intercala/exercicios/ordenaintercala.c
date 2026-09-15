@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PARTES 3
+#define PARTES 8
 
 struct Endereco{
     char logradouro[72];
