@@ -28,6 +28,11 @@ void intercala(char *arqA, char *arqB, char *arqSaida){
     b = fopen(arqB, "rb");
     saida = fopen(arqSaida, "wb");
 
+    if(!a || !b || !saida){
+        fprintf(stderr, "Arquivo nao pode ser aberto.\n");
+        return;
+    }
+
     fread(&ea, sizeof(Endereco), 1, a);
     fread(&eb, sizeof(Endereco), 1, b);
 
