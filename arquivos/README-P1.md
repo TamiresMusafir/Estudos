@@ -924,17 +924,15 @@ for (int i = 0; i < (quantidadeIntercala - 1) * 2; i += 2) // ❌ i < 12 → fal
 - [ ] `fseek` não lê · `ftell` não move · `fread` avança.
 
 **Memória e strings**
-- [ ] Testar `malloc == NULL`; todo `malloc` tem `free`.
+- [ ] Todo `malloc` tem `free`.
 - [ ] `.` para struct · `->` para ponteiro.
 - [ ] Array não se atribui → `strcpy`/`strncpy`.
 - [ ] Campos fixos → `strncmp`/`strncpy` com tamanho e `printf("%.8s")`.
-- [ ] `argc` conta o nome do programa; conferir antes de usar `argv[i]`.
 
 **Ordenação e busca**
 - [ ] `qsort`: `sizeof` e casting do tipo **daquela** chamada; função **sem parênteses**.
 - [ ] Ordem invertida: `fread(onde, TAMANHO, QTD, f)` × `qsort(onde, QTD, TAMANHO, compara)`. Trocar compila, mas dá errado.
 - [ ] Busca binária direta: arquivo **ordenado** e **um `fseek` por tentativa**.
-- [ ] Índice ordenado **não** muda `posicao` nem o arquivo.
 - [ ] Ordenação externa: `malloc(divisao + 1)`, resto nas primeiras partes, `fclose` em cada parte.
 - [ ] Intercalações = `PARTES − 1`; laço até `(PARTES − 1) × 2` com `i += 2`; não subtrair o 1 duas vezes.
 
