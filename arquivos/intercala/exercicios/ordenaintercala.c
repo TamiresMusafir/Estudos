@@ -90,10 +90,9 @@ int main(int argc, char **argv){
         fclose(parte);
     }
 
-    int quantidadeIntercala = PARTES;
     int arquivoNome = PARTES;
 
-    for(int i = 0; i < (quantidadeIntercala-1)*2; i+=2){
+    for(int i = 0; i < (PARTES-1)*2; i+=2){
         char nome1[20];
         char nome2[20];
         char nome3[20];
