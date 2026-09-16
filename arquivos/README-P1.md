@@ -1142,12 +1142,14 @@ Essa é uma das decisões mais importantes.
 Pergunta:
 
 > Preciso guardar um registro ou vários registros na memória?
+> 
+| Situação                                                   | Declaração                                      | `malloc`? | Acesso                               |
+| ---------------------------------------------------------- | ----------------------------------------------- | :-------: | ------------------------------------ |
+| Um registro                                                | `Endereco e;`                                   |     ❌     | `e.cep`                              |
+| Vários registros, quantidade conhecida                     | `Endereco e[qtd];`                              |     ❌     | `e[i].cep`                           |
+| Vários registros, quantidade definida em tempo de execução | `Endereco *e = malloc(qtd * sizeof(Endereco));` |     ✅     | `e[i].cep` ou `e->cep`               |
+| Arquivo                                                    | `FILE *f;`                                      |     ❌     | usa `fopen`, `fread`, `fwrite`, etc. |
 
-| Situação            | Declaração     | `malloc`? | Acesso                 |
-| ------------------- | -------------- | :-------: | ---------------------- |
-| Um registro por vez | `Endereco e;`  |     ❌     | `e.cep`                |
-| Vários registros    | `Endereco *e;` |     ✅     | `e[i].cep` ou `e->cep` |
-| Arquivo             | `FILE *f;`     |     ❌     | usa `fopen`            |
 
 ### Um registro
 
