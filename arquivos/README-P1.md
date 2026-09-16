@@ -2,19 +2,13 @@
 
 Material de revisão sobre arquivos, registros, memória, ponteiros, busca, índices e ordenação externa em C.
 
-A ideia é estudar nesta ordem:
-
-```text
-FUNÇÕES
-   ↓
-CONCEITOS
-   ↓
-PROGRAMAS
-   ↓
-PEGADINHAS
-   ↓
-FOLHA DE COLA
-```
+| Parte | O que tem | Quando usar |
+| --- | --- | --- |
+| **1. Funções** | Ficha de cada função: o que faz, parâmetros, retorno, cuidado | Folha de cola |
+| **2. Conceitos** | Ponteiros, struct, memória, as duas contas | Entender o "porquê" |
+| **3. Programas** | As receitas completas, passo a passo | Treinar para a prova |
+| **4. Pegadinhas** | Checklist do que costumo errar | Revisão da véspera |
+| **5. Folha de cola** | Tudo condensado, pronto para copiar | Montar a cola |
 
 ---
 
