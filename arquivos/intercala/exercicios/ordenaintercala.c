@@ -76,7 +76,7 @@ int main(int argc, char **argv){
 
     rewind(cep);
 
-    e = (Endereco*) malloc((divisao + resto)*sizeof(Endereco));
+    e = (Endereco*) malloc((divisao + 1)*sizeof(Endereco));
 
     for(int i = 0; i < PARTES; i++){
         long quantidadeParte = divisao;;
