@@ -2971,7 +2971,11 @@ INTERCALAR
 
 ```c
 FILE *f = fopen("arq", "rb");
-if (!f) return 1;
+
+if (!f){
+  fprintf(stderr,"Arquivo %s não pode ser aberto para leitura\n", argv[1]);
+  return 1;
+}
 
 fclose(f);
 ```
