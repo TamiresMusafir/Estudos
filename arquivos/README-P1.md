@@ -3373,15 +3373,17 @@ f → endereço do FILE       *f → FILE
 
 ```text
 e.campo → struct            e->campo → ponteiro
+e->campo → ponteiro para struct
 ```
 
 ```text
 &e → endereço              *e → conteúdo apontado
+*e → conteúdo apontado por e
 ```
 
 ```text
-fseek escolhe ONDE
-fread lê O QUE está lá
+fseek → escolhe ONDE
+fread → lê O QUE está lá
 ```
 
 ```text
@@ -3407,6 +3409,7 @@ ler → testar → usar → ler de novo
 
 ```text
 malloc → reserva
+memset → preenche
 free → libera
 ```
 
@@ -3417,6 +3420,20 @@ free → libera
 
 ```text
 qsort → ordena na memória
+```
+```text
+fseek(f, n * sizeof(Endereco), SEEK_SET)
+→ vai para o registro n
+```
+```text
+499 × sizeof(Endereco)
+→ posição em bytes do registro 499
+```
+
+```text
+SEEK_SET → início
+SEEK_CUR → posição atual
+SEEK_END → fim
 ```
 
 ```text
