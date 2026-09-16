@@ -51,6 +51,7 @@ Material de revisão sobre arquivos, registros, memória, ponteiros, busca, índ
 
 * [Parte 5 — Folha de cola](#parte-5--folha-de-cola)
 
+* [📄 Folha de cola — Estrutura de Arquivos](#-folha-de-cola--estrutura-de-arquivos)
 ---
 
 # Parte 1 — Funções principais
