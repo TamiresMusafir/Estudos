@@ -4131,3 +4131,15 @@ intercalação 2 a 2 (PARTES − 1 vezes)
      ↓
 arquivo final ordenado
 ```
+
+## 📄 Folha de cola — Estrutura de Arquivos
+
+### Página 1
+
+![Folha de cola - Página 1](arquivos/folha-de-cola/folha_de_cola_estrutura_arquivos-1.png)
+
+### Página 2
+
+![Folha de cola - Página 2](arquivos/folha-de-cola/folha_de_cola_estrutura_arquivos-2.png)
+
+📥 [Baixar folha de cola em PDF](arquivos/folha-de-cola/folha_de_cola_estrutura_arquivos.pdf)
