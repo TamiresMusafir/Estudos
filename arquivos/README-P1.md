@@ -2532,7 +2532,7 @@ e = (Endereco*) malloc((divisao + 1) * sizeof(Endereco));
 
 Um único bloco serve para todas as partes.
 
-> O código do professor usa `(divisao + resto)`. Também funciona: reserva um pouco mais do que o necessário, mas nunca menos.
+> O código do professor usa `(divisao + 1)`. Também funciona: `divisao + resto`. Reserva um pouco mais do que o necessário, mas nunca menos.
 
 ### Etapa 2 — Ordenar cada parte
 
@@ -2551,7 +2551,7 @@ fechar arquivo
 Código:
 
 ```c
-e = (Endereco*) malloc((divisao + resto) * sizeof(Endereco));
+e = (Endereco*) malloc((divisao + 1) * sizeof(Endereco));
 
 for(int i = 0; i < PARTES; i++){
     long quantidadeParte = divisao;
@@ -3230,7 +3230,7 @@ int main(int argc, char **argv){
 
     rewind(cep);
 
-    e = (Endereco*) malloc((divisao + resto) * sizeof(Endereco));
+    e = (Endereco*) malloc((divisao + 1) * sizeof(Endereco));
 
     // Etapas 1 e 2: dividir, ordenar e gravar cada parte
     for(int i = 0; i < PARTES; i++){
