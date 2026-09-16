@@ -26,7 +26,7 @@ Material de revisão sobre arquivos, registros, memória, ponteiros, busca, índ
 
 * [Parte 2 — Conceitos fundamentais](#parte-2--conceitos-fundamentais)
 
-  * [2.1 `FILE *` e ponteiros](#21-FILE-*-e-ponteiros)
+  * [2.1 `FILE *` e ponteiros](#21-file-e-ponteiros)
   * [2.2 `struct` e `typedef`](#22-struct-e-typedef)
   * [2.3 `Tipo x` × `Tipo *x`](#23-tipo-x--tipo-x)
   * [2.4 `.` × `->` e `&` × `*`](#24---e--)
@@ -961,7 +961,7 @@ Agora que as funções estão conhecidas, esta parte explica **por que o código
 
 ---
 
-# 2.1 `FILE *` e ponteiros
+# 2.1 `FILE` e ponteiros
 
 `FILE` é um tipo da `stdio.h` usado para controlar um arquivo aberto.
 
