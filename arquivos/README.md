@@ -9,6 +9,7 @@ Material de revisão sobre arquivos, registros, memória, ponteiros, busca, índ
 | **3. Programas** | As receitas completas, passo a passo | Treinar para a prova |
 | **4. Pegadinhas** | Checklist do que costumo errar | Revisão da véspera |
 | **5. Folha de cola** | Tudo condensado, pronto para copiar | Montar a cola |
+| **6. Lógica pelo enunciado** | Como transformar o enunciado em estratégia de leitura + questões resolvidas | Treinar interpretação |
 
 ---
 
@@ -47,9 +48,21 @@ Material de revisão sobre arquivos, registros, memória, ponteiros, busca, índ
     * [Etapa 3 — Intercalar](#etapa-3--intercalar)
     * [Etapa 4 — Repetir as intercalações](#etapa-4--repetir-as-intercalações)
 
+  * [3.6 Busca sequencial](#36-busca-sequencial)
+
 * [Parte 4 — Checklist de pegadinhas](#parte-4--checklist-de-pegadinhas)
 
 * [Parte 5 — Folha de cola](#parte-5--folha-de-cola)
+
+* [Parte 6 — Lógica pelo enunciado](#parte-6--lógica-pelo-enunciado)
+
+  * [6.1 Como identificar a lógica pelo enunciado](#61-como-identificar-a-lógica-pelo-enunciado)
+  * [6.2 Sequencial × binária](#62-sequencial--binária)
+  * [6.3 Padrões de lógica](#63-padrões-de-lógica)
+  * [6.4 Questão 1 — Pagamentos (sequencial)](#64-questão-1--pagamentos-sequencial)
+  * [6.5 Questão 2 — Pagamentos (navegação com `fseek`)](#65-questão-2--pagamentos-navegação-com-fseek)
+  * [6.6 Questão 3 — Série temporal de COVID-19](#66-questão-3--série-temporal-de-covid-19)
+  * [6.7 Checklist de interpretação](#67-checklist-de-interpretação)
 
 * [📄 Folha de cola — Estrutura de Arquivos](#-folha-de-cola--estrutura-de-arquivos)
 ---
@@ -3333,6 +3346,202 @@ INTERCALAR
 
 ---
 
+## 3.6 Busca sequencial
+
+A busca sequencial lê **um registro por vez, do começo ao fim**, até encontrar o que procura ou até o arquivo acabar.
+
+```text
+registro 0
+   ↓
+registro 1
+   ↓
+registro 2
+   ↓
+...
+   ↓
+achou (break)  ou  acabou (feof)
+```
+
+Usa só:
+
+```c
+fread(&e, sizeof(Endereco), 1, f);
+```
+
+O próprio `fread` avança a posição. **Não precisa de `fseek`.**
+
+### Quando usar
+
+| Situação | Busca |
+| --- | --- |
+| Arquivo **não** ordenado | sequencial simples |
+| Arquivo ordenado + "pare quando passar" | sequencial otimizada |
+| Precisa **somar, contar, comparar** vários registros | processamento sequencial (percorre tudo) |
+| Arquivo ordenado + "localize um registro" / "meio" | binária (seção 3.3) |
+| "Não leia o arquivo todo para a memória" | sequencial, **1 registro por vez** (`Endereco e;`, sem `malloc(qtd)`) |
+
+### Molde
+
+É o mesmo da intercalação: **ler → testar → usar → ler de novo**.
+
+```c
+fread(&e, sizeof(Endereco), 1, f);          // 1º: lê ANTES do while
+
+while(!feof(f)){
+
+    /* compara / soma / conta / imprime */
+
+    fread(&e, sizeof(Endereco), 1, f);      // 2º: lê o próximo
+}
+```
+
+Forma equivalente, testando o retorno do `fread` (devolve `1` quando leu, `0` quando acabou):
+
+```c
+while(fread(&e, sizeof(Endereco), 1, f) == 1){
+
+    /* compara / soma / conta / imprime */
+}
+```
+
+---
+
+### Busca sequencial simples (arquivo NÃO ordenado)
+
+Compara cada registro. Achou → imprime e para.
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+typedef struct _Endereco Endereco;
+
+struct _Endereco{
+    char logradouro[72];
+    char bairro[72];
+    char cidade[72];
+    char uf[72];
+    char sigla[2];
+    char cep[8];
+    char lixo[2];
+};
+
+int main(int argc, char **argv){
+    FILE *f;
+    Endereco e;             // 1 registro por vez
+    int achou = 0;
+
+    if(argc != 2){
+        fprintf(stderr, "USO: %s [CEP]\n", argv[0]);
+        return 1;
+    }
+
+    f = fopen("cep.dat", "rb");
+
+    if(f == NULL){
+        fprintf(stderr, "Erro ao abrir cep.dat\n");
+        return 1;
+    }
+
+    fread(&e, sizeof(Endereco), 1, f);
+
+    while(!feof(f)){
+        if(strncmp(argv[1], e.cep, 8) == 0){
+            printf("%.72s\n%.72s\n%.72s\n%.72s\n%.2s\n%.8s\n",
+                   e.logradouro, e.bairro, e.cidade, e.uf, e.sigla, e.cep);
+            achou = 1;
+            break;
+        }
+        fread(&e, sizeof(Endereco), 1, f);
+    }
+
+    if(!achou){
+        printf("CEP nao encontrado\n");
+    }
+
+    fclose(f);
+
+    return 0;
+}
+```
+
+---
+
+### Busca sequencial otimizada (arquivo ORDENADO)
+
+Se o arquivo está ordenado, dá para **parar assim que passar** do valor procurado: dali para frente só existem valores maiores.
+
+```text
+ANTES   → continua lendo
+IGUAL   → faz alguma coisa (imprime, soma...)
+DEPOIS  → break (já passou)
+```
+
+Com `r = strncmp(argv[1], e.cep, 8)`:
+
+| `r` | Significa | Ação |
+| --- | --- | --- |
+| `r > 0` | procurado **maior** que o atual → ainda não chegou | continua |
+| `r == 0` | achou | imprime / soma |
+| `r < 0` | procurado **menor** que o atual → já passou | `break` |
+
+```c
+fread(&e, sizeof(Endereco), 1, f);
+
+while(!feof(f)){
+    int r = strncmp(argv[1], e.cep, 8);
+
+    if(r == 0){
+        printf("%.72s\n%.8s\n", e.logradouro, e.cep);
+        achou = 1;
+        break;              // se puder haver repetidos, NÃO dá break aqui
+    }else if(r < 0){
+        break;              // passou do CEP procurado → não existe
+    }
+
+    fread(&e, sizeof(Endereco), 1, f);
+}
+```
+
+> Se a chave pode se repetir (ex.: vários pagamentos no mesmo mês), no `IGUAL` você **soma e continua**, e só dá `break` no `DEPOIS`. É o caso da Questão 1(c) da Parte 6.
+
+---
+
+### Processamento sequencial (percorrer tudo)
+
+Quando o enunciado pede **total, quantidade, maior, menor**, lê o arquivo inteiro, registro a registro, acumulando.
+
+Exemplo: contar quantos endereços têm a sigla passada em `argv[1]`:
+
+```c
+long count = 0;
+
+fread(&e, sizeof(Endereco), 1, f);
+
+while(!feof(f)){
+    if(strncmp(argv[1], e.sigla, 2) == 0){
+        count++;
+    }
+    fread(&e, sizeof(Endereco), 1, f);
+}
+
+printf("Total: %ld\n", count);
+```
+
+---
+
+### Sequencial × binária × índice
+
+| | Sequencial | Binária direta | Índice |
+| --- | --- | --- | --- |
+| Arquivo precisa estar ordenado? | Não (otimizada: sim) | Sim | Não |
+| Usa `fseek`? | Não | A cada tentativa | Só quando acha |
+| Lê quantos registros? | Até achar / até o fim | ~20 para 1 milhão | Todos (para montar o índice) |
+| Memória | 1 registro | 1 registro | O índice |
+| Serve para somar/contar? | **Sim** | Não | Não |
+
+---
+
 # Parte 4 — Checklist de pegadinhas
 
 ## 📁 Arquivos
@@ -3431,7 +3640,33 @@ INTERCALAR
 * [ ] Não subtrair o `1` duas vezes.
 * [ ] Arquivo final com 8 partes → `cep_14.dat`.
 
+## 🔁 Busca sequencial
+
+* [ ] Lê 1 registro por vez com `fread`; não precisa de `fseek`.
+* [ ] `fread` antes do `while` e no fim de cada volta.
+* [ ] Arquivo **não** ordenado → só para quando achar ou quando acabar.
+* [ ] Arquivo ordenado → `break` assim que **passar** do valor procurado.
+* [ ] Chave repetida → no `IGUAL` soma e **continua**; `break` só no `DEPOIS`.
+* [ ] "Não leia o arquivo todo" → `Tipo r;` (1 registro), nada de `malloc(qtd)`.
+
+## 🧭 Lógica pelo enunciado
+
+* [ ] Antes de codar, perguntar: **sequencial, binária, `fseek` direto, intercalação ou janela?**
+* [ ] Separar os casos **ANTES → continua · IGUAL → faz · DEPOIS → break**.
+* [ ] Agrupamento ("para cada ano"): inicializar o grupo com o **1º registro**.
+* [ ] Agrupamento: quando a chave **muda**, fechar o grupo anterior e começar outro.
+* [ ] Agrupamento: **imprimir o último grupo depois do laço**.
+* [ ] Ordenado por ano **e** mês → comparar com a chave `ano * 100 + mes`.
+* [ ] "Adicionar ao final" → `fopen(..., "ab")` (nunca `"wb"`, que apaga).
+* [ ] Depois de um `fread`, a posição já está no **próximo** registro (conta isso no `SEEK_CUR`).
+* [ ] Deslocamento negativo com `sizeof` → converter para `long`: `-(long)sizeof(Tipo)`.
+* [ ] Último registro → `fseek(f, -(long)sizeof(Tipo), SEEK_END)`.
+* [ ] Lacuna → comparar com o **anterior**: `atual != anterior + 1`.
+* [ ] Janela móvel → lê `k`, processa, volta `k - 1` com `SEEK_CUR`.
+* [ ] Intercalação com soma → no **igual** soma e avança **os dois** arquivos.
+
 ---
+
 # Parte 5 — Folha de cola
 
 > Resumo da Parte 3 (Programas), no estilo do professor.
@@ -4029,6 +4264,145 @@ i += 2          → 2 arquivos por volta
 
 ---
 
+## 📌 9. Busca sequencial
+
+**Molde (ler → testar → usar → ler de novo), sem `fseek`:**
+
+```c
+fread(&e, sizeof(Endereco), 1, f);
+
+while(!feof(f)){
+    /* compara / soma / conta */
+    fread(&e, sizeof(Endereco), 1, f);
+}
+
+// equivalente:
+while(fread(&e, sizeof(Endereco), 1, f) == 1){ ... }
+```
+
+**Simples (arquivo NÃO ordenado):**
+
+```c
+fread(&e, sizeof(Endereco), 1, f);
+
+while(!feof(f)){
+    if(strncmp(argv[1], e.cep, 8) == 0){
+        printf("%.72s\n%.8s\n", e.logradouro, e.cep);
+        achou = 1;
+        break;
+    }
+    fread(&e, sizeof(Endereco), 1, f);
+}
+```
+
+**Otimizada (arquivo ORDENADO) — ANTES continua · IGUAL faz · DEPOIS break:**
+
+```c
+fread(&e, sizeof(Endereco), 1, f);
+
+while(!feof(f)){
+    int r = strncmp(argv[1], e.cep, 8);
+
+    if(r == 0){             // IGUAL
+        achou = 1;
+        break;              // chave repetida? soma e NÃO dá break
+    }else if(r < 0){        // DEPOIS (já passou)
+        break;
+    }
+    fread(&e, sizeof(Endereco), 1, f);   // ANTES → continua
+}
+```
+
+| | Sequencial | Binária | Índice |
+| --- | --- | --- | --- |
+| Ordenado? | não (otimizada: sim) | sim | não |
+| `fseek` | não | a cada tentativa | só quando acha |
+| Soma/conta? | **sim** | não | não |
+
+---
+
+## 📌 10. Lógica pelo enunciado
+
+| Enunciado fala... | Pensar em... |
+| --- | --- |
+| "tamanho do arquivo" / "número de registros" | `SEEK_END` + `ftell` ÷ `sizeof` |
+| "leia os registros" / "um por um" | `fread` sequencial |
+| "até encontrar" | sequencial + `break` ao achar |
+| "arquivo ordenado" + "pare após passar" | sequencial otimizada (ANTES/IGUAL/DEPOIS) |
+| "localize um registro" + arquivo ordenado | busca binária pode ser usada |
+| "meio", "metade", "posição central" | busca binária + `fseek` |
+| "calcule o total" / "quantos" | percorrer e acumular |
+| "para cada ano" / "para cada X" | quebra de grupo (mudou a chave → fecha o grupo) |
+| "maior e menor de cada ano" | guardar maior/menor, reiniciar quando mudar o ano |
+| "adicione ao final" / "inclusão em lote" | `fopen(..., "ab")` + copiar registro a registro |
+| "posicione no n-ésimo registro" | `fseek(f, (n-1) * sizeof(T), SEEK_SET)` |
+| "retroceda / avance a partir da posição atual" | `SEEK_CUR` (lembrar que o `fread` já avançou) |
+| "último registro" | `fseek(f, -(long)sizeof(T), SEEK_END)` |
+| "lacunas" / "dias ausentes" / "sequência" | comparar com o anterior: `atual != anterior + 1` |
+| "média móvel" / "janela de tamanho k" | lê `k`, calcula, volta `k - 1` com `SEEK_CUR` |
+| "combine dois arquivos ordenados" | intercalação (igual → soma e avança os dois) |
+| "não leia o arquivo todo" | 1 registro (ou 1 bloco fixo) por vez, sem `malloc(qtd)` |
+
+**Quebra de grupo (maior/menor por ano):**
+
+```c
+fread(&p, sizeof(Pagamento), 1, f);
+anoAtual = p.ano;  maior = p;  menor = p;          // grupo começa no 1º registro
+fread(&p, sizeof(Pagamento), 1, f);
+
+while(!feof(f)){
+    if(p.ano != anoAtual){                          // NOVO ANO → fecha o anterior
+        imprime(maior);  imprime(menor);
+        anoAtual = p.ano;  maior = p;  menor = p;
+    }else{                                          // MESMO ANO → compara
+        if(p.valor > maior.valor) maior = p;
+        if(p.valor < menor.valor) menor = p;
+    }
+    fread(&p, sizeof(Pagamento), 1, f);
+}
+imprime(maior);  imprime(menor);                    // ⚠️ último grupo
+```
+
+**Chave ano/mês (ordenado por ano e mês):**
+
+```c
+int alvo  = ano * 100 + mes;            // 2024/03 → 202403
+int atual = p.ano * 100 + p.mes;
+if(atual == alvo) total += p.valor;     // IGUAL
+else if(atual > alvo) break;            // DEPOIS
+```
+
+**Lacuna:** `if(r.dia != anterior + 1) printf("faltam %d a %d\n", anterior + 1, r.dia - 1);`
+
+**Janela móvel (blocos de k, anda 1):**
+
+```c
+while(fread(bloco, sizeof(Registro), k, f) == k){
+    /* soma bloco[0..k-1]; dia = bloco[k-1].dia; fwrite da média */
+    fseek(f, -(long)((k - 1) * sizeof(Registro)), SEEK_CUR);
+}
+```
+
+**Intercalação com soma:**
+
+```c
+if(ra.dia < rb.dia){ fwrite(&ra,...); fread(&ra,...,a); }
+else if(ra.dia > rb.dia){ fwrite(&rb,...); fread(&rb,...,b); }
+else{ soma = ra;  soma.novos_casos += rb.novos_casos;  soma.obitos += rb.obitos;
+      fwrite(&soma,...);  fread(&ra,...,a);  fread(&rb,...,b); }
+```
+
+**Navegação com `fseek` (1º registro = índice 0):**
+
+```text
+n-ésimo registro            → fseek(f, (n-1) * sizeof(T), SEEK_SET)
+depois de ler o registro i  → a posição está no i+1
+voltar ao registro j        → fseek(f, -(long)((i+1-j) * sizeof(T)), SEEK_CUR)
+último registro             → fseek(f, -(long)sizeof(T), SEEK_END)
+```
+
+---
+
 # 🧠 Lembretes de uma linha
 
 **Ponteiros**
@@ -4068,6 +4442,17 @@ busca binária direta → arquivo ordenado → fseek a cada tentativa
 ordenação externa → divide → qsort cada parte → intercala 2 a 2 → repete → sobra 1 arquivo
 PARTES = 8 → 7 intercalações → arquivo final = cep_14.dat (2 × PARTES − 2)
 malloc((divisao + 1) * sizeof(Endereco)) → cabe a maior parte
+```
+
+**Lógica**
+```text
+sequencial → fread em laço, sem fseek · ordenado → break quando passar
+ANTES → continua · IGUAL → faz · DEPOIS → break
+para cada ano → mudou a chave? fecha o grupo · imprime o último depois do laço
+ano e mês → chave = ano * 100 + mes
+adicionar ao final → "ab" · lacuna → atual != anterior + 1
+janela k → lê k, volta k - 1 com SEEK_CUR · intercalação: igual → soma e avança os dois
+depois do fread a posição já está no próximo · -(long)sizeof(T) para voltar
 ```
 
 ---
@@ -4132,6 +4517,821 @@ intercalação 2 a 2 (PARTES − 1 vezes)
      ↓
 arquivo final ordenado
 ```
+
+---
+
+# Parte 6 — Lógica pelo enunciado
+
+A maior dificuldade na prova costuma não ser a sintaxe do C, e sim **transformar o enunciado em uma estratégia de leitura do arquivo**.
+
+Antes de escrever código, responda:
+
+```text
+1. Preciso ler TODOS os registros ou só achar UM?
+2. O arquivo está ordenado? Por qual campo?
+3. Posso parar antes do fim? Quando?
+4. Preciso guardar alguma coisa entre um registro e outro? (total, maior, anterior...)
+5. O enunciado manda ir a uma posição específica? (fseek)
+6. São dois arquivos? (intercalação)
+```
+
+---
+
+## 6.1 Como identificar a lógica pelo enunciado
+
+| Enunciado fala... | Pensar em... |
+| --- | --- |
+| "tamanho do arquivo" / "número de registros" | `fseek(SEEK_END)` + `ftell` ÷ `sizeof` |
+| "leia os registros" | `fread` |
+| "um por um" | sequencial |
+| "até encontrar" | sequencial + condição de parada |
+| "pare quando ultrapassar" | sequencial + `break` |
+| "arquivo ordenado" + "pare após passar" | sequencial otimizada |
+| "localize/encontre um registro" + arquivo ordenado | busca binária pode ser usada |
+| "meio", "metade", "posição central" | busca binária + `fseek` |
+| "calcule total" | ler vários registros e acumular |
+| "para cada ano" | agrupar/processar por ano |
+| "maior e menor de cada ano" | guardar maior e menor e reiniciar quando mudar o ano |
+| "adicione ao final" / "inclusão em lote" | abrir com `"ab"` e copiar registro a registro |
+| "posicione no n-ésimo registro" | `fseek(f, (n-1) * sizeof(T), SEEK_SET)` |
+| "a partir da posição atual, avance/retroceda" | `SEEK_CUR` (o `fread` anterior já avançou!) |
+| "último registro" | `fseek(f, -(long)sizeof(T), SEEK_END)` |
+| "lacunas", "dias ausentes", "quebra na sequência" | comparar com o registro **anterior** |
+| "média móvel", "janela de tamanho k" | ler blocos de `k` e voltar `k - 1` com `SEEK_CUR` |
+| "dois arquivos ordenados" → "um arquivo combinado" | intercalação |
+| "quando o mesmo dia estiver nos dois, some" | intercalação com soma no caso **igual** |
+| "não leia o arquivo todo em um array" | 1 registro (ou 1 bloco fixo) por vez, sem `malloc(qtd)` |
+
+---
+
+## 6.2 Sequencial × binária
+
+### Sequencial
+
+```text
+registro 1
+   ↓
+registro 2
+   ↓
+registro 3
+   ↓
+registro 4
+```
+
+Usa:
+
+```c
+fread(...)
+```
+
+Você vai avançando pelo arquivo. Serve para **achar**, **somar**, **contar**, **comparar**.
+
+### Binária
+
+```text
+início ─────── meio ─────── fim
+                ↓
+       decide esquerda/direita
+```
+
+Divide o espaço de busca pela metade, normalmente com `fseek` para acessar uma posição diretamente. Serve só para **achar** um registro em arquivo **ordenado**.
+
+| | Sequencial | Binária |
+| --- | --- | --- |
+| Arquivo ordenado? | não precisa | obrigatório |
+| `fseek` | não | a cada tentativa |
+| Soma/conta vários? | sim | não |
+| Detalhes | seção 3.6 | seção 3.3 |
+
+---
+
+## 6.3 Padrões de lógica
+
+### A) Continuar, fazer ou parar (arquivo ordenado)
+
+A maior dificuldade é decidir **quando continuar, quando somar/comparar e quando parar**.
+
+```text
+ANTES      → continue
+IGUAL      → faz alguma coisa
+DEPOIS     → break
+```
+
+```c
+fread(&p, sizeof(Pagamento), 1, f);
+
+while(!feof(f)){
+    if(/* IGUAL */){
+        total += p.valor;       // faz
+    }else if(/* DEPOIS */){
+        break;                  // para
+    }
+    // ANTES → não faz nada, só lê o próximo
+    fread(&p, sizeof(Pagamento), 1, f);
+}
+```
+
+### B) Quebra de grupo ("para cada ano")
+
+```text
+MESMO ANO   → continua comparando
+NOVO ANO    → fecha o ano anterior e começa outro
+```
+
+Três cuidados:
+
+```text
+1. o grupo começa com o PRIMEIRO registro (maior = menor = p)
+2. quando a chave muda → imprime o grupo anterior e reinicia
+3. depois do while → imprime o ÚLTIMO grupo (senão ele se perde)
+```
+
+### C) Acumular
+
+```c
+float total = 0;
+long quantidade = 0;
+...
+total += p.valor;
+quantidade++;
+```
+
+Inicializar **fora** do laço.
+
+### D) Comparar com o anterior (sequência / lacunas)
+
+```c
+anterior = r.dia;           // guarda o 1º
+...
+if(r.dia != anterior + 1){  // pulou algum
+    ...
+}
+anterior = r.dia;           // atualiza SEMPRE, no fim da volta
+```
+
+### E) Janela deslizante (blocos de tamanho k)
+
+```text
+[0 1 2] 3 4 5   → média → dia 2
+ 0 [1 2 3] 4 5  → média → dia 3
+ 0 1 [2 3 4] 5  → média → dia 4
+```
+
+```text
+lê k registros → posição anda k
+volta k - 1    → posição anda só 1 no total
+```
+
+```c
+fseek(f, -(long)((k - 1) * sizeof(Registro)), SEEK_CUR);
+```
+
+### F) Intercalação com soma
+
+Igual à intercalação da ordenação externa, com um terceiro caso:
+
+```text
+A < B  → grava A, avança A
+A > B  → grava B, avança B
+A == B → soma, grava, avança OS DOIS
+```
+
+### G) Navegação com `fseek`
+
+```text
+índice 0 = 1º registro      índice n-1 = n-ésimo registro
+```
+
+| Quero... | Código |
+| --- | --- |
+| ir ao n-ésimo | `fseek(f, (n-1) * sizeof(T), SEEK_SET)` |
+| ler e ficar no mesmo | `fread` e depois `fseek(f, -(long)sizeof(T), SEEK_CUR)` |
+| voltar X registros a partir do **início** do registro que acabei de ler | `fseek(f, -(long)((X + 1) * sizeof(T)), SEEK_CUR)` |
+| último | `fseek(f, -(long)sizeof(T), SEEK_END)` |
+
+> ⚠️ `sizeof` é **sem sinal**. Para deslocamento negativo, converta para `long` antes: `-(long)sizeof(T)`.
+
+### H) Adicionar ao final (append)
+
+```text
+"ab" → abre para escrita no FINAL, sem apagar
+"wb" → APAGA tudo  ❌
+```
+
+---
+
+## 6.4 Questão 1 — Pagamentos (sequencial)
+
+> Sistema de pagamentos de benefícios sociais. Arquivo `beneficios.dat`, **ordenado por mês e ano** (crescente).
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {
+    char cpf[12];       // CPF do contribuinte
+    char nome[80];      // Nome do contribuinte
+    int mes;            // Mês do pagamento (1 a 12)
+    int ano;            // Ano do pagamento
+    float valor;        // Valor do benefício pago
+} Pagamento;            // 12 + 80 + 4 + 4 + 4 = 104 bytes (usar sizeof)
+
+void imprimePagamento(Pagamento p){
+    printf("CPF: %.12s | Nome: %.80s | Mes: %d | Valor: %.2f\n",
+           p.cpf, p.nome, p.mes, p.valor);
+}
+```
+
+### (a) Tamanho do arquivo e número de registros
+
+**Lógica:** "tamanho" + "número de registros" → `SEEK_END` + `ftell` ÷ `sizeof`.
+
+```c
+FILE *f;
+long tamanho, qtd;
+
+f = fopen("beneficios.dat", "rb");
+
+if(!f){
+    fprintf(stderr, "Erro ao abrir beneficios.dat\n");
+    return 1;
+}
+
+fseek(f, 0, SEEK_END);
+tamanho = ftell(f);
+qtd = tamanho / sizeof(Pagamento);
+
+printf("Tamanho: %ld bytes\n", tamanho);
+printf("Registros: %ld\n", qtd);
+
+fclose(f);
+```
+
+### (b) Inclusão em lote
+
+**Lógica:** "adicionar ao final" → `novos.dat` em `"rb"` e `beneficios.dat` em **`"ab"`**; copiar registro a registro.
+
+```c
+void inclusao_em_lote(){
+    FILE *novos, *benef;
+    Pagamento p;
+
+    novos = fopen("novos.dat", "rb");
+
+    if(!novos){
+        fprintf(stderr, "Erro ao abrir novos.dat\n");
+        return;
+    }
+
+    benef = fopen("beneficios.dat", "ab");      // append: NÃO apaga
+
+    if(!benef){
+        fclose(novos);
+        fprintf(stderr, "Erro ao abrir beneficios.dat\n");
+        return;
+    }
+
+    fread(&p, sizeof(Pagamento), 1, novos);
+
+    while(!feof(novos)){
+        fwrite(&p, sizeof(Pagamento), 1, benef);
+        fread(&p, sizeof(Pagamento), 1, novos);
+    }
+
+    fclose(novos);
+    fclose(benef);
+}
+```
+
+> ⚠️ `"wb"` apagaria todos os pagamentos existentes.
+> Observação: se `novos.dat` tiver meses anteriores aos já gravados, a ordenação do arquivo deixa de valer. O enunciado só pede a inclusão.
+
+### (c) Total pago em um mês/ano (sequencial otimizada)
+
+**Lógica:** "ordenado por mês e ano" + "interromper após passar do período" → **ANTES continua · IGUAL soma · DEPOIS break**.
+
+Como a ordem é por **ano e mês**, junta os dois numa chave só:
+
+```text
+chave = ano * 100 + mes     →   03/2024 = 202403   ·   12/2023 = 202312
+```
+
+```c
+float total_pago_mes_ano(int mes, int ano){
+    FILE *f;
+    Pagamento p;
+    float total = 0;
+    int alvo = ano * 100 + mes;
+
+    f = fopen("beneficios.dat", "rb");
+
+    if(!f){
+        fprintf(stderr, "Erro ao abrir beneficios.dat\n");
+        return 0;
+    }
+
+    fread(&p, sizeof(Pagamento), 1, f);
+
+    while(!feof(f)){
+        int atual = p.ano * 100 + p.mes;
+
+        if(atual == alvo){          // IGUAL → soma e continua (há vários no mesmo mês)
+            total += p.valor;
+        }else if(atual > alvo){     // DEPOIS → já passou do período
+            break;
+        }
+                                    // ANTES → só lê o próximo
+        fread(&p, sizeof(Pagamento), 1, f);
+    }
+
+    fclose(f);
+
+    return total;
+}
+```
+
+Sem a chave, a mesma comparação fica:
+
+```c
+if(p.ano == ano && p.mes == mes){
+    total += p.valor;
+}else if(p.ano > ano || (p.ano == ano && p.mes > mes)){
+    break;
+}
+```
+
+> ⚠️ No `IGUAL` **não** dá `break`: vários contribuintes recebem no mesmo mês.
+
+### (d) Maior e menor valor de cada ano
+
+**Lógica:** "para cada ano distinto" + arquivo ordenado → **quebra de grupo**.
+
+```text
+MESMO ANO → compara com maior e menor
+NOVO ANO  → imprime maior e menor do ano anterior e reinicia
+FIM       → imprime o último ano
+```
+
+```c
+void maior_menor_por_ano(){
+    FILE *f;
+    Pagamento p, maior, menor;
+    int anoAtual;
+
+    f = fopen("beneficios.dat", "rb");
+
+    if(!f){
+        fprintf(stderr, "Erro ao abrir beneficios.dat\n");
+        return;
+    }
+
+    if(fread(&p, sizeof(Pagamento), 1, f) != 1){   // arquivo vazio
+        fclose(f);
+        return;
+    }
+
+    anoAtual = p.ano;       // o grupo começa com o 1º registro
+    maior = p;
+    menor = p;
+
+    fread(&p, sizeof(Pagamento), 1, f);
+
+    while(!feof(f)){
+        if(p.ano != anoAtual){                      // NOVO ANO
+            printf("Ano %d\n", anoAtual);
+            printf("Maior: ");  imprimePagamento(maior);
+            printf("Menor: ");  imprimePagamento(menor);
+
+            anoAtual = p.ano;
+            maior = p;
+            menor = p;
+        }else{                                      // MESMO ANO
+            if(p.valor > maior.valor){
+                maior = p;
+            }
+            if(p.valor < menor.valor){
+                menor = p;
+            }
+        }
+
+        fread(&p, sizeof(Pagamento), 1, f);
+    }
+
+    printf("Ano %d\n", anoAtual);                   // ⚠️ último ano
+    printf("Maior: ");  imprimePagamento(maior);
+    printf("Menor: ");  imprimePagamento(menor);
+
+    fclose(f);
+}
+```
+
+> `maior = p;` copia a **struct inteira** (CPF, nome, mês, valor). Em C isso é permitido com `=` porque é struct, não array.
+
+---
+
+## 6.5 Questão 2 — Pagamentos (navegação com `fseek`)
+
+**Lógica:** "posicione", "avance", "retroceda", "último" → `fseek` com a origem pedida.
+
+Mapa de posições (1º registro = índice 0):
+
+```text
+registro:  1º  2º  3º  4º  5º  6º  7º  8º  9º ...
+índice:     0   1   2   3   4   5   6   7   8 ...
+```
+
+```c
+#include <stdio.h>
+
+typedef struct {
+    char cpf[12];
+    char nome[80];
+    int mes;
+    int ano;
+    float valor;
+} Pagamento;
+
+int main(){
+    FILE *f;
+    Pagamento p;
+
+    f = fopen("beneficios.dat", "rb");
+
+    if(!f){
+        fprintf(stderr, "Erro ao abrir beneficios.dat\n");
+        return 1;
+    }
+
+    // (a) 5º registro → índice 4
+    fseek(f, 4 * sizeof(Pagamento), SEEK_SET);
+    fread(&p, sizeof(Pagamento), 1, f);
+    printf("5o: %.12s %.80s %d/%d %.2f\n", p.cpf, p.nome, p.mes, p.ano, p.valor);
+
+    // (b) 8º registro → índice 7
+    fseek(f, 7 * sizeof(Pagamento), SEEK_SET);
+    fread(&p, sizeof(Pagamento), 1, f);
+    printf("8o: CPF %.12s | Valor %.2f\n", p.cpf, p.valor);
+
+    // (c) 6º registro (índice 5) usando SEEK_CUR
+    //     depois do fread do 8º, a posição está no índice 8 → voltar 3
+    fseek(f, -3 * (long)sizeof(Pagamento), SEEK_CUR);
+    fread(&p, sizeof(Pagamento), 1, f);
+    printf("6o: %.80s | Valor %.2f\n", p.nome, p.valor);
+
+    // (d) último registro usando SEEK_END
+    fseek(f, -(long)sizeof(Pagamento), SEEK_END);
+    fread(&p, sizeof(Pagamento), 1, f);
+    printf("Ultimo: CPF %.12s | Valor %.2f\n", p.cpf, p.valor);
+
+    fclose(f);
+
+    return 0;
+}
+```
+
+### ⚠️ A pegadinha do item (c)
+
+```text
+fseek para o 8º (índice 7)      posição = início do 8º
+fread do 8º                     posição = início do 9º (índice 8)   ← o fread AVANÇOU
+"retroceder dois registros" a partir do 8º = chegar no 6º (índice 5)
+índice 8 → índice 5  =  voltar 3 registros
+```
+
+Se fizer só `-2`, cai no índice 6 e lê o **7º**, não o 6º.
+
+| Item | Origem | Deslocamento | Por quê |
+| --- | --- | --- | --- |
+| (a) 5º | `SEEK_SET` | `4 * sizeof` | índice = n − 1 |
+| (b) 8º | `SEEK_SET` | `7 * sizeof` | índice = n − 1 |
+| (c) 6º | `SEEK_CUR` | `-3 * sizeof` | está no índice 8 depois do `fread` |
+| (d) último | `SEEK_END` | `-1 * sizeof` | um registro antes do fim |
+
+> ⚠️ `-(long)sizeof(Pagamento)`: o `sizeof` não tem sinal; converter para `long` garante o deslocamento negativo.
+
+---
+
+## 6.6 Questão 3 — Série temporal de COVID-19
+
+> Arquivo binário com registros de três inteiros. **Não pode ler o arquivo todo em um array**: registro a registro ou em blocos de tamanho fixo (item III).
+
+```c
+typedef struct {
+    int dia;            // dia sequencial (começa em 0)
+    int novos_casos;    // novos casos no dia
+    int obitos;         // óbitos no dia
+} Registro;             // 3 × 4 = 12 bytes
+```
+
+### I) Número de registros e tamanho do arquivo
+
+**Lógica:** `SEEK_END` + `ftell` ÷ `sizeof`. Não lê nenhum registro.
+
+```c
+#include <stdio.h>
+
+typedef struct {
+    int dia;
+    int novos_casos;
+    int obitos;
+} Registro;
+
+int main(int argc, char **argv){
+    FILE *f;
+    long tamanho, qtd;
+
+    if(argc != 2){
+        fprintf(stderr, "USO: %s [ARQUIVO]\n", argv[0]);
+        return 1;
+    }
+
+    f = fopen(argv[1], "rb");
+
+    if(!f){
+        fprintf(stderr, "Arquivo %s não pode ser aberto para leitura\n", argv[1]);
+        return 1;
+    }
+
+    fseek(f, 0, SEEK_END);
+    tamanho = ftell(f);
+    qtd = tamanho / sizeof(Registro);
+
+    printf("Registros: %ld\n", qtd);
+    printf("Tamanho: %ld bytes\n", tamanho);
+
+    fclose(f);
+
+    return 0;
+}
+```
+
+### II) Detecção de lacunas
+
+**Lógica:** "quebras na sequencialidade do campo dia" → sequencial + **comparar com o anterior**.
+
+```text
+dias: 0 1 2 5 6
+          ↑ ↑
+   anterior=2, atual=5 → 5 != 2 + 1 → faltam 3 e 4
+```
+
+```c
+#include <stdio.h>
+
+typedef struct {
+    int dia;
+    int novos_casos;
+    int obitos;
+} Registro;
+
+int main(int argc, char **argv){
+    FILE *f;
+    Registro r;
+    int anterior;
+    int lacunas = 0;
+
+    if(argc != 2){
+        fprintf(stderr, "USO: %s [ARQUIVO]\n", argv[0]);
+        return 1;
+    }
+
+    f = fopen(argv[1], "rb");
+
+    if(!f){
+        fprintf(stderr, "Arquivo %s não pode ser aberto para leitura\n", argv[1]);
+        return 1;
+    }
+
+    if(fread(&r, sizeof(Registro), 1, f) != 1){
+        printf("Arquivo vazio\n");
+        fclose(f);
+        return 0;
+    }
+
+    anterior = r.dia;                               // guarda o 1º
+
+    fread(&r, sizeof(Registro), 1, f);
+
+    while(!feof(f)){
+        if(r.dia != anterior + 1){
+            printf("Lacuna: dias %d a %d ausentes\n", anterior + 1, r.dia - 1);
+            lacunas++;
+        }
+        anterior = r.dia;                           // atualiza sempre
+        fread(&r, sizeof(Registro), 1, f);
+    }
+
+    if(lacunas == 0){
+        printf("Nenhuma lacuna encontrada\n");
+    }
+
+    fclose(f);
+
+    return 0;
+}
+```
+
+### III) Médias móveis (janela k)
+
+**Lógica:** "blocos consecutivos de tamanho k" + "a janela avança um registro por vez" → **lê k, calcula, volta k − 1**.
+
+```text
+lê bloco [0..k-1]   → posição = k
+volta k - 1         → posição = 1
+lê bloco [1..k]     → posição = k + 1
+volta k - 1         → posição = 2
+...
+quando o fread não conseguir ler k registros → acabou
+```
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    int dia;
+    int novos_casos;
+    int obitos;
+} Registro;
+
+typedef struct {
+    int dia;                // dia do ÚLTIMO registro do bloco
+    float novos_casos;      // média do bloco
+    float obitos;           // média do bloco
+} MediaMovel;
+
+int main(int argc, char **argv){
+    FILE *entrada, *saida;
+    Registro *bloco;        // só k registros, NÃO o arquivo todo
+    MediaMovel m;
+    int k;
+
+    if(argc != 4){
+        fprintf(stderr, "USO: %s [ENTRADA] [SAIDA] [K]\n", argv[0]);
+        return 1;
+    }
+
+    k = atoi(argv[3]);
+
+    entrada = fopen(argv[1], "rb");
+
+    if(!entrada){
+        fprintf(stderr, "Arquivo %s não pode ser aberto para leitura\n", argv[1]);
+        return 1;
+    }
+
+    saida = fopen(argv[2], "wb");
+
+    if(!saida){
+        fclose(entrada);
+        fprintf(stderr, "Arquivo %s não pode ser aberto para escrita\n", argv[2]);
+        return 1;
+    }
+
+    bloco = malloc(k * sizeof(Registro));
+
+    if(bloco == NULL){
+        fprintf(stderr, "Erro ao alocar memoria\n");
+        fclose(entrada);
+        fclose(saida);
+        return 1;
+    }
+
+    while(fread(bloco, sizeof(Registro), k, entrada) == k){
+        float somaCasos = 0;
+        float somaObitos = 0;
+
+        for(int i = 0; i < k; i++){
+            somaCasos += bloco[i].novos_casos;
+            somaObitos += bloco[i].obitos;
+        }
+
+        m.dia = bloco[k - 1].dia;
+        m.novos_casos = somaCasos / k;
+        m.obitos = somaObitos / k;
+
+        fwrite(&m, sizeof(MediaMovel), 1, saida);
+
+        // a janela anda 1: volta k - 1 registros
+        fseek(entrada, -(long)((k - 1) * sizeof(Registro)), SEEK_CUR);
+    }
+
+    free(bloco);
+    fclose(entrada);
+    fclose(saida);
+
+    return 0;
+}
+```
+
+> ⚠️ `malloc(k * ...)` é permitido: é **um bloco de tamanho fixo**, não o arquivo inteiro.
+> ⚠️ Somas em `float` para a divisão não ser inteira.
+> Se `k` for uma constante (`#define K 7`), pode usar `Registro bloco[K];` sem `malloc`.
+
+### IV) Combinação de dois arquivos ordenados
+
+**Lógica:** "dois arquivos ordenados" → "um arquivo ordenado" → **intercalação**, com o caso extra de dia igual.
+
+```text
+A.dia < B.dia  → grava A, avança A
+A.dia > B.dia  → grava B, avança B
+A.dia == B.dia → soma casos e óbitos, grava, avança OS DOIS
+```
+
+```c
+#include <stdio.h>
+
+typedef struct {
+    int dia;
+    int novos_casos;
+    int obitos;
+} Registro;
+
+int main(int argc, char **argv){
+    FILE *a, *b, *saida;
+    Registro ra, rb, soma;
+
+    if(argc != 4){
+        fprintf(stderr, "USO: %s [ARQ_A] [ARQ_B] [SAIDA]\n", argv[0]);
+        return 1;
+    }
+
+    a = fopen(argv[1], "rb");
+    b = fopen(argv[2], "rb");
+    saida = fopen(argv[3], "wb");
+
+    if(!a || !b || !saida){
+        fprintf(stderr, "Arquivo nao pode ser aberto.\n");
+        return 1;
+    }
+
+    fread(&ra, sizeof(Registro), 1, a);
+    fread(&rb, sizeof(Registro), 1, b);
+
+    while(!feof(a) && !feof(b)){
+        if(ra.dia < rb.dia){
+            fwrite(&ra, sizeof(Registro), 1, saida);
+            fread(&ra, sizeof(Registro), 1, a);
+        }else if(ra.dia > rb.dia){
+            fwrite(&rb, sizeof(Registro), 1, saida);
+            fread(&rb, sizeof(Registro), 1, b);
+        }else{                                          // mesmo dia
+            soma = ra;
+            soma.novos_casos += rb.novos_casos;
+            soma.obitos += rb.obitos;
+            fwrite(&soma, sizeof(Registro), 1, saida);
+            fread(&ra, sizeof(Registro), 1, a);         // avança os DOIS
+            fread(&rb, sizeof(Registro), 1, b);
+        }
+    }
+
+    while(!feof(a)){                                    // sobrou A
+        fwrite(&ra, sizeof(Registro), 1, saida);
+        fread(&ra, sizeof(Registro), 1, a);
+    }
+
+    while(!feof(b)){                                    // sobrou B
+        fwrite(&rb, sizeof(Registro), 1, saida);
+        fread(&rb, sizeof(Registro), 1, b);
+    }
+
+    fclose(a);
+    fclose(b);
+    fclose(saida);
+
+    return 0;
+}
+```
+
+> ⚠️ No caso igual, se avançar só um arquivo, o outro dia fica "sobrando" e é gravado duplicado.
+
+### Resumo da Questão 3
+
+| Item | Estratégia | Lê como? |
+| --- | --- | --- |
+| I | `SEEK_END` + `ftell` | não lê registros |
+| II | sequencial + comparar com anterior | 1 registro por vez |
+| III | janela deslizante | bloco de `k` + volta `k - 1` |
+| IV | intercalação com soma | 1 registro de cada arquivo |
+
+---
+
+## 6.7 Checklist de interpretação
+
+```text
+[ ] Ordenado?              → posso parar cedo (break) ou usar binária
+[ ] Achar 1 ou processar?  → achar: break ao encontrar · processar: vai até o fim
+[ ] Chave repete?          → no IGUAL soma e continua
+[ ] "Para cada X"?         → quebra de grupo + imprimir o último depois do laço
+[ ] Precisa do anterior?   → variável "anterior", atualizada no fim da volta
+[ ] Posição específica?    → fseek (n-1) · lembrar que fread avança
+[ ] Dois arquivos?         → intercalação · igual → avança os dois
+[ ] Adicionar?             → "ab"
+[ ] Janela / bloco?        → fread de k · fseek -(k-1) SEEK_CUR
+[ ] Proibido ler tudo?     → Tipo r; (1 por vez) · nada de malloc(qtd)
+```
+
+---
 
 ## 📄 Folha de cola — Estrutura de Arquivos
 
