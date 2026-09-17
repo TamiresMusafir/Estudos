@@ -1,0 +1,8 @@
+acrescenta funcoes do copia e cola na folha
+acrescenta o ld long. ftell sempre retorna long
+colocar que fseek leva a gente pro fim do arquivo, naqo pro ultimo elemento
+mesclar com os outros readmes.
+nao esquecer do return 0
+diferença de eof e feof
+fread avança. ftell acompanha isso. 
+começa no 0 os vetores.
