@@ -5270,8 +5270,8 @@ int main(int argc, char **argv){
 
 ## 📄 Folha de cola — Estrutura de Arquivos
 
-![Folha de cola - Página 1](folha-de-cola/folha_de_cola_estrutura_arquivos-2-pt1.png)
+![Folha de cola - Página 1](folha-de-cola/folha_de_cola_estrutura_arquivos-1.png)
 
-![Folha de cola - Página 2](folha-de-cola/folha_de_cola_estrutura_arquivos-2-pt2.png)
+![Folha de cola - Página 2](folha-de-cola/folha_de_cola_estrutura_arquivos-2.png)
 
-📥 [Baixar folha de cola em PDF](folha-de-cola/folha_de_cola_estrutura_arquivos-2.pdf)
+📥 [Baixar folha de cola em PDF](folha-de-cola/folha_de_cola_estrutura_arquivos.pdf)
