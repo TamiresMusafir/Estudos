@@ -4747,24 +4747,26 @@ void imprimePagamento(Pagamento p){
 **Lógica:** "tamanho" + "número de registros" → `SEEK_END` + `ftell` ÷ `sizeof`.
 
 ```c
-FILE *f;
-long tamanho, qtd;
+int main(int argc, char **argv){
+    FILE *f = fopen("beneficios.dat", "rb");
 
-f = fopen("beneficios.dat", "rb");
+    if(!f){
+        fprintf(stderr, "Não foi possível abrir o arquivo.");
+        return 1;
+    }
 
-if(!f){
-    fprintf(stderr, "Erro ao abrir beneficios.dat\n");
-    return 1;
+    fseek(f, 0, SEEK_END);
+    long totalBytes = ftell(f);
+    long totalRegistros = totalBytes / sizeof(Pagamento);
+
+    //duvida: quando usar fprintf ou printf.
+    fprintf(stdout, "O total de byte presentes no arquivo é: %ld", totalBytes);
+    fprintf(stdout, "O total de registros presentes no arquivo é: %ld", totalRegistros);
+
+    fclose(f);
+
+    return 0;
 }
-
-fseek(f, 0, SEEK_END);
-tamanho = ftell(f);
-qtd = tamanho / sizeof(Pagamento);
-
-printf("Tamanho: %ld bytes\n", tamanho);
-printf("Registros: %ld\n", qtd);
-
-fclose(f);
 ```
 
 ### (b) Inclusão em lote
@@ -4772,34 +4774,50 @@ fclose(f);
 **Lógica:** "adicionar ao final" → `novos.dat` em `"rb"` e `beneficios.dat` em **`"ab"`**; copiar registro a registro.
 
 ```c
-void inclusao_em_lote(){
-    FILE *novos, *benef;
+int main(int argc, char **argv){
+    FILE *origem = fopen("novos.dat", "rb");
+    //duvida: pode usar append?
+    FILE *destino = fopen("beneficios.dat", "ab");
+
+    if(!origem || !destino){
+        fprintf(stderr, "Não foi possível abrir os arquivos");
+        return 1;
+    }
+
     Pagamento p;
 
-    novos = fopen("novos.dat", "rb");
-
-    if(!novos){
-        fprintf(stderr, "Erro ao abrir novos.dat\n");
-        return;
+    while(fread(&p, sizeof(Pagamento), 1, origem) == 1){
+        fwrite(&p, sizeof(Pagamento), 1, destino);    
     }
 
-    benef = fopen("beneficios.dat", "ab");      // append: NÃO apaga
+    fclose(origem);
+    fclose(destino);
 
-    if(!benef){
-        fclose(novos);
-        fprintf(stderr, "Erro ao abrir beneficios.dat\n");
-        return;
+    //ou
+
+    FILE *origem = fopen("novos.dat", "rb");
+    //duvida: pode usar r+b?
+    FILE *destino = fopen("beneficios.dat", "r+b");
+
+    if(!origem || !destino){
+        fprintf(stderr, "Não foi possível abrir os arquivos");
+        return 1;
     }
 
-    fread(&p, sizeof(Pagamento), 1, novos);
+    fseek(destino, 0, SEEK_END);
+ 
+    Pagamento p;
 
-    while(!feof(novos)){
-        fwrite(&p, sizeof(Pagamento), 1, benef);
-        fread(&p, sizeof(Pagamento), 1, novos);
+    while(fread(&p, sizeof(Pagamento), 1, origem) == 1){
+        fwrite(&p, sizeof(Pagamento), 1, destino);
     }
 
-    fclose(novos);
-    fclose(benef);
+    rewind(destino);
+
+    fclose(origem);
+    fclose(destino);
+
+    return 0;
 }
 ```
 
@@ -4810,53 +4828,28 @@ void inclusao_em_lote(){
 
 **Lógica:** "ordenado por mês e ano" + "interromper após passar do período" → **ANTES continua · IGUAL soma · DEPOIS break**.
 
-Como a ordem é por **ano e mês**, junta os dois numa chave só:
-
-```text
-chave = ano * 100 + mes     →   03/2024 = 202403   ·   12/2023 = 202312
-```
-
 ```c
 float total_pago_mes_ano(int mes, int ano){
-    FILE *f;
+    FILE *f = fopen("beneficios.dat", "rb");
     Pagamento p;
     float total = 0;
-    int alvo = ano * 100 + mes;
 
-    f = fopen("beneficios.dat", "rb");
+    while(fread(&p, sizeof(Pagamento), 1, f) == 1){
 
-    if(!f){
-        fprintf(stderr, "Erro ao abrir beneficios.dat\n");
-        return 0;
-    }
+        if (p.ano < ano || (p.ano == ano && p.mes < mes))
+            continue;
 
-    fread(&p, sizeof(Pagamento), 1, f);
-
-    while(!feof(f)){
-        int atual = p.ano * 100 + p.mes;
-
-        if(atual == alvo){          // IGUAL → soma e continua (há vários no mesmo mês)
+        if(p.ano == ano && p.mes == mes){
             total += p.valor;
-        }else if(atual > alvo){     // DEPOIS → já passou do período
-            break;
         }
-                                    // ANTES → só lê o próximo
-        fread(&p, sizeof(Pagamento), 1, f);
+
+        if(p.ano > ano || (p.ano == ano && p.mes > mes))
+            break;
     }
 
     fclose(f);
 
     return total;
-}
-```
-
-Sem a chave, a mesma comparação fica:
-
-```c
-if(p.ano == ano && p.mes == mes){
-    total += p.valor;
-}else if(p.ano > ano || (p.ano == ano && p.mes > mes)){
-    break;
 }
 ```
 
