@@ -2455,6 +2455,7 @@ void intercala(char *arqA, char *arqB, char *arqSaida){
     saida = fopen(arqSaida, "wb");
 
     if(!a || !b || !saida){
+        fprintf(stderr, "Arquivo nao pode ser aberto.\n");
         return;
     }
 
