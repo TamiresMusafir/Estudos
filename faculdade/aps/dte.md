@@ -9,18 +9,19 @@
 * [5. Ponto de junção](#5-ponto-de-junção)
 * [6. Diferença rápida](#6-diferença-rápida)
 * [7. Como identificar no enunciado](#7-como-identificar-no-enunciado)
+* [8. Exemplo: desclassificação](#8-exemplo-desclassificação)
 
 ---
 
 ## 1. Evento de chamada
 
-### O que é?
+### Identifique quando:
 
-Acontece quando **outro objeto chama uma operação/serviço** do objeto.
+**Alguém/objeto faz alguma coisa → isso provoca a mudança.**
 
-### Quando usar?
+### Palavras comuns
 
-Quando o enunciado indica que alguém ou algum objeto **solicita, chama ou executa uma operação**.
+> realizar, registrar, cancelar, solicitar, retirar, devolver...
 
 ### Exemplo
 
@@ -32,25 +33,23 @@ Quando o enunciado indica que alguém ou algum objeto **solicita, chama ou execu
 [Inscrito]
 ```
 
-**Leia:**
+**Pense:**
 
-> Alguém chamou `realizarInscricao()` → o objeto muda de estado.
+> **"Alguém fez alguma coisa."**
 
-### Palavra-chave
-
-> **"Alguém chamou."**
+→ **EVENTO DE CHAMADA**
 
 ---
 
 ## 2. Evento temporal
 
-### O que é?
+### Identifique quando:
 
-A mudança acontece porque **passou determinado tempo**.
+A mudança acontece porque **passou um tempo**.
 
-### Quando usar?
+### Palavras comuns
 
-Quando o enunciado fala que, depois de um intervalo de tempo, o objeto muda de estado.
+> após 30 dias, depois de 24 horas, quando acabar o prazo...
 
 ### Exemplo
 
@@ -62,17 +61,9 @@ Quando o enunciado fala que, depois de um intervalo de tempo, o objeto muda de e
 [Expirado]
 ```
 
-**Leia:**
+→ **EVENTO TEMPORAL**
 
-> Depois de 30 dias → muda para `Expirado`.
-
-### Representação
-
-```text
-after(tempo)
-```
-
-### Palavra-chave
+### Pense:
 
 > **"Passou um tempo."**
 
@@ -80,13 +71,13 @@ after(tempo)
 
 ## 3. Evento de mudança
 
-### O que é?
+### Identifique quando:
 
-Uma **condição se torna verdadeira** e isso dispara a transição.
+**Uma condição fica verdadeira → isso dispara a mudança.**
 
-### Quando usar?
+### Palavras comuns
 
-Quando o objeto deve mudar de estado **assim que uma determinada condição ficar verdadeira**, sem depender de alguém realizar uma ação.
+> quando chegar..., quando todos..., quando atingir..., assim que...
 
 ### Exemplo
 
@@ -98,35 +89,31 @@ Quando o objeto deve mudar de estado **assim que uma determinada condição fica
 [Aguardando avaliação]
 ```
 
-**Leia:**
+→ **EVENTO DE MUDANÇA**
 
-> Quando `hj = dataInicioProvas` se tornar verdadeiro → muda de estado.
+### Pense:
 
-### Representação
+> **"Quando isso ficar verdadeiro..."**
+
+### Fórmula
 
 ```text
 when(condição)
 ```
 
-### Palavra-chave
-
-> **"Quando isso se tornar verdadeiro..."**
-
 ---
 
 ## 4. Condição de guarda
 
-### O que é?
+### Identifique quando:
 
-É uma condição que precisa ser **verdadeira para a transição acontecer**.
+Existe um **"se"** que diz que a transição **só pode acontecer naquela condição**.
 
-É escrita entre **colchetes `[ ]`**.
+### Palavras comuns
 
-### Quando usar?
+> se, somente se, caso, desde que...
 
-Quando existe um **"se..."**, ou seja, a transição só pode acontecer caso determinada condição seja satisfeita.
-
-### Exemplo com evento
+### Exemplo
 
 ```text
 [Cadastrado]
@@ -136,224 +123,258 @@ Quando existe um **"se..."**, ou seja, a transição só pode acontecer caso det
 [Inscrito]
 ```
 
-Aqui:
-
 ```text
-realizarInscricao() → evento
-[período válido]    → guarda
+realizarInscricao() → EVENTO
+[período válido]    → GUARDA
 ```
 
-Leia:
-
-> A inscrição foi realizada, **mas só muda para `Inscrito` se o período for válido**.
-
-### A guarda pode aparecer sozinha
-
-```text
-[Estado A]
-     |
-     | [idade >= 18]
-     ↓
-[Estado B]
-```
-
-Não é obrigatório ter um evento escrito antes.
-
-### Palavra-chave
+### Pense:
 
 > **"Só se..."**
+
+### Fórmula
+
+```text
+[condição]
+```
 
 ---
 
 ## 5. Ponto de junção
 
-### O que é?
+### Identifique quando:
 
-É usado quando existem **vários caminhos possíveis** e precisamos decidir para qual estado o objeto vai.
+Existe **mais de um resultado possível**.
 
-É representado por um **losango `◇`**.
+> Se X → caminho A
+> Senão → caminho B
 
-### Quando usar?
+Representado por:
 
-Quando o enunciado apresenta algo como:
-
-* se X → estado A
-* caso contrário → estado B
-* dependendo de X → estado A ou B
+```text
+◇
+```
 
 ### Exemplo
 
 ```text
-                         [desclassificado]
-                                ↓
-[Avaliando] ───────────────→   ◇
-                               │
-                               │ [else]
-                               ↓
-                         [Avaliado]
+                 [desclassificação]
+                        ↓
+[Avaliando] ──────────→ ◇
+                        |
+                      [else]
+                        ↓
+                    [Avaliado]
 ```
 
-O losango representa o **ponto de decisão**.
+→ **PONTO DE JUNÇÃO**
 
-As condições ficam nas **transições que saem do losango**.
-
-### Palavra-chave
+### Pense:
 
 > **"Qual caminho?"**
+
+As condições ficam **depois do losango**:
+
+```text
+◇
+├── [condição] → Estado A
+└── [else]     → Estado B
+```
 
 ---
 
 # 6. Diferença rápida
 
-| Elemento              | Significa                                              | Exemplo                   |
-| --------------------- | ------------------------------------------------------ | ------------------------- |
-| **Evento de chamada** | Alguém/objeto chamou uma operação                      | `realizarInscricao()`     |
-| **Evento temporal**   | Passou determinado tempo                               | `after(30 dias)`          |
-| **Evento de mudança** | Uma condição se tornou verdadeira e disparou a mudança | `when(dataInicio = hoje)` |
-| **Guarda**            | Condição que precisa ser verdadeira                    | `[período válido]`        |
-| **Junção**            | Existem vários caminhos possíveis                      | `◇`                       |
+| Se o texto diz...                        | Use                          |
+| ---------------------------------------- | ---------------------------- |
+| alguém **fez alguma coisa**              | **Evento de chamada**        |
+| **passou um tempo**                      | **Evento temporal**          |
+| **quando** uma condição ficar verdadeira | **Evento de mudança `when`** |
+| **se / somente se / caso**               | **Guarda `[ ]`**             |
+| existem **vários resultados**            | **Junção `◇`**               |
 
-### Para decorar
+### COLA:
 
 ```text
-EVENTO DE CHAMADA
-→ "Alguém chamou."
+ALGUÉM FEZ?
+→ evento de chamada
 
-EVENTO TEMPORAL
-→ "Passou um tempo."
+PASSOU TEMPO?
+→ evento temporal
 
-EVENTO DE MUDANÇA
-→ "Uma condição ficou verdadeira."
+CONDIÇÃO FICOU VERDADEIRA?
+→ when
 
-GUARDA
-→ "Só se..."
+"SÓ SE..."?
+→ [guarda]
 
-PONTO DE JUNÇÃO
-→ "Qual caminho?"
+VÁRIOS CAMINHOS?
+→ ◇ junção
 ```
 
 ---
 
 # 7. Como identificar no enunciado
 
-Quando encontrar uma possível transição, faça estas perguntas:
+Não tente classificar o texto inteiro.
 
-### 1. Alguém ou outro objeto solicitou uma operação?
+Primeiro procure:
 
-```text
-realizarInscricao()
-registrarAvaliacao()
-cancelarAluguel()
-```
+> **O objeto mudou de situação?**
 
-→ **Evento de chamada**
+Se sim, pergunte:
 
----
+### ① O que fez mudar?
 
-### 2. A mudança acontece depois de um período?
+**Alguém fez algo?**
 
-```text
-após 30 dias
-depois de 24 horas
-```
+→ evento
 
-→ **Evento temporal**
+**Passou tempo?**
 
-```text
-after(30 dias)
-```
+→ `after`
+
+**Uma condição ficou verdadeira?**
+
+→ `when`
 
 ---
 
-### 3. A mudança acontece quando uma condição se torna verdadeira?
+### ② Existe um "só se"?
+
+→ `[guarda]`
+
+---
+
+### ③ Existem vários resultados?
+
+→ `◇` **junção**
+
+E coloque uma guarda em cada caminho:
 
 ```text
-quando chegar a data da prova
-quando o pagamento for confirmado
-quando todos forem avaliados
+       ◇
+      / \
+ [condição] [else]
+    ↓         ↓
+ Estado A   Estado B
 ```
 
-→ **Evento de mudança**
+---
+
+# 8. Exemplo: desclassificação
+
+### Frase do enunciado
+
+> **"Uma desclassificação pode ocorrer, por exemplo, se o atleta abandonar o tablado ou aparelho sem concluir o exercício."**
+
+Aqui tem uma pista MUITO importante:
+
+```text
+se o atleta abandonar
+       +
+sem concluir o exercício
+       ↓
+DESCLASSIFICADO
+```
+
+→ Isso é uma **condição**.
+
+Portanto:
+
+```text
+[abandona o aparelho sem concluir]
+                ↓
+        Desclassificado
+```
+
+### No exercício da ginástica:
+
+O atleta é avaliado e existem dois resultados:
+
+```text
+              Registrar avaliação
+                      ↓
+                      ◇
+                    /   \
+                   /     \
+[desclassificação]       [else]
+        ↓                   ↓
+Desclassificado          Avaliado
+```
+
+### Como pensar:
+
+**Abandonou sem concluir?**
+
+→ `[desclassificação]`
+
+**Não?**
+
+→ `[else]` → `Avaliado`
+
+### ⭐ Pista para decorar
+
+> **"Pode ser desclassificado se..."**
+
+O **"se"** é a pista da condição.
+
+---
+
+# ⭐ REGRA MAIS IMPORTANTE
+
+Não confunda:
 
 ```text
 when(condição)
 ```
 
----
-
-### 4. Existe um "se" que limita a transição?
-
-```text
-se o período estiver válido
-se a idade for maior que 18
-se o atleta estiver classificado
-```
-
-→ **Condição de guarda**
+com:
 
 ```text
 [condição]
 ```
 
-A guarda pode aparecer **com ou sem evento**.
+### `when`
+
+A condição **DISPARA** a mudança:
+
+```text
+when(data chegou)
+```
+
+> "Quando chegar a data → muda."
+
+### `[condição]`
+
+A condição **DECIDE/PERMITE** o caminho:
+
+```text
+[período válido]
+```
+
+> "Só pode seguir por aqui se for válido."
 
 ---
 
-### 5. Existem dois ou mais destinos possíveis?
+## 🧠 Mini cola final
 
 ```text
-se desclassificado → Desclassificado
-senão → Avaliado
+EVENTO
+→ alguém fez algo
+
+after
+→ passou tempo
+
+when
+→ condição ficou verdadeira
+→ DISPARA
+
+[ ]
+→ condição precisa ser satisfeita
+→ DECIDE/PERMITE
+
+◇
+→ vários caminhos
+→ "qual resultado?"
 ```
-
-→ **Ponto de junção**
-
-```text
-             [desclassificado]
-                    ↓
-Estado ───────────→ ◇
-                    ↓
-                  [else]
-```
-
----
-
-## ⭐ Regra principal
-
-Não confunda **evento de mudança** com **guarda**:
-
-```text
-when(condição)
-```
-
-→ **a condição ficar verdadeira é o que DISPARA a transição.**
-
-```text
-[condição]
-```
-
-→ **a condição precisa ser verdadeira para a transição ser PERMITIDA/ESCOLHIDA.**
-
-### Exemplo final
-
-```text
-[Inscrito]
-    |
-    | when(hj = dataInicioProvas)
-    ↓
-[Aguardando avaliação]
-```
-
-> Quando chegar a data → muda.
-
-Enquanto:
-
-```text
-[Cadastrado]
-    |
-    | realizarInscricao() [período válido]
-    ↓
-[Inscrito]
-```
-
-> Realizou a inscrição → **só muda se** o período for válido.
