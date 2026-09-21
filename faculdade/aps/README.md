@@ -4,130 +4,312 @@
 > Organizado por slide/tema, com foco em definições, regras e pontos que costumam cair em **questões de concurso**.
 
 ---
+# PARTE 1 — DIAGRAMA DE CLASSES DE ANÁLISE
 
-## PARTE 1 — DIAGRAMA DE CLASSES DE ANÁLISE
+## 1.1 Modelagem de Classes — conceitos básicos
 
-### 1.1 Modelagem de Classes — conceitos básicos
-- Objetos colaboram sob dois aspectos: **dinâmico** (troca de mensagens/eventos) e **estrutural estático** (como o sistema está organizado).
-- O diagrama UML que representa o aspecto **estrutural estático** é o **Diagrama de Classes**.
-- **3 níveis de abstração do modelo de classes** (pegadinha clássica de prova — saber a ordem e a diferença):
-  1. **Classes de domínio** — não considera tecnologia.
-  2. **Classes de especificação** — extensão do domínio + detalhes da solução de software + novas classes.
-  3. **Classes de implementação** — extensão da especificação, já em linguagem de programação.
+* **Diagrama de Classes** representa o aspecto **estrutural e estático** do sistema: quais classes existem, seus atributos e como se relacionam.
+* O aspecto **dinâmico** mostra o comportamento: eventos, mensagens e mudanças ao longo do tempo.
 
-### 1.2 Técnicas de identificação de classes
-- **Análise dos Casos de Uso** (Identificação Dirigida por Casos de Uso) e **Análise Textual de Abbott** são as duas técnicas citadas.
-- Regra da Análise de Casos de Uso: uma classe só se justifica se participar do **comportamento externamente visível** do sistema.
+### 3 níveis de abstração
 
-**Categorização BCE (Jacobson) — MUITO cobrada em concurso:**
-| Estereótipo | Papel |
-|---|---|
-| `<<boundary>>` (fronteira) | Interface entre o sistema e os atores |
-| `<<control>>` (controle) | Intermediário entre fronteira e entidade; define o comportamento do caso de uso |
-| `<<entity>>` (entidade) | Objetos do domínio do problema, geralmente persistentes |
-- Atores interagem com objetos de **fronteira**.
-- Decore: fronteira → controle → entidade (fluxo típico de uma interação).
+| Nível                        | O que representa                                              |
+| ---------------------------- | ------------------------------------------------------------- |
+| **Classes de domínio**       | Conceitos do problema, **sem tecnologia**                     |
+| **Classes de especificação** | Domínio + detalhes necessários para a **solução do software** |
+| **Classes de implementação** | Especificação adaptada para uma **linguagem de programação**  |
 
-**Análise Textual de Abbott — passo a passo (decore a ordem):**
-1. Busca por substantivos/adjetivos (nomes e locuções).
-2. Remoção de sinônimos.
-3. Classificação de cada termo: **classe candidata**, **atributo** ou **irrelevante**.
-- Verbos de ação (calcular, cancelar, comprar) → **operações**.
-- Verbos com sentido de "ter" → **agregação/composição**.
-- Verbos com sentido de "ser" → **generalização**.
+🧠 **Ordem:** domínio → especificação → implementação.
 
-**Tabela de correspondência Abbott (decorar — cai muito):**
-| Parte do texto | Componente | Exemplo |
-|---|---|---|
-| Nome próprio | Objeto | Eduardo Bezerra |
-| Nome simples | Classe | Aluno |
-| Verbo de ação | Operação | Registrar |
-| Verbo "ser" | Herança | É um |
-| Verbo "ter" | Todo-parte | Tem um |
+---
 
-### 1.3 Nomenclatura (convenções — clássico de prova de "está certo/errado")
-- **Classes e relacionamentos**: começam com letra **maiúscula** (ex.: `Cliente`, `ItemPedido`).
-- **Atributos e operações**: primeira palavra minúscula, demais em CamelCase interno, sem espaços; **siglas mantidas** (ex.: `quantidade`, `precoUnitario`, `CPF`, `dataNascimento`).
-- **Identificadores**: removem-se espaços e preposições.
+## 1.2 Técnicas de identificação de classes
 
-### 1.4 Associações, multiplicidade e conectividade
-- **Multiplicidade**: limites mínimo e máximo de objetos associados (Min..Max).
+Duas técnicas principais:
 
-| Nome | Notação |
-|---|---|
-| Apenas um | 1..1 (ou 1) |
-| Zero ou muitos | 0..* (ou *) |
-| Um ou muitos | 1..* |
-| Zero ou um | 0..1 |
-| Intervalo específico | Im..In |
+* **Análise dos Casos de Uso** — identifica classes a partir do comportamento que o sistema precisa oferecer externamente.
+* **Análise Textual de Abbott** — procura termos importantes no texto do problema.
 
-- **Conectividade** leva em conta a **multiplicidade MÁXIMA** de cada lado (pegadinha: não confundir multiplicidade com conectividade).
+### Categorização BCE (Jacobson)
 
-| Conectividade | Mult. de um lado | Mult. do outro lado |
-|---|---|---|
-| Um para um | 0..1 ou 1 | 0..1 ou 1 |
-| Um para muitos | 0..1 ou 1 | * / 1..* / 0..* |
-| Muitos para muitos | * / 1..* / 0..* | * / 1..* / 0..* |
+| Estereótipo    | Função                                                                 |
+| -------------- | ---------------------------------------------------------------------- |
+| `<<boundary>>` | Interface entre **ator e sistema**                                     |
+| `<<control>>`  | Coordena o comportamento do **caso de uso**                            |
+| `<<entity>>`   | Representa objetos do **domínio do problema**, geralmente persistentes |
 
-- **Participação obrigatória** = multiplicidade mínima 1 (ou mais); **opcional** = mínimo 0.
-- **Adornos de associação** (recursos de notação): **nome da associação**, **papel (role)** e **sentido de leitura** — servem para tirar ambiguidade.
+🧠 **Fluxo típico:** `ator → boundary → control → entity`
 
-### 1.5 Classes associativas
-- Usadas quando é preciso guardar **informações sobre o relacionamento** entre duas classes.
-- **Não confundir** classe associativa com uma associação "promovida" a classe.
-- Permite **apenas uma ocorrência por par de objetos** (ou por trio, no caso ternário).
-- Mais comum em relações muitos-para-muitos, mas pode ocorrer em 1-para-muitos e 1-para-1 também (pegadinha: não é exclusiva do muitos-para-muitos).
+### Análise Textual de Abbott
 
-### 1.6 Associações reflexivas e ternárias
-- **Reflexiva (auto-associação)**: associa objetos da **mesma classe**, cada um com papel distinto (ex.: empregado supervisiona empregado).
-- **Grau de associação** = nº de classes envolvidas; a maioria é **binária**; grau 3 = **ternária**.
-- Numa associação ternária A-B-C, a multiplicidade do extremo C indica quantos objetos de C se associam a **cada par (a,b)**.
+1. Procurar **substantivos/adjetivos**.
+2. Remover **sinônimos**.
+3. Classificar os termos: **classe, atributo ou irrelevante**.
 
-### 1.7 Agregação e Composição (tema clássico de concurso — decore as diferenças!)
-- Ambas representam relações **todo-parte**, são **assimétricas** (se A é parte de B, B não é parte de A).
+* Verbo de **ação** → operação: `calcular`, `cancelar`, `registrar`.
+* Verbo **"ter"** → relação **todo-parte**: agregação/composição.
+* Verbo **"ser"** → **generalização**: "Aluno é uma Pessoa".
 
-| | Agregação | Composição |
-|---|---|---|
-| Notação | Losango **vazio** | Losango **cheio** |
-| Força do vínculo | Mais fraca | Mais forte |
-| Destruição do todo | **Não** implica destruição da parte | Parte é destruída junto (tempo de vida coincidente) |
-| Multiplicidade do lado "todo" | Pode ser >1 | Não excede 1 (a parte pertence a um único todo) |
+### Tabela rápida
 
-### 1.8 Generalização / Especialização
-- Relação entre **superclasse** e **subclasses**; também chamada relação **"é um"**.
-- Uma subclasse herda **atributos, operações E associações** da superclasse.
-- Termos **ancestral/descendente**: generalização entre vários níveis.
-- Regra de bom senso citada nos slides: hierarquias de 2-3 níveis são aceitáveis; 10 níveis é excessivo.
-- **Classe abstrata**: não gera objetos diretamente; nome em **itálico**; serve para organizar hierarquia.
-- **Herança múltipla**: uma classe com mais de uma superclasse.
-  - Vantagem: mais reuso e poder de especificação.
-  - Desvantagem: perda de simplicidade conceitual/implementação.
-  - Diferença conceitual (pegadinha de prova): **generalização** = relacionamento conceitual; **herança** = mecanismo de linguagem.
+| Texto            | Pode indicar      | Exemplo            |
+| ---------------- | ----------------- | ------------------ |
+| Nome próprio     | **Objeto**        | João               |
+| Nome comum       | **Classe**        | Aluno              |
+| Verbo de ação    | **Operação**      | Registrar          |
+| "É um" / "é uma" | **Generalização** | Aluno é uma Pessoa |
+| "Tem / possui"   | **Todo-parte**    | Pedido tem Itens   |
 
-**Restrições sobre generalização (tabela decorável — cai muito em concurso):**
-| Restrição | Significado |
-|---|---|
-| Sobreposta | Subclasses podem herdar de mais de uma superclasse (herança múltipla) |
-| Disjunta (separada) | Subclasses mutuamente exclusivas |
-| Completa | Todas as subclasses possíveis foram enumeradas |
-| Incompleta | Nem todas as subclasses foram enumeradas |
+---
 
-### 1.9 Restrições (constraints) e OCL
-- Restrições = informações extras que validam condições durante implementação (métodos, associações, atributos).
-- Representadas entre **chaves { }**.
-- Usadas para representar **regras de negócio** e requisitos não funcionais.
-- **OCL (Object Constraint Language)**: linguagem para escrever restrições complexas, parecida com linguagem de programação.
-- Restrições predefinidas pela UML para associações: **subset** e **xor** (exemplo clássico: conta bancária é de uma pessoa OU de uma instituição, nunca as duas → **xor**).
+## 1.3 Nomenclatura
 
-### 1.10 Identificadores de objetos e Enumerações
-- **Não devem** ser listados em diagramas de classe de análise (são implícitos).
-- Não confundir identificador interno (conveniência de implementação) com atributo do mundo real.
-- **Enumeração**: tipo de dado com conjunto finito de valores (domínio fechado).
+* **Classes e relacionamentos:** começam com letra maiúscula: `Cliente`, `ItemPedido`.
+* **Atributos e operações:** começam com minúscula e usam `camelCase`: `quantidade`, `precoUnitario`, `dataNascimento`.
+* **Identificadores:** removem espaços e preposições.
 
-### 1.11 Padrões de Análise (Party e Metamodel)
-- Um padrão de análise fornece um **fragmento de diagrama de classes reutilizável**; o trabalho de análise passa a ser **identificar o problema**, não identificar classes do zero.
-- **Padrão Party**: representa **pessoas e organizações** e seus relacionamentos (ex.: `Pessoa` e `Organização` generalizam de `Parte`).
-- **Padrão Metamodel**: usado quando itens de um conjunto têm **propriedades variáveis entre si**; permite mudar a estrutura do modelo **sem alterar o esquema** das classes (evita criar uma subclasse para cada tipo de item).
+---
+
+## 1.4 Associações, multiplicidade e conectividade
+
+### Multiplicidade
+
+Indica **quantos objetos** podem estar associados a um objeto do outro lado.
+
+| Multiplicidade | Significado    |
+| -------------- | -------------- |
+| `1` ou `1..1`  | exatamente um  |
+| `0..1`         | zero ou um     |
+| `0..*` ou `*`  | zero ou muitos |
+| `1..*`         | um ou muitos   |
+| `m..n`         | entre m e n    |
+
+🧠 **Mínimo = é obrigatório ou opcional?**
+🧠 **Máximo = quantos podem existir?**
+
+* Mínimo `1` → participação **obrigatória**.
+* Mínimo `0` → participação **opcional**.
+
+### Conectividade
+
+Indica se a relação é **1:1, 1:N ou N:N**.
+
+⚠️ **Pegadinha:** conectividade considera a **multiplicidade máxima**, enquanto multiplicidade mostra o intervalo completo (`mínimo..máximo`).
+
+### Adornos de associação
+
+Recursos usados para deixar a associação mais clara:
+
+* **nome da associação**
+* **papel (role)**
+* **sentido de leitura**
+
+---
+
+## 1.5 Classes associativas
+
+Usadas quando é necessário guardar **informações sobre a própria associação** entre objetos.
+
+Exemplo:
+
+```text
+Aluno ───── Matrícula ───── Disciplina
+              |
+           dataMatrícula
+           nota
+```
+
+`dataMatrícula` e `nota` pertencem à **relação**, não diretamente a Aluno ou Disciplina.
+
+* Mais comum em associações **muitos-para-muitos**.
+* ⚠️ Não é exclusiva de muitos-para-muitos: pode aparecer em outros tipos de associação.
+* Uma classe associativa permite **uma ocorrência por combinação de objetos** envolvidos na associação.
+
+---
+
+## 1.6 Associações reflexivas e ternárias
+
+### Reflexiva (auto-associação)
+
+Uma classe se relaciona **com ela mesma**.
+
+Exemplo:
+
+```text
+Empregado ───── supervisiona ───── Empregado
+```
+
+São dois objetos diferentes da mesma classe, com papéis diferentes.
+
+### Grau da associação
+
+É o **número de classes envolvidas**:
+
+* 2 classes → **binária** (mais comum)
+* 3 classes → **ternária**
+
+Em uma associação ternária `A-B-C`, a multiplicidade de `C` indica quantos objetos de `C` podem se associar a **cada combinação de um objeto de A + um objeto de B**.
+
+---
+
+## 1.7 Agregação e Composição
+
+As duas representam relação **todo-parte**.
+
+### Símbolos
+
+|                   | Agregação                      | Composição                              |
+| ----------------- | ------------------------------ | --------------------------------------- |
+| Símbolo           | `◇` losango vazio              | `◆` losango cheio                       |
+| Vínculo           | mais fraco                     | mais forte                              |
+| Todo é destruído  | parte pode continuar existindo | parte deixa de existir junto com o todo |
+| Um todo por parte | pode haver mais de um          | uma parte pertence a no máximo um todo  |
+
+🧠 **Decore pelo símbolo:**
+
+`◇` = **agregação**
+`◆` = **composição**
+
+⚠️ A palavra "composta" no enunciado **não significa automaticamente composição**. Quem define é o **símbolo UML**.
+
+---
+
+## 1.8 Generalização / Especialização
+
+Representa uma relação de **"é um"** entre uma classe mais geral e classes mais específicas.
+
+Exemplo:
+
+```text
+        Pessoa
+          △
+         / \
+    Aluno  Professor
+```
+
+* `Pessoa` = **superclasse**
+* `Aluno` e `Professor` = **subclasses**
+* A subclasse herda **atributos, operações e associações** da superclasse.
+
+### Classe abstrata
+
+* Serve como **base para outras classes**.
+* Não gera objetos diretamente.
+* Nome aparece em **itálico**.
+
+### Herança múltipla
+
+Uma classe possui **mais de uma superclasse**.
+
+* Vantagem: mais reuso.
+* Desvantagem: maior complexidade.
+
+🧠 **Pegadinha:**
+
+* **Generalização** = relacionamento conceitual da UML.
+* **Herança** = mecanismo de implementação em uma linguagem.
+
+### Restrições de generalização
+
+| Restrição      | Significado                                                |
+| -------------- | ---------------------------------------------------------- |
+| **Sobreposta** | Um mesmo objeto pode pertencer a **mais de uma subclasse** |
+| **Disjunta**   | Um objeto só pode pertencer a **uma subclasse**            |
+| **Completa**   | Todas as subclasses possíveis foram **enumeradas**         |
+| **Incompleta** | Ainda podem existir outras subclasses                      |
+
+⚠️ **Sobreposta ≠ herança múltipla.**
+
+* **Sobreposta:** um objeto pode acumular subclasses.
+* **Herança múltipla:** uma classe possui várias superclasses.
+
+---
+
+## 1.9 Restrições (Constraints) e OCL
+
+**Restrição (constraint)** = regra que precisa ser respeitada pelo modelo/sistema.
+
+* Representada entre **chaves `{ }`**.
+* Pode representar **regras de negócio** e outras condições do modelo.
+* **OCL (Object Constraint Language)** é uma linguagem usada para escrever restrições de forma precisa.
+
+### Restrições UML comuns
+
+* **`subset`** → uma associação/conjunto deve estar contido em outro.
+* **`xor`** → uma opção **OU** outra, mas **nunca as duas**.
+
+Exemplo:
+
+```text
+Conta pertence a Pessoa XOR Instituição
+```
+
+→ pertence a uma ou à outra, **não às duas**.
+
+---
+
+## 1.10 Identificadores de objetos e Enumerações
+
+### Identificador
+
+* Identificadores internos usados apenas para facilitar a implementação normalmente são **implícitos** no diagrama de classes de análise.
+* Não confundir com atributos reais do domínio.
+
+Exemplo:
+
+`CPF` pode ser um atributo importante do domínio, enquanto um `id` criado apenas pelo banco pode ser detalhe de implementação.
+
+### Enumeração
+
+É um tipo com **conjunto fechado de valores possíveis**.
+
+Exemplo:
+
+```text
+Status = {ATIVO, INATIVO, CANCELADO}
+```
+
+🧠 **Enumeração = lista fechada de opções.**
+
+---
+
+## 1.11 Padrões de Análise — Party e Metamodel
+
+### O que é um padrão de análise?
+
+É uma **solução/modelo reutilizável** para problemas que aparecem com frequência.
+
+Em vez de criar toda a estrutura do zero, o analista pode reutilizar um padrão conhecido.
+
+### Party
+
+**Party é um padrão de análise para representar quem participa de relações**, principalmente **pessoas e organizações**.
+
+Exemplo:
+
+```text
+              Parte
+             /     \
+        Pessoa    Organização
+```
+
+Aqui:
+
+* `Parte` é uma classe mais geral.
+* `Pessoa` e `Organização` são especializações.
+* A relação entre elas é uma **generalização**.
+
+⚠️ **Party não é a generalização.**
+**Party é o padrão; a generalização é uma relação UML usada dentro do padrão.**
+
+### Metamodel
+
+Usado quando existem itens de um mesmo conjunto, mas suas **propriedades/tipos podem variar**.
+
+Em vez de criar uma nova subclasse para cada tipo, o tipo pode ser tratado como **dados do modelo**.
+
+🧠 **Metamodel = permite variar a estrutura/tipos sem precisar alterar as classes toda vez.**
+
 
 ---
 
