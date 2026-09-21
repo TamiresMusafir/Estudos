@@ -312,69 +312,289 @@ Em vez de criar uma nova subclasse para cada tipo, o tipo pode ser tratado como 
 
 
 ---
-
 ## PARTE 2 — DIAGRAMA DE TRANSIÇÃO DE ESTADOS (DTE)
 
 ### 2.1 Conceitos básicos
-- Objetos assumem **estados** ao longo do tempo; mudança de estado = **transição**, disparada por **evento**.
 
-**Elementos de um DTE (decorar a lista):**
-Estado, Transição, Evento (trigger), Condição de guarda, Ação, Atividade — (elementos menos comuns: transições internas, estados aninhados, concorrentes, subestados).
+* Objetos assumem **estados** ao longo do tempo.
+* A mudança de um estado para outro é uma **transição**, normalmente disparada por um **evento**.
+
+**Elementos de um DTE:**
+Estado, Transição, Evento (trigger), Condição de guarda, Ação e Atividade.
+
+Elementos menos comuns: transições internas, estados aninhados, estados concorrentes e subestados.
+
+---
 
 ### 2.2 Estado
-- Situação em que o objeto satisfaz uma condição ou realiza uma atividade; determinado pelos valores de atributos e/ou ligações com outros objetos.
-- Notação: retângulo de bordas arredondadas.
-- **Estado inicial**: só pode haver **um** por DTE (exceto em estados aninhados/concorrentes/compostos) — pegadinha comum.
-- **Estado final**: **opcional**, pode haver **mais de um**.
+
+* **Estado** = situação em que o objeto se encontra.
+* Pode ser determinado pelos valores de atributos e/ou pelas ligações com outros objetos.
+* Notação: retângulo de bordas arredondadas.
+
+**Estado inicial:**
+
+* Indica onde o objeto começa.
+* Normalmente há **um único estado inicial** por DTE.
+* ⚠️ Estados aninhados/concorrentes podem ter particularidades.
+
+**Estado final:**
+
+* Indica o término do ciclo representado.
+* É **opcional**.
+* Pode haver **mais de um**.
+
+---
 
 ### 2.3 Transição
-- Forma geral: `Evento(lista-parâmetro) [guarda] / ação`
-- Componentes: evento, condição de guarda (entre colchetes) e ação (precedida de `/`).
 
-### 2.4 Evento (Trigger) — classificação (tema forte de concurso)
-| Tipo | Descrição |
-|---|---|
-| **Evento de chamada** | Recebimento de mensagem; o emissor **espera** a execução |
-| **Evento de sinal** | Recebimento de sinal; emissor **não espera**; raramente usado |
-| **Evento temporal** | Passagem de intervalo de tempo; cláusula **`after`** |
-| **Evento de mudança** | Condição lógica se torna verdadeira; cláusula **`when`** |
+É a passagem de um **estado para outro**.
+
+Forma geral:
+
+```text
+Evento(lista-parâmetros) [guarda] / ação
+```
+
+* **Evento** → o que provoca a tentativa de mudança.
+* **Guarda** → condição do sistema que precisa ser verdadeira para a transição ocorrer.
+* **Ação** → algo executado durante a transição.
+
+---
+
+### 2.4 Evento (Trigger) — classificação
+
+**Evento = algo que dispara uma transição.**
+
+🧠 Pergunta para identificar:
+
+> **“O que aconteceu para o objeto tentar mudar de estado?”**
+
+| Tipo                  | Como identificar                                     | Notação               |
+| --------------------- | ---------------------------------------------------- | --------------------- |
+| **Evento de chamada** | Alguém/sistema envia uma mensagem ou solicita algo   | `realizarInscricao()` |
+| **Evento de sinal**   | Recebimento de um sinal; emissor não espera resposta | —                     |
+| **Evento temporal**   | Passou determinado tempo                             | `after(30 dias)`      |
+| **Evento de mudança** | Uma condição do sistema tornou-se verdadeira         | `when(condição)`      |
+
+### Como diferenciar rapidamente
+
+**Evento de chamada:** alguém **fez algo/chamou**.
+
+> Usuário realiza inscrição.
+
+**Evento temporal:** **passou tempo**.
+
+> Após 30 dias.
+
+**Evento de mudança:** uma **condição do sistema mudou para verdadeira** e isso dispara a transição.
+
+> Quando a data de início das provas for atingida.
+
+🧠 **Cola:**
+
+```text
+alguém fez algo → chamada
+passou tempo → after
+condição ficou verdadeira → when
+```
+
+---
 
 ### 2.5 Condição de guarda e Ação x Atividade
-- **Guarda**: expressão lógica entre colchetes; transição só dispara se o evento ocorrer **E** a guarda for verdadeira. Sem guarda → dispara sempre que o evento ocorrer.
-- **Ação**: executada instantaneamente (não pode ser interrompida), ligada à transição, precedida de `/`.
-- **Atividade**: pode ser **interrompida** — diferença fundamental entre ação e atividade (cai muito em prova).
+
+### Condição de guarda
+
+É uma **condição do sistema**, escrita entre **colchetes `[ ]`**, que precisa ser verdadeira para a transição seguir por aquele caminho.
+
+🧠 Pergunta para identificar:
+
+> **“Existe alguma condição do sistema que precisa ser satisfeita para essa transição acontecer?”**
+
+Exemplo:
+
+```text
+Realizar inscrição [período de inscrição válido]
+```
+
+* `Realizar inscrição` → **evento**
+* `[período de inscrição válido]` → **condição de guarda**
+
+A transição só ocorre se:
+
+**evento acontecer + guarda for verdadeira.**
+
+Sem guarda → a transição pode ocorrer quando o evento acontecer.
+
+⚠️ **Guarda não é evento.**
+
+* Evento = **o que aconteceu?**
+* Guarda = **qual condição do sistema precisa ser verdadeira?**
+
+### Ação
+
+* Executada **instantaneamente** durante a transição.
+* Não pode ser interrompida.
+* É escrita depois de `/`.
+
+Exemplo:
+
+```text
+evento [guarda] / registrarData
+```
+
+### Atividade
+
+* É uma execução que ocorre **durante um estado**.
+* Pode ser **interrompida**.
+
+🧠 **Ação = instantânea.**
+🧠 **Atividade = pode durar e ser interrompida.**
+
+---
 
 ### 2.6 Ponto de junção
-- Desenhado como **losango**; usado quando o próximo estado depende do valor de uma condição de guarda; cada transição de saída tem sua própria guarda.
 
-### 2.7 Cláusulas entry, exit, do (dentro do próprio estado)
-| Cláusula | Quando ocorre |
-|---|---|
-| `entry` | Ao **entrar** no estado, independente de onde veio |
-| `exit` | Ao **sair** do estado, independente de para onde vai |
-| `do` | Atividade **contínua** enquanto o objeto permanece no estado |
+* Desenhado como **losango**.
+* Usado quando existem **vários caminhos possíveis** após uma transição.
+* Cada caminho de saída pode possuir uma **guarda diferente**.
 
-### 2.8 Transições internas x Autotransições (**clássica pegadinha de concurso**)
-- **Transição interna**: NÃO muda de estado; NÃO dispara `entry`/`exit`.
-- **Autotransição**: origem = destino, mas **dispara `entry` e `exit`** normalmente.
-- É exatamente essa diferença (disparo ou não de entry/exit) que costuma ser cobrada.
+Exemplo:
+
+```text
+                    [desclassificado]
+                   ↗
+Aguardando avaliação
+                   ↘
+                    [else] → Avaliado
+```
+
+🧠 Pergunta:
+
+> **“Dependendo de uma condição, para qual estado o objeto vai?”**
+
+---
+
+### 2.7 Cláusulas `entry`, `exit`, `do`
+
+| Cláusula | Quando ocorre                                    |
+| -------- | ------------------------------------------------ |
+| `entry`  | Ao **entrar** no estado                          |
+| `exit`   | Ao **sair** do estado                            |
+| `do`     | Atividade executada enquanto permanece no estado |
+
+* `entry` ocorre independentemente de onde veio.
+* `exit` ocorre independentemente de para onde vai.
+* `do` representa uma atividade enquanto o objeto permanece no estado.
+
+---
+
+### 2.8 Transições internas x Autotransições
+
+⚠️ **Pegadinha clássica.**
+
+**Transição interna:**
+
+* Não muda de estado.
+* Não dispara `entry` nem `exit`.
+
+**Autotransição:**
+
+* Origem e destino são o **mesmo estado**.
+* Dispara `exit` e depois `entry` normalmente.
+
+🧠 Diferença principal:
+
+> **Interna → não sai do estado → não executa exit/entry.**
+> **Auto → sai e entra novamente → executa exit/entry.**
+
+---
 
 ### 2.9 Estados aninhados, compostos e concorrentes
-- **Estado composto**: contém outros estados; todos os subestados **herdam** as transições do estado composto.
-- Símbolo no canto inferior direito indica estado composto (detalhes escondidos).
-- **Estado concorrente**: tipo especial de estado composto onde o objeto está em **dois ou mais estados independentes simultaneamente** (também chamado paralelo ou composto ortogonal).
 
-### 2.10 Roteiro para construção de um DTE (decore a sequência — pode virar questão de ordenação)
-1. Identificar classes que precisam de DTE.
-2. Identificar estados relevantes.
-3. Identificar eventos relevantes e as transições que eles causam.
-4. Para cada estado, identificar as transições possíveis.
-5. Identificar eventos internos e ações correspondentes.
-6. Definir condições de guarda e ações associadas às transições.
-7. Identificar atributos/ligações envolvidos em guardas e ações.
-8. Definir estado inicial e estado(s) final(is).
-9. Desenhar o diagrama (de cima para baixo, esquerda para direita).
+**Estado composto:**
 
+* Contém outros estados (subestados).
+* Pode representar um comportamento mais detalhado dentro de um estado maior.
+
+**Estado concorrente:**
+
+* Tipo de estado composto em que o objeto pode estar em **dois ou mais subestados independentes simultaneamente**.
+* Também chamado de paralelo/ortogonal.
+
+---
+
+### 2.10 Roteiro para construção de um DTE
+
+🧠 **Use esta ordem para resolver a questão:**
+### 2.10 Roteiro para construção de um DTE
+
+1. **Identificar as classes que precisam de DTE.**
+   → Classes cujos objetos **mudam de situação ao longo do tempo**.
+
+2. **Identificar os estados.**
+   → Quais são as **situações** do objeto?
+   Ex.: `Cadastrado`, `Inscrito`, `Avaliado`.
+
+3. **Identificar os eventos.**
+   → O que **provoca a mudança** de estado?
+   Ex.: `realizar inscrição`.
+
+4. **Identificar o tipo do evento.**
+
+   * alguém fez algo → **chamada**
+   * passou tempo → **temporal (`after`)**
+   * condição ficou verdadeira → **mudança (`when`)**
+   * recebeu sinal → **sinal**
+
+5. **Identificar as transições.**
+   → Ligar o estado de origem ao estado de destino pelo evento.
+   Ex.: `Cadastrado → Inscrito`.
+
+6. **Procurar condições de guarda.**
+   → Existe uma **condição do sistema** que precisa ser verdadeira?
+   Ex.: `realizar inscrição [período válido]`
+
+   * evento → `realizar inscrição`
+   * guarda → `[período válido]`
+
+7. **Verificar pontos de junção.**
+   → Existem **caminhos diferentes** dependendo de uma condição?
+   Ex.: `[desclassificação] → Desclassificado` / `[else] → Avaliado`.
+
+8. **Definir estado inicial e finais.**
+   → Onde começa? Onde pode terminar?
+
+9. **Desenhar o DTE.**
+
+🧠 **COLA:**
+
+**CLASSE → ESTADOS → EVENTOS → TIPO → TRANSIÇÕES → GUARDAS → JUNÇÕES → INÍCIO/FIM → DESENHO**
+
+### 🧠 COLA DA IDENTIFICAÇÃO
+
+```text
+1. QUAIS SÃO AS SITUAÇÕES? → ESTADOS
+
+2. O QUE FAZ MUDAR? → EVENTOS
+
+3. QUE TIPO DE EVENTO?
+   alguém fez algo → chamada
+   passou tempo → after
+   condição ficou verdadeira → when
+
+4. TEM ALGUMA CONDIÇÃO DO SISTEMA?
+   → [GUARDA]
+
+5. TEM ALGO EXECUTADO NA MUDANÇA?
+   → /AÇÃO
+
+6. TEM ALGO ACONTECENDO ENQUANTO ESTÁ NO ESTADO?
+   → ATIVIDADE
+
+7. TEM MAIS DE UM CAMINHO POSSÍVEL?
+   → JUNÇÃO + GUARDAS
+```
 ---
 
 ## PARTE 3 — DIAGRAMAS DE INTERAÇÃO
