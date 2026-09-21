@@ -587,7 +587,6 @@ São SEMANTICAMENTE EQUIVALENTES → conversão sem perda de informação
 | "No DSS, aparecem os objetos internos do sistema" | **Falso** — o sistema é uma **caixa preta**, `:Sistema` |
 
 ---
-
 # Parte 2 — Diagrama de Transição de Estado (DTE)
 
 ## 2.1 A ideia
@@ -595,6 +594,24 @@ São SEMANTICAMENTE EQUIVALENTES → conversão sem perda de informação
 📌 **Slide 2:**
 
 > Objetos do mundo real se encontram em **estados particulares** a cada momento (uma jarra está cheia de líquido; um pedido está pago). Um objeto **muda de estado quando acontece um evento** interno ou externo ao sistema. Quando um objeto muda de um estado para outro, diz-se que ele realizou uma **transição** entre estados.
+
+💡 **Em outras palavras:** um **estado é a situação em que o objeto está naquele momento**.
+
+Exemplo:
+
+```text
+Pedido
+  ↓
+Não pago
+  ↓ pagar
+Pago
+  ↓ cancelar
+Cancelado
+```
+
+O objeto continua sendo o mesmo `Pedido`. O que muda é **a situação dele**.
+
+---
 
 ## 2.2 Os seis elementos de um DTE
 
@@ -609,16 +626,36 @@ São SEMANTICAMENTE EQUIVALENTES → conversão sem perda de informação
 >
 > Notação: **retângulo com bordas arredondadas**.
 
+💡 **Pense em estado como “como o objeto está”.**
+
+Exemplo:
+
+```text
+Aluguel
+→ Confirmado
+→ Ativo
+→ Atrasado
+→ Concluído
+```
+
+O `Aluguel` é o objeto. `Confirmado`, `Ativo`, `Atrasado` e `Concluído` são **situações diferentes desse objeto**.
+
 📌 **Slide 6 — regra que cai:**
 
-| | Estado inicial | Estado final |
-| --- | --- | --- |
-| Notação | círculo preenchido ● | círculo com anel ◉ |
-| Quantidade | **só pode haver UM** por DTE | **pode haver MAIS DE UM** |
-| Obrigatório? | sim | **não, é opcional** |
-| Significa | o objeto foi **criado** | **fim do ciclo de vida** do objeto |
+|              | Estado inicial               | Estado final                       |
+| ------------ | ---------------------------- | ---------------------------------- |
+| Notação      | círculo preenchido ●         | círculo com anel ◉                 |
+| Quantidade   | **só pode haver UM** por DTE | **pode haver MAIS DE UM**          |
+| Obrigatório? | sim                          | **não, é opcional**                |
+| Significa    | o objeto foi **criado**      | **fim do ciclo de vida** do objeto |
 
 > A restrição de um só estado inicial serve para **definir a partir de que ponto o DTE deve começar a ser lido**. A exceção é quando se trata de estados aninhados, concorrentes ou compostos.
+
+💡 **Cuidado:** estado inicial não significa necessariamente `Cadastrado`.
+
+`Cadastrado` só deve aparecer se fizer parte do **ciclo de vida que está sendo modelado**.
+
+---
 
 ### Transição
 
@@ -635,22 +672,77 @@ evento (lista-parâmetro) [guarda] / ação
  /  depois da BARRA  → AÇÃO     (o que é executado)
 ```
 
+💡 **Leia da esquerda para a direita:**
+
+```text
+evento → guarda → ação
+```
+
+Exemplo:
+
+```text
+pagar() [valor > 0] / registrarPagamento()
+```
+
+* `pagar()` → **evento:** algo aconteceu.
+* `[valor > 0]` → **guarda:** condição que precisa ser verdadeira.
+* `/ registrarPagamento()` → **ação:** o que será executado.
+
+Se a guarda for falsa, a transição não acontece.
+
+---
+
 ### Evento (Trigger)
 
 📌 **Slide 8:** um evento é **algo que acontece em algum ponto no tempo e que pode modificar o estado de um objeto**. Ex.: Realizar pedido, Pagar fatura, Devolver cheque.
 
+💡 **Pense em evento como “alguma coisa aconteceu”.**
+
+Exemplo:
+
+```text
+Não pago
+   ↓ Pagar fatura
+Pago
+```
+
+`Pagar fatura` é o **evento** que provoca a mudança.
+
 📌 **Slides 9 e 10 — os quatro tipos de evento:**
 
-| Tipo | O que é | Cláusula |
-| --- | --- | --- |
-| **De chamada** | recebimento de uma **mensagem** de outro objeto; solicitação de serviço de um objeto a outro | — |
-| **De sinal** | recebimento de um **sinal** de outro objeto | — |
-| **Temporal** | passagem de um **intervalo de tempo** predefinido | **`after`** |
-| **De mudança** | uma **condição que se torna verdadeira** (expressão lógica) | **`when`** |
+| Tipo           | O que é                                                                                      | Cláusula    |
+| -------------- | -------------------------------------------------------------------------------------------- | ----------- |
+| **De chamada** | recebimento de uma **mensagem** de outro objeto; solicitação de serviço de um objeto a outro | —           |
+| **De sinal**   | recebimento de um **sinal** de outro objeto                                                  | —           |
+| **Temporal**   | passagem de um **intervalo de tempo** predefinido                                            | **`after`** |
+| **De mudança** | uma **condição que se torna verdadeira** (expressão lógica)                                  | **`when`**  |
+
+💡 Para reconhecer rapidamente:
+
+* **Alguém/objeto pediu alguma coisa** → chamada.
+* **Recebeu um sinal** → sinal.
+* **Passou um tempo** → `after`.
+* **Uma condição ficou verdadeira** → `when`.
+
+Exemplos:
+
+```text
+after(30 dias)
+```
+
+→ passaram 30 dias.
+
+```text
+when(hoje = dataFimContrato + 1)
+```
+
+→ a condição ficou verdadeira.
 
 ⚠️ **Obs. literal do slide 9:** a diferença básica entre sinal e chamada é que **no evento de chamada o objeto que envia a mensagem fica esperando a execução**. O **evento de sinal raramente é utilizado**.
 
 🎯 `after(30 dias)` · `when(hoje = dataFimContrato + 1)` — os gabaritos das provas usam muito o `when`.
+
+---
 
 ### Condição de guarda
 
@@ -658,18 +750,60 @@ evento (lista-parâmetro) [guarda] / ação
 
 > Uma condição de guarda (sentinela) é uma **expressão de valor lógico**. Uma transição com guarda é disparada **somente se o evento associado ocorre E a condição de guarda é verdadeira**. Se uma transição **não** tiver guarda, ela **sempre** será disparada quando o evento ocorrer. A expressão é sempre apresentada **entre colchetes**.
 
+💡 **Guarda = “só pode passar se...”**
+
+Exemplo:
+
+```text
+pagar() [valor > 0]
+```
+
+O evento `pagar()` aconteceu, mas a transição **só acontece se `valor > 0`**.
+
+Portanto:
+
+```text
+evento + guarda verdadeira → transição acontece
+evento + guarda falsa      → transição NÃO acontece
+```
+
+---
+
 ### Ação × Atividade
 
 📌 **Slides 12 e 13:**
 
-| | **Ação** | **Atividade** |
-| --- | --- | --- |
-| Onde fica | **na linha da transição**, precedida de `/` | **dentro do estado**, com a cláusula `do` |
-| Duração | tempo **insignificante** | tem duração |
-| **Pode ser interrompida?** | **NÃO** | **SIM** |
-| Quando executa | **só se a transição for disparada** | continuamente, enquanto o objeto está no estado |
+|                            | **Ação**                                    | **Atividade**                                   |
+| -------------------------- | ------------------------------------------- | ----------------------------------------------- |
+| Onde fica                  | **na linha da transição**, precedida de `/` | **dentro do estado**, com a cláusula `do`       |
+| Duração                    | tempo **insignificante**                    | tem duração                                     |
+| **Pode ser interrompida?** | **NÃO**                                     | **SIM**                                         |
+| Quando executa             | **só se a transição for disparada**         | continuamente, enquanto o objeto está no estado |
+
+💡 **A maneira mais fácil de diferenciar:**
+
+> **Ação = acontece.**
+> **Atividade = fica acontecendo.**
+
+Exemplo de ação:
+
+```text
+/ registrarPagamento()
+```
+
+Registrar o pagamento é uma operação pontual.
+
+Exemplo de atividade:
+
+```text
+do/ processarPagamento()
+```
+
+O processamento pode continuar durante algum tempo.
 
 ⚠️ Essa é **a** diferença entre ação e atividade: **atividade pode ser interrompida, ação não**.
+
+---
 
 ### Ponto de junção
 
@@ -677,15 +811,46 @@ evento (lista-parâmetro) [guarda] / ação
 
 > Em algumas situações, o próximo estado varia de acordo com o valor da condição de guarda. Isso é representado por um **ponto de junção**, desenhado como um **losango** em que chegam uma ou mais transições. A cada transição de **saída** está associada uma condição de guarda, e o objeto segue aquela cuja guarda for **verdadeira**.
 
+💡 **Pense no ponto de junção como uma bifurcação:**
+
+```text
+             ┌─ [nota >= 7] ─→ Aprovado
+Estado ─→ ◇ ─┤
+             └─ [nota < 7] ──→ Reprovado
+```
+
+O objeto chega ao losango e verifica as guardas.
+
+* Se `[nota >= 7]` for verdadeira → `Aprovado`.
+* Se `[nota < 7]` for verdadeira → `Reprovado`.
+
+---
+
 ## 2.3 Cláusulas `entry`, `exit` e `do`
 
 📌 **Slide 17:**
 
-| Cláusula | Quando executa | Detalhe |
-| --- | --- | --- |
-| **`entry`** | no momento em que o objeto **entra** no estado | **independentemente do estado de onde ele veio** |
-| **`exit`** | no momento em que o objeto **sai** do estado | **independentemente do estado para onde ele vai** |
-| **`do`** | **continuamente**, durante o tempo em que o objeto permanece no estado | define uma **atividade em andamento** |
+| Cláusula    | Quando executa                                                         | Detalhe                                           |
+| ----------- | ---------------------------------------------------------------------- | ------------------------------------------------- |
+| **`entry`** | no momento em que o objeto **entra** no estado                         | **independentemente do estado de onde ele veio**  |
+| **`exit`**  | no momento em que o objeto **sai** do estado                           | **independentemente do estado para onde ele vai** |
+| **`do`**    | **continuamente**, durante o tempo em que o objeto permanece no estado | define uma **atividade em andamento**             |
+
+💡 **Imagine o estado como uma sala:**
+
+```text
+ENTROU NA SALA → entry
+       ↓
+FICOU NA SALA  → do
+       ↓
+SAIU DA SALA   → exit
+```
+
+Então:
+
+* `entry` = **entrou** → executa.
+* `do` = **está dentro** → atividade continua enquanto permanece.
+* `exit` = **saiu** → executa.
 
 ```text
 ╭──────────────────────────────╮
@@ -699,6 +864,10 @@ evento (lista-parâmetro) [guarda] / ação
 
 ⚠️ **Slide 18:** a **inexistência de um evento** na transição entre dois estados indica que, **assim que a atividade (`do`) for concluída, a transição ocorrerá automaticamente**.
 
+💡 Ou seja, não é necessário alguém apertar um botão ou ocorrer outro evento. A própria conclusão do `do` permite a transição.
+
+---
+
 ## 2.4 ⭐ Transição interna × Autotransição
 
 **Este é o ponto mais cobrado do DTE em concurso.**
@@ -709,15 +878,80 @@ evento (lista-parâmetro) [guarda] / ação
 >
 > **As atividades internas NÃO disparam atividades de entrada e saída.** Essa é a grande diferença entre as atividades internas e as autotransições.
 
+💡 **Pense na pergunta: “o objeto sai do estado?”**
+
+Na transição interna:
+
+> **Não.**
+
+Exemplo:
+
+```text
+╭─────────────────────────╮
+│ Digitando senha         │
+├─────────────────────────┤
+│ entry/ definirEco()     │
+│ caractere(c)/tratar(c)  │
+│ ajuda/ exibirAjuda()    │
+│ exit/ definirEco()      │
+╰─────────────────────────╯
+```
+
+O evento `caractere(c)` acontece, mas o objeto **continua em `Digitando senha`**.
+
+Não acontece:
+
+```text
+sair → entrar novamente
+```
+
+Por isso `entry` e `exit` **não executam**.
+
+---
+
 📌 **Slide 20 — Autotransição:**
 
 > Uma autotransição é uma transição onde o **estado de origem e o estado destino são iguais** e suas cláusulas **`entry` e `exit` SÃO executadas**.
 
-| | **Transição interna** | **Autotransição** |
-| --- | --- | --- |
-| Notação | escrita **dentro** da caixa do estado | **seta que sai e volta** para o mesmo estado |
-| Muda de estado? | Não | Sai e volta ao mesmo estado |
-| Executa `entry` / `exit`? | **NÃO** ❌ | **SIM** ✅ |
+💡 Aqui está a pegadinha:
+
+**O estado final tem o mesmo nome, mas o objeto sai e entra novamente nele.**
+
+```text
+       evento
+    ┌──────────┐
+    ↓          │
+  [State A] ───┘
+```
+
+É:
+
+```text
+State A → State A
+```
+
+Não significa que ele mudou para outro estado.
+
+Significa que ele:
+
+```text
+SAI de State A
+      ↓
+ENTRA novamente em State A
+```
+
+Por isso:
+
+```text
+exit  → executa
+entry → executa
+```
+
+|                           | **Transição interna**                 | **Autotransição**                            |
+| ------------------------- | ------------------------------------- | -------------------------------------------- |
+| Notação                   | escrita **dentro** da caixa do estado | **seta que sai e volta** para o mesmo estado |
+| Muda de estado?           | Não                                   | Sai e volta ao mesmo estado                  |
+| Executa `entry` / `exit`? | **NÃO** ❌                             | **SIM** ✅                                    |
 
 ```text
 TRANSIÇÃO INTERNA                    AUTOTRANSIÇÃO
@@ -732,8 +966,26 @@ TRANSIÇÃO INTERNA                    AUTOTRANSIÇÃO
  entry/exit NÃO executam
 ```
 
+🧠 **Para não confundir:**
+
+```text
+TRANSIÇÃO INTERNA
+fica dentro do estado
+→ não sai
+→ não entra novamente
+→ não executa entry/exit
+
+
+AUTOTRANSIÇÃO
+sai do estado
+→ volta para o mesmo estado
+→ executa exit/entry
+```
+
 🧪 **Questão CESGRANRIO 2011 (caiu na prova):** *"Os dois diagramas são equivalentes entre si, PORQUE modelar o evento02 com uma transição recursiva é equivalente a modelar o evento02 com uma atividade interna."*
 → Gabarito: **as duas afirmações são FALSAS**. Não são equivalentes, justamente porque a **autotransição dispara `entry`/`exit`** e a **transição interna não**.
+
+---
 
 ## 2.5 Estados compostos, aninhados e concorrentes
 
@@ -741,9 +993,39 @@ TRANSIÇÃO INTERNA                    AUTOTRANSIÇÃO
 
 > Um estado que contém diversos outros é dito **composto**. **Todos os estados dentro de um estado composto HERDAM qualquer transição deste último.** O uso de estados compostos geralmente torna um DTE **mais legível**.
 
+💡 **Pense em uma caixa grande com caixas menores dentro.**
+
+```text
+╭─────────────────────────────╮
+│          Ativo              │ ← estado composto
+│                             │
+│   ╭──────────────╮          │
+│   │ Em uso       │          │ ← estado aninhado
+│   ╰──────────────╯          │
+│                             │
+│   ╭──────────────╮          │
+│   │ Em manutenção│          │ ← estado aninhado
+│   ╰──────────────╯          │
+╰─────────────────────────────╯
+```
+
+Portanto:
+
+> **Composto = contém outros estados.**
+
+> **Aninhado = está dentro de outro estado.**
+
+📌 **Importante:** os estados internos **herdam as transições do estado composto**.
+
+Isso significa que uma transição definida para o estado composto também pode ser aplicada aos estados que estão dentro dele.
+
+---
+
 📌 **Slides 26 e 27 — Estados concorrentes** (ou paralelos, ou compostos ortogonais):
 
 > Um estado concorrente é um **tipo especial de estado composto**. Um objeto em um estado concorrente pode, na verdade, se encontrar em **dois ou mais estados independentes**.
+
+💡 **Concorrente = situações independentes acontecendo ao mesmo tempo.**
 
 ```text
 ╭─── Weather ──────────────────────────────╮
@@ -757,6 +1039,21 @@ TRANSIÇÃO INTERNA                    AUTOTRANSIÇÃO
 ╰──────────────────────────────────────────╯
    O objeto está em UM estado de CADA região ao mesmo tempo (ex.: Day + Cold)
 ```
+
+O objeto pode estar, ao mesmo tempo:
+
+```text
+Day + Cold
+```
+
+porque:
+
+* `Day/Night` pertence à região 1.
+* `Warm/Cold` pertence à região 2.
+
+Ele possui **um estado em cada região simultaneamente**.
+
+---
 
 ## 2.6 Roteiro de construção de um DTE (slides 28–29)
 
@@ -774,20 +1071,64 @@ TRANSIÇÃO INTERNA                    AUTOTRANSIÇÃO
     DE CIMA PARA BAIXO e DA ESQUERDA PARA A DIREITA.
 ```
 
+💡 **A ordem é importante. Não tente descobrir tudo de uma vez.**
+
+Pense:
+
+```text
+CLASSE
+   ↓
+ESTADOS
+   ↓
+EVENTOS
+   ↓
+TRANSIÇÕES
+   ↓
+GUARDAS / AÇÕES
+   ↓
+DETALHES
+   ↓
+INÍCIO / FIM
+   ↓
+DESENHO
+```
+
 🎯 **Como o gabarito das provas monta o DTE a partir do minimundo:**
 
 ```text
 substantivo de SITUAÇÃO no texto  → ESTADO
    "o aluguel está ativo/concluído/atrasado"  → Ativo, Concluído, Atrasado
+
 verbo de AÇÃO do ator             → EVENTO
    "o atendente registra a devolução"          → Registrar devolução
+
 condição de TEMPO/REGRA           → when(...) na transição
    "quando a data prevista for atingida"       → when(hoje > dataPrevista)
+
 "desde que / somente se"          → [guarda]
+
 agrupamento de estados            → ESTADO COMPOSTO
    (P1 2025.1: Livre, Responsável por pedido e Trabalhando
     ficaram dentro do estado composto "Ativo")
 ```
+
+💡 **Para ler um minimundo rapidamente:**
+
+```text
+"está / é / encontra-se em..."
+→ provavelmente está descrevendo um ESTADO
+
+"registrar / pagar / devolver / realizar..."
+→ provavelmente está descrevendo um EVENTO
+
+"quando..."
+→ provavelmente indica um EVENTO DE MUDANÇA / TEMPO
+
+"se / desde que / somente se..."
+→ provavelmente indica uma GUARDA
+```
+
+⚠️ **Cuidado:** isso é um guia para procurar as informações no texto. Não significa que toda palavra desse tipo obrigatoriamente será um elemento do DTE. É preciso verificar o contexto e o ciclo de vida da classe.
 
 ---
 
