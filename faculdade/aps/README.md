@@ -3,6 +3,56 @@
 
 > Organizado por slide/tema, com foco em definições, regras e pontos que costumam cair em **questões de concurso**.
 
+# ÍNDICE
+
+## PARTE 1 — DIAGRAMA DE CLASSES DE ANÁLISE
+
+* **1.1** Modelagem de Classes — conceitos básicos
+* **1.2** Técnicas de identificação de classes
+* **1.3** Nomenclatura
+* **1.4** Associações, multiplicidade e conectividade
+* **1.5** Classes associativas
+* **1.6** Associações reflexivas e ternárias
+* **1.7** Agregação e Composição
+* **1.8** Generalização / Especialização
+* **1.9** Restrições (Constraints) e OCL
+* **1.10** Identificadores de objetos e Enumerações
+* **1.11** Padrões de Análise — Party e Metamodel
+
+## PARTE 2 — DIAGRAMA DE TRANSIÇÃO DE ESTADOS (DTE)
+
+* **2.1** Conceitos básicos
+* **2.2** Estado
+* **2.3** Transição
+* **2.4** Evento (Trigger) — classificação
+* **2.5** Condição de guarda e Ação x Atividade
+* **2.6** Ponto de junção
+* **2.7** Cláusulas `entry`, `exit`, `do`
+* **2.8** Transições internas x Autotransições
+* **2.9** Estados aninhados, compostos e concorrentes
+* **2.10** Roteiro para construção de um DTE
+
+## PARTE 3 — DIAGRAMAS DE INTERAÇÃO
+
+* **3.1** Definição geral
+* **3.2** Diagrama de Sequência
+* **3.3** Diagrama de Sequência do Sistema (DSS)
+* **3.4** Diagrama de Comunicação
+* **3.5** Diagrama de Visão Geral da Interação
+* **3.6** Diagrama de Temporização
+
+## RESUMO RÁPIDO
+
+* Agregação × Composição
+* Ação × Atividade
+* Transição interna × Autotransição
+* Multiplicidade × Conectividade
+* Evento de chamada × Evento de sinal
+* Mensagem síncrona × Mensagem assíncrona
+* Sequência × Comunicação
+* Classe associativa × Associação promovida a classe
+
+
 ---
 # PARTE 1 — DIAGRAMA DE CLASSES DE ANÁLISE
 
