@@ -374,19 +374,3 @@ when
 → condição precisa ser satisfeita
 → DECIDE/PERMITE
 ```
-
----
-
-```text
-DESENHO do DTE  → não invente ações. Gaste o tempo em
-                  estados + eventos + guardas + estado composto.
-
-OBJETIVAS       → decore só três frases:
-                  1. sintaxe: evento (params) [guarda] / ação   ← nessa ordem
-                  2. ação NÃO pode ser interrompida; atividade PODE
-                  3. transição interna não dispara entry/exit; autotransição dispara
-
-◇
-→ vários caminhos
-→ "qual resultado?"
-```
