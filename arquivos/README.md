@@ -2300,16 +2300,6 @@ fprintf(stderr, "Não foi possível abrir o arquivo %s.\n", "arquivo.dat");
 qsort(v, qtd, sizeof(Tipo), compara);
 ```
 
-```c
-int compara(const void *a, const void *b){
-    return strncmp(
-        ((Endereco*)a)->cep,
-        ((Endereco*)b)->cep,
-        8
-    );
-}
-```
-
 ---
 
 ## 5.12 Programas para copiar e colar
@@ -2453,7 +2443,24 @@ arquivo precisa estar ordenado
 cada tentativa → novo fseek + fread
 ```
 
-### E. Índice
+### E. Compara
+
+```c
+int compara(const void *a, const void *b){
+    return strncmp(
+        ((Endereco*)a)->cep,
+        ((Endereco*)b)->cep,
+        8
+    );
+}
+```
+Para int:
+
+```c
+return ((COVID *)a)->dia - ((COVID *)b)->dia;
+```
+
+### F. Índice
 
 Estrutura:
 
@@ -2506,7 +2513,7 @@ fclose(f);
 ordenar o índice NÃO muda a posição guardada (ela é do arquivo original)
 ```
 
-### F. Ordenação externa — divisão
+### G. Ordenação externa — divisão
 
 ```c
 #define PARTES 8
@@ -2557,7 +2564,7 @@ divisao = quantidade / PARTES        i < resto  → parte com divisao + 1
 resto   = quantidade % PARTES        i >= resto → parte com divisao
 ```
 
-### G. Intercalação
+### H. Intercalação
 
 ```c
 void intercala(char *arqA, char *arqB, char *arqSaida){
@@ -2602,7 +2609,7 @@ void intercala(char *arqA, char *arqB, char *arqSaida){
 }
 ```
 
-### H. Intercalações — `PARTES = 8`
+### I. Intercalações — `PARTES = 8`
 
 ```c
 int arquivoNome = PARTES;
