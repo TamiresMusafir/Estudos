@@ -44,9 +44,8 @@ Material de consulta e revisão sobre arquivos, registros, memória, ponteiros, 
   - [5.10 Strings](#510-strings)
   - [5.11 qsort](#511-qsort)
   - [5.12 Programas para copiar e colar](#512-programas-para-copiar-e-colar)
-  - [5.13 Modelos de lógica](#513-modelos-de-lógica)
-  - [5.14 Contas e lembretes](#514-contas-e-lembretes)
-  - [5.15 Checklist — antes de entregar](#515-checklist--antes-de-entregar)
+  - [5.13 Contas e lembretes](#514-contas-e-lembretes)
+  - [5.14 Checklist — antes de entregar](#515-checklist--antes-de-entregar)
 
 ---
 
