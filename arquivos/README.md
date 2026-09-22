@@ -2027,22 +2027,6 @@ struct Casos{
 typedef struct Casos Casos;
 ```
 
-### `Endereco`
-
-```c
-typedef struct _Endereco Endereco;
-
-struct _Endereco{
-    char logradouro[72];
-    char bairro[72];
-    char cidade[72];
-    char uf[72];
-    char sigla[2];
-    char cep[8];
-    char lixo[2];
-};
-```
-
 ### Acesso
 
 ```c
@@ -2138,7 +2122,7 @@ fgetc → 1 byte → int
 fputc → 1 byte
 ```
 
-### Copiar
+### Copiar e colar
 
 ```c
 c = fgetc(entrada);
@@ -2209,13 +2193,6 @@ fread(destino, tamanho, quantidade, arquivo);
 fwrite(origem, tamanho, quantidade, arquivo);
 ```
 
-```text
-fread  → arquivo → memória
-fwrite → memória → arquivo
-
-retorno → quantidade de ITENS lidos
-```
-
 ### Ler até acabar
 
 ```c
@@ -2229,19 +2206,13 @@ while(fread(&e, sizeof(Endereco), 1, f) == 1){
 ## 5.7 `fseek` / `ftell` / `rewind`
 
 ```c
-fseek(f, deslocamento, SEEK_SET);
-fseek(f, deslocamento, SEEK_CUR);
-fseek(f, deslocamento, SEEK_END);
+fseek(f, deslocamento, SEEK_SET); → início
+fseek(f, deslocamento, SEEK_CUR); → posição atual
+fseek(f, deslocamento, SEEK_END); → fim
 
 long pos = ftell(f);
 
 rewind(f);
-```
-
-```text
-SEEK_SET → início
-SEEK_CUR → posição atual
-SEEK_END → fim
 ```
 
 ### Quantidade de registros
@@ -2344,7 +2315,7 @@ free(indice);
 ### `memset`
 
 ```c
-memset(p, 0, bytes);
+memset(p, 0, 1000 * sizeof(Struct));
 ```
 
 ---
@@ -2359,7 +2330,6 @@ int r = strncmp(a, b, n);
 ```
 
 ```text
-strncmp:
 < 0 → a antes de b
 = 0 → iguais
 > 0 → a depois de b
@@ -2377,6 +2347,12 @@ sprintf(nome, "cep_%d.dat", i);
 printf("%.8s", e.cep);
 ```
 
+### Imprimir saída de erro
+
+```c
+fprint(stderr, "Não foi possível abrir o arquivo %s.\n", "arquivo.dat");
+```
+
 ---
 
 ## 5.11 `qsort`
@@ -2387,23 +2363,7 @@ printf("%.8s", e.cep);
 qsort(v, qtd, sizeof(Tipo), compara);
 ```
 
-```text
-compara → SEM ()
-```
-
-### Comparador (chave string genérica)
-
-```c
-int compara(const void *a, const void *b){
-    return strncmp(
-        ((Tipo*)a)->chave,
-        ((Tipo*)b)->chave,
-        8
-    );
-}
-```
-
-### Comparador `Endereco`
+### Comparador 
 
 ```c
 int compara(const void *a, const void *b){
@@ -2412,31 +2372,6 @@ int compara(const void *a, const void *b){
         ((Endereco*)b)->cep,
         8
     );
-}
-```
-
-### Comparador `IndiceCep`
-
-```c
-int compara(const void *a, const void *b){
-    return strncmp(
-        ((IndiceCep*)a)->cep,
-        ((IndiceCep*)b)->cep,
-        8
-    );
-}
-```
-
-### Chave numérica
-
-```c
-int comparaNumero(const void *a, const void *b){
-    long x = ((Registro*)a)->valor;
-    long y = ((Registro*)b)->valor;
-
-    if(x < y) return -1;
-    if(x > y) return 1;
-    return 0;
 }
 ```
 
