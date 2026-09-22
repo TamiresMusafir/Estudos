@@ -318,8 +318,8 @@ Em vez de criar uma nova subclasse para cada tipo, o tipo pode ser tratado como 
 
 🧠 **Metamodel = permite variar a estrutura/tipos sem precisar alterar as classes toda vez.**
 
-
 ---
+
 ## PARTE 2 — DIAGRAMA DE TRANSIÇÃO DE ESTADOS (DTE)
 
 ### 2.1 Conceitos básicos
@@ -328,6 +328,7 @@ Em vez de criar uma nova subclasse para cada tipo, o tipo pode ser tratado como 
 * A mudança de um estado para outro é uma **transição**, normalmente disparada por um **evento**.
 
 **Elementos de um DTE:**
+
 Estado, Transição, Evento (trigger), Condição de guarda, Ação e Atividade.
 
 Elementos menos comuns: transições internas, estados aninhados, estados concorrentes e subestados.
@@ -365,7 +366,7 @@ Evento(lista-parâmetros) [guarda] / ação
 ```
 
 * **Evento** → o que provoca a tentativa de mudança.
-* **Guarda** → condição do sistema que precisa ser verdadeira para a transição ocorrer.
+* **Guarda** → condição que precisa ser verdadeira para a transição seguir.
 * **Ação** → algo executado durante a transição.
 
 ---
@@ -378,16 +379,16 @@ Evento(lista-parâmetros) [guarda] / ação
 
 > **“O que aconteceu para o objeto tentar mudar de estado?”**
 
-| Tipo                  | Como identificar                                     | Notação               |
-| --------------------- | ---------------------------------------------------- | --------------------- |
-| **Evento de chamada** | Alguém/sistema envia uma mensagem ou solicita algo   | `realizarInscricao()` |
-| **Evento de sinal**   | Recebimento de um sinal; emissor não espera resposta | —                     |
-| **Evento temporal**   | Passou determinado tempo                             | `after(30 dias)`      |
-| **Evento de mudança** | Uma condição do sistema tornou-se verdadeira         | `when(condição)`      |
+| Tipo                  | Como identificar                                                        | Notação               |
+| --------------------- | ----------------------------------------------------------------------- | --------------------- |
+| **Evento de chamada** | Alguém/sistema envia uma mensagem ou solicita algo                      | `realizarInscricao()` |
+| **Evento de sinal**   | Recebimento de um sinal; emissor não espera resposta                    | —                     |
+| **Evento temporal**   | Passou determinado tempo                                                | `after(30 dias)`      |
+| **Evento de mudança** | Uma condição do sistema tornou-se verdadeira e isso dispara a transição | `when(condição)`      |
 
 ### Como diferenciar rapidamente
 
-**Evento de chamada:** alguém **fez algo/chamou**.
+**Evento de chamada:** alguém **fez/solicitou algo**.
 
 > Usuário realiza inscrição.
 
@@ -395,7 +396,7 @@ Evento(lista-parâmetros) [guarda] / ação
 
 > Após 30 dias.
 
-**Evento de mudança:** uma **condição do sistema mudou para verdadeira** e isso dispara a transição.
+**Evento de mudança:** uma **condição do sistema ficou verdadeira** e isso dispara a transição.
 
 > Quando a data de início das provas for atingida.
 
@@ -404,20 +405,104 @@ Evento(lista-parâmetros) [guarda] / ação
 ```text
 alguém fez algo → chamada
 passou tempo → after
-condição ficou verdadeira → when
+condição ficou verdadeira e dispara → when
 ```
+
+### 🧠 COLA — Chamada x `when` x Guarda
+
+Esses três podem ser confundidos. Pense no **papel** de cada um:
+
+| O que está acontecendo?                                    | O que é?              | Como pensar                                   |
+| ---------------------------------------------------------- | --------------------- | --------------------------------------------- |
+| **Alguém/sistema fez uma solicitação**                     | **Evento de chamada** | “Alguém chamou/mandou fazer algo.”            |
+| **Uma condição ficou verdadeira e isso dispara a mudança** | **`when`**            | “Assim que isso acontecer → muda.”            |
+| **Uma condição só decide se a transição pode seguir**      | **Guarda `[ ]`**      | “Se isso for verdade → pode seguir por aqui.” |
+
+**Exemplo de chamada:**
+
+```text
+realizarInscricao()
+```
+
+→ **evento de chamada**
+
+> Alguém solicitou a inscrição.
+
+**Exemplo de `when`:**
+
+```text
+when(data/hora prevista atingida)
+```
+
+→ **evento de mudança**
+
+> Assim que a data/hora for atingida, ocorre a mudança.
+
+**Exemplo de guarda:**
+
+```text
+[período de inscrição válido]
+```
+
+→ **condição de guarda**
+
+> Se o período for válido, pode seguir por essa transição.
+
+### 🧠 Perguntas rápidas na prova
+
+**1. Alguém fez/solicitou alguma coisa?**
+
+→ **CHAMADA**
+
+```text
+realizarInscricao()
+cancelarAluguel()
+registrarDevolucao()
+```
+
+**2. A própria condição ficar verdadeira é o que dispara a mudança?**
+
+→ **`when`**
+
+```text
+when(prazo atingido)
+when(condição se tornar verdadeira)
+```
+
+**3. A condição só serve para decidir qual caminho seguir?**
+
+→ **GUARDA `[ ]`**
+
+```text
+[nota entre as maiores]
+[período válido]
+[aluguel não concluído]
+```
+
+🧠 **Frase para decorar:**
+
+```text
+CHAMADA → alguém FAZ
+when    → algo FICA VERDADEIRO e DISPARA
+GUARDA  → algo é VERDADEIRO e DECIDE
+```
+
+⚠️ Não use **“é automático”** como regra.
+
+A diferença é o **papel da condição**:
+
+> `when` → **DISPARA** a transição.
+> `[ ]` → **DECIDE/PERMITE** a transição.
 
 ---
 
-### 2.5 Condição de guarda e Ação x Atividade
-
-### Condição de guarda
+### 2.5 Condição de guarda
 
 É uma **condição do sistema**, escrita entre **colchetes `[ ]`**, que precisa ser verdadeira para a transição seguir por aquele caminho.
 
 🧠 Pergunta para identificar:
 
-> **“Existe alguma condição do sistema que precisa ser satisfeita para essa transição acontecer?”**
+> **“Essa condição está apenas decidindo se a transição pode seguir por esse caminho?”**
 
 Exemplo:
 
@@ -436,28 +521,8 @@ Sem guarda → a transição pode ocorrer quando o evento acontecer.
 
 ⚠️ **Guarda não é evento.**
 
-* Evento = **o que aconteceu?**
-* Guarda = **qual condição do sistema precisa ser verdadeira?**
-
-### Ação
-
-* Executada **instantaneamente** durante a transição.
-* Não pode ser interrompida.
-* É escrita depois de `/`.
-
-Exemplo:
-
-```text
-evento [guarda] / registrarData
-```
-
-### Atividade
-
-* É uma execução que ocorre **durante um estado**.
-* Pode ser **interrompida**.
-
-🧠 **Ação = instantânea.**
-🧠 **Atividade = pode durar e ser interrompida.**
+* Evento = **o que aconteceu para disparar a transição?**
+* Guarda = **a condição é verdadeira para permitir/decidir o caminho?**
 
 ---
 
@@ -514,6 +579,7 @@ Aguardando avaliação
 🧠 Diferença principal:
 
 > **Interna → não sai do estado → não executa exit/entry.**
+>
 > **Auto → sai e entra novamente → executa exit/entry.**
 
 ---
@@ -535,7 +601,6 @@ Aguardando avaliação
 ### 2.10 Roteiro para construção de um DTE
 
 🧠 **Use esta ordem para resolver a questão:**
-### 2.10 Roteiro para construção de um DTE
 
 1. **Identificar as classes que precisam de DTE.**
    → Classes cujos objetos **mudam de situação ao longo do tempo**.
@@ -552,7 +617,7 @@ Aguardando avaliação
 
    * alguém fez algo → **chamada**
    * passou tempo → **temporal (`after`)**
-   * condição ficou verdadeira → **mudança (`when`)**
+   * condição ficou verdadeira e dispara → **mudança (`when`)**
    * recebeu sinal → **sinal**
 
 5. **Identificar as transições.**
@@ -560,7 +625,7 @@ Aguardando avaliação
    Ex.: `Cadastrado → Inscrito`.
 
 6. **Procurar condições de guarda.**
-   → Existe uma **condição do sistema** que precisa ser verdadeira?
+   → Existe uma **condição que apenas decide/permite o caminho**?
    Ex.: `realizar inscrição [período válido]`
 
    * evento → `realizar inscrição`
@@ -579,30 +644,38 @@ Aguardando avaliação
 
 **CLASSE → ESTADOS → EVENTOS → TIPO → TRANSIÇÕES → GUARDAS → JUNÇÕES → INÍCIO/FIM → DESENHO**
 
+---
+
 ### 🧠 COLA DA IDENTIFICAÇÃO
 
 ```text
-1. QUAIS SÃO AS SITUAÇÕES? → ESTADOS
+1. QUAIS SÃO AS SITUAÇÕES?
+   → ESTADOS
 
-2. O QUE FAZ MUDAR? → EVENTOS
+2. O QUE FAZ MUDAR?
+   → EVENTOS
 
 3. QUE TIPO DE EVENTO?
-   alguém fez algo → chamada
-   passou tempo → after
-   condição ficou verdadeira → when
 
-4. TEM ALGUMA CONDIÇÃO DO SISTEMA?
+   alguém fez/solicitou algo
+   → CHAMADA
+
+   passou tempo
+   → after
+
+   condição ficou verdadeira E DISPARA
+   → when
+
+   recebeu sinal
+   → SINAL
+
+4. A CONDIÇÃO SÓ DECIDE/PERMITE O CAMINHO?
    → [GUARDA]
 
-5. TEM ALGO EXECUTADO NA MUDANÇA?
-   → /AÇÃO
-
-6. TEM ALGO ACONTECENDO ENQUANTO ESTÁ NO ESTADO?
-   → ATIVIDADE
-
-7. TEM MAIS DE UM CAMINHO POSSÍVEL?
+5. TEM MAIS DE UM CAMINHO POSSÍVEL?
    → JUNÇÃO + GUARDAS
 ```
+
 ---
 
 ## PARTE 3 — DIAGRAMAS DE INTERAÇÃO
