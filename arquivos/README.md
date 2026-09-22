@@ -2169,13 +2169,15 @@ while(fread(&e, sizeof(Endereco), 1, f) == 1){
 ```
 
 ---
-
 ## 5.7 `fseek` / `ftell` / `rewind`
 
 ```c
-fseek(f, deslocamento, SEEK_SET); → início
-fseek(f, deslocamento, SEEK_CUR); → posição atual
-fseek(f, deslocamento, SEEK_END); → fim
+fseek(f, deslocamento, SEEK_SET); // início
+fseek(f, deslocamento, SEEK_CUR); // posição atual
+fseek(f, deslocamento, SEEK_END); // fim
+
+// 5º registro → posição 4 (primeiro = posição 0)
+fseek(f, 4 * sizeof(Pagamento), SEEK_SET);
 
 // n-ésimo registro a partir do início
 fseek(f, (n - 1) * sizeof(Pagamento), SEEK_SET);
@@ -2183,39 +2185,29 @@ fseek(f, (n - 1) * sizeof(Pagamento), SEEK_SET);
 // voltar n registros a partir da posição atual
 fseek(f, -n * sizeof(Pagamento), SEEK_CUR);
 
-// ir n registros para frente a partir da posição atual
+// avançar n registros a partir da posição atual
 fseek(f, n * sizeof(Pagamento), SEEK_CUR);
 
 // n-ésimo registro a partir do fim
 fseek(f, -n * sizeof(Pagamento), SEEK_END);
 
-long pos = ftell(f);
+long pos = ftell(f); // posição atual
 
-rewind(f);
+rewind(f); // volta ao início
 ```
 
-Quantidade de registros:
+⚠️ **Atenção ao `fread`:** ele lê o registro e **avança 1 posição**.
+Se precisar voltar até um registro específico depois de um `fread`, pode ser necessário considerar **+1 posição no deslocamento**.
 
 ```c
-fseek(f, 0, SEEK_END);
-
-long tamanhoBytes = ftell(f);
-long qtd = tamanhoBytes / sizeof(Endereco);
-
-rewind(f);
+fread(&p, sizeof(Pagamento), 1, f); // lê → ponteiro avança 1
 ```
 
-Ir para o registro `n`:
+Ex.: leu o 8º e quer ler o 6º:
 
 ```c
-fseek(f, n * sizeof(Endereco), SEEK_SET);
-```
-
-Último registro:
-
-```c
-fseek(f, -(long)sizeof(Endereco), SEEK_END);
-fread(&e, sizeof(Endereco), 1, f);
+fseek(f, -3 * sizeof(Pagamento), SEEK_CUR);
+fread(&p, sizeof(Pagamento), 1, f);
 ```
 
 ---
