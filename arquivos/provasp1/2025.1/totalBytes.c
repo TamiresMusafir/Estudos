@@ -1,24 +1,26 @@
 #include <stdio.h>
 
-struct COVID{
-    int dia;
-    int novos_casos;
-    int obitos;
+struct Pagamento{
+    char cpf[12];
+    char nome[80];
+    int mes;
+    int ano; 
+    float valor;
 };
 
-typdef struct COVID COVID;
+typedef struct Pagamento Pagamento;
 
-main(){
-    FILE *f = fopen("covid.dat", "rb");
+int main(){
+    FILE *f = fopen("beneficios.dat", "rb");
 
     if(!f){
         fprintf(stderr, "Não foi possível abrir o arquivo %s.\n", "covid.dat");
         return 1;
     }
-    
+
     fseek(f, 0, SEEK_END);
-    long tamanhoBytes = ftell(f);
-    long totalRegistros = tamanhoBytes / sizeof(COVID);
+    long totalBytes = ftell(f);
+    long totalRegistros = totalBytes / sizeof(Pagamento);
 
     printf("Tamanho total de bytes: %ld", tamanhoBytes);
     printf("Total de registros: %ld", totalRegistros);
