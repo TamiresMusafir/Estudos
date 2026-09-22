@@ -1,4 +1,4 @@
-#include
+#include <stdio.h>
 
 int retornaPares(int numeros[], int qtd){
     int produto = 1;

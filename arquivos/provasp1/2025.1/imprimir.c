@@ -8,23 +8,20 @@ struct Pagamento{
     float valor;
 };
 
+typedef struct Pagamento Pagamento;
+
 int main(){
     FILE *f = fopen("beneficiarios.dat", "rb");
-    Pagamento p;
+    Pagamento p, maior, menor;
 
-    float maiorValor = 0;
-    int anoAtual;
+    int anoAtual = p.ano;
 
     while(fread(&p, sizeof(Pagamento), 1, f) == 1){
-        anoAtual = p.ano;
+        if(anoAtual == p.ano){
+            maior = p;
+            menor = p;
 
-        if(p.valor > maiorValor)
-            maiorValor = p.valor;
-
-
-        primeiro, pegar o ano. ir colocando no maior valor. 
-        Ver qual foi o beneficiario desse valor e guardar
-        imprimir
-        fazer isso com cada ano
+            
+        }
     }
 }

@@ -6,6 +6,8 @@ struct COVID{
     int obitos;
 };
 
+typedef struct COVID COVID;
+
 int main(){
     int count = 0;
 
