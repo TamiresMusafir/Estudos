@@ -2314,8 +2314,6 @@ int compara(const void *a, const void *b){
 
 ## 5.12 Programas para copiar e colar
 
-## 5.12 Programas para copiar e colar
-
 ### A. Copiar arquivo byte a byte
 
 ```c
