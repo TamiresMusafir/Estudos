@@ -2016,24 +2016,15 @@ Essa divisão resolve muitos exercícios de busca ordenada.
 
 ## 5.2 Struct
 
-### Modelo
-
-```c
-typedef struct {
-    tipo campo1;
-    tipo campo2;
-    tipo campo3;
-} Tipo;
-```
-
 ### Exemplo
 
 ```c
-typedef struct {
+struct Casos{
     int dia;
     int novos_casos;
     int obitos;
-} Casos;
+};
+typedef struct Casos Casos;
 ```
 
 ### `Endereco`
@@ -2058,8 +2049,8 @@ struct _Endereco{
 Endereco e;
 Endereco *p;
 
-e.cep
-p->cep
+e.cep — quando você tem a struct em si (Endereco e;).
+p->cep — quando você tem um ponteiro para a struct
 ```
 
 ---
@@ -2068,13 +2059,6 @@ p->cep
 
 ```c
 int main(int argc, char **argv)
-```
-
-```text
-argc    → quantidade de argumentos
-argv[0] → nome do programa
-argv[1] → 1º argumento
-argv[2] → 2º argumento
 ```
 
 ```c
@@ -2113,14 +2097,6 @@ fclose(f);
 "wb"  → escreve / cria / APAGA
 "r+b" → lê + escreve
 "ab"  → adiciona no final
-```
-
-```text
-r = read
-w = write
-a = append
-+ = lê + escreve
-b = binary
 ```
 
 ### Dois arquivos
