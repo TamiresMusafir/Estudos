@@ -2177,6 +2177,18 @@ fseek(f, deslocamento, SEEK_SET); → início
 fseek(f, deslocamento, SEEK_CUR); → posição atual
 fseek(f, deslocamento, SEEK_END); → fim
 
+// n-ésimo registro a partir do início
+fseek(f, (n - 1) * sizeof(Pagamento), SEEK_SET);
+
+// voltar n registros a partir da posição atual
+fseek(f, -n * sizeof(Pagamento), SEEK_CUR);
+
+// ir n registros para frente a partir da posição atual
+fseek(f, n * sizeof(Pagamento), SEEK_CUR);
+
+// n-ésimo registro a partir do fim
+fseek(f, -n * sizeof(Pagamento), SEEK_END);
+
 long pos = ftell(f);
 
 rewind(f);
