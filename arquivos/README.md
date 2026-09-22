@@ -1983,10 +1983,11 @@ Essa divisão resolve muitos exercícios de busca ordenada.
 ```
 
 ---
-
 # 5. Folha de cola
 
-> Versão condensada para consulta rápida. Os programas desta seção são modelos **prontos para copiar e adaptar**.
+> Versão condensada para consulta rápida. Programas e modelos prontos para copiar e adaptar.
+
+---
 
 ## 5.1 Bibliotecas
 
@@ -2002,59 +2003,243 @@ Essa divisão resolve muitos exercícios de busca ordenada.
 
 ---
 
-## 5.2 Funções
+## 5.2 Struct
 
-### Arquivo
+### Modelo
 
 ```c
-FILE *f = fopen("arquivo.dat", "rb");
+typedef struct {
+    tipo campo1;
+    tipo campo2;
+    tipo campo3;
+} Tipo;
+```
 
-if(!f){
+### Exemplo
+
+```c
+typedef struct {
+    int dia;
+    int novos_casos;
+    int obitos;
+} Casos;
+```
+
+### `Endereco`
+
+```c
+typedef struct _Endereco Endereco;
+
+struct _Endereco{
+    char logradouro[72];
+    char bairro[72];
+    char cidade[72];
+    char uf[72];
+    char sigla[2];
+    char cep[8];
+    char lixo[2];
+};
+```
+
+### Acesso
+
+```c
+Endereco e;
+Endereco *p;
+
+e.cep
+p->cep
+```
+
+---
+
+## 5.3 `argc` / `argv`
+
+```c
+int main(int argc, char **argv)
+```
+
+```text
+argc    → quantidade de argumentos
+argv[0] → nome do programa
+argv[1] → 1º argumento
+argv[2] → 2º argumento
+```
+
+```c
+if(argc != 3){
+    fprintf(stderr, "USO: %s origem destino\n", argv[0]);
+    return 1;
+}
+
+fopen(argv[1], "rb");
+fopen(argv[2], "wb");
+```
+
+---
+
+## 5.4 Arquivos
+
+### Abrir / testar / fechar
+
+```c
+FILE *f;
+
+f = fopen("arquivo.dat", "rb");
+
+if(f == NULL){
+    fprintf(stderr, "Erro ao abrir arquivo.\n");
     return 1;
 }
 
 fclose(f);
 ```
 
+### Modos
+
 ```text
-rb  → lê
-wb  → escreve / cria / APAGA
-r+b → lê + escreve
-ab  → adiciona no final
+"rb"  → lê
+"wb"  → escreve / cria / APAGA
+"r+b" → lê + escreve
+"ab"  → adiciona no final
 ```
 
-### Byte
+```text
+r = read
+w = write
+a = append
++ = lê + escreve
+b = binary
+```
+
+### Dois arquivos
 
 ```c
-int c = fgetc(f);
-fputc(c, f);
+entrada = fopen(argv[1], "rb");
+
+if(!entrada){
+    fprintf(stderr, "Erro ao abrir arquivo de entrada\n");
+    return 1;
+}
+
+saida = fopen(argv[2], "wb");
+
+if(!saida){
+    fclose(entrada);
+    fprintf(stderr, "Erro ao abrir arquivo de saida\n");
+    return 1;
+}
+```
+
+---
+
+## 5.5 `fgetc` / `fputc`
+
+```c
+int c;
+
+c = fgetc(f);
+
+while(c != EOF){
+    /* tarefa */
+    c = fgetc(f);
+}
 ```
 
 ```text
-fgetc → 1 byte
+fgetc → 1 byte → int
 fputc → 1 byte
 ```
 
-### Registros
+### Copiar
+
+```c
+c = fgetc(entrada);
+
+while(c != EOF){
+    fputc(c, saida);
+    c = fgetc(entrada);
+}
+```
+
+### Contar linhas
+
+```c
+int c;
+int count = 0;
+
+c = fgetc(f);
+
+while(c != EOF){
+    if(c == '\n'){
+        count++;
+    }
+    c = fgetc(f);
+}
+```
+
+### Contar cada byte
+
+```c
+int contador[256] = {0};
+int c;
+
+c = fgetc(f);
+
+while(c != EOF){
+    contador[c]++;
+    c = fgetc(f);
+}
+
+for(int i = 0; i < 256; i++){
+    if(contador[i] > 0){
+        printf("%c: %d\n", i, contador[i]);
+    }
+}
+```
+
+---
+
+## 5.6 `fread` / `fwrite`
+
+### Um registro
 
 ```c
 fread(&e, sizeof(Endereco), 1, f);
+```
 
+### Vários registros
+
+```c
 fread(v, sizeof(Endereco), qtd, f);
-
 fwrite(v, sizeof(Endereco), qtd, f);
 ```
 
-```text
-fread(destino, tamanho, quantidade, arquivo)
-fwrite(origem, tamanho, quantidade, arquivo)
+### Forma geral
+
+```c
+fread(destino, tamanho, quantidade, arquivo);
+fwrite(origem, tamanho, quantidade, arquivo);
 ```
 
 ```text
-retorno = quantidade de ITENS
+fread  → arquivo → memória
+fwrite → memória → arquivo
+
+retorno → quantidade de ITENS lidos
 ```
 
-### Posição
+### Ler até acabar
+
+```c
+while(fread(&e, sizeof(Endereco), 1, f) == 1){
+    /* tarefa */
+}
+```
+
+---
+
+## 5.7 `fseek` / `ftell` / `rewind`
 
 ```c
 fseek(f, deslocamento, SEEK_SET);
@@ -2067,41 +2252,159 @@ rewind(f);
 ```
 
 ```text
-SET → início
-CUR → atual
-END → fim
+SEEK_SET → início
+SEEK_CUR → posição atual
+SEEK_END → fim
 ```
 
-### Memória
+### Quantidade de registros
 
 ```c
-Endereco *e = malloc(qtd * sizeof(Endereco));
+fseek(f, 0, SEEK_END);
+
+long tamanhoBytes = ftell(f);
+long qtd = tamanhoBytes / sizeof(Endereco);
+
+rewind(f);
+```
+
+### Ir para o registro `n`
+
+```c
+fseek(f, n * sizeof(Endereco), SEEK_SET);
+```
+
+### Último registro
+
+```c
+fseek(f, -(long)sizeof(Endereco), SEEK_END);
+fread(&e, sizeof(Endereco), 1, f);
+```
+
+```text
+registro → bytes: n * sizeof(Tipo)
+bytes → registros: bytes / sizeof(Tipo)
+```
+
+---
+
+## 5.8 Ponteiros
+
+```c
+Tipo x;
+
+x   → conteúdo
+&x  → endereço
+```
+
+```c
+Tipo *p;
+
+p   → endereço
+*p  → conteúdo apontado
+```
+
+```text
+struct       → .
+ponteiro     → ->
+```
+
+### `fread`
+
+```c
+fread(&e, sizeof(Endereco), 1, f);
+```
+
+```c
+Endereco *e;
+
+fread(e, sizeof(Endereco), 1, f);
+```
+
+---
+
+## 5.9 `malloc` / `free` / `memset`
+
+### Modelo
+
+```c
+Endereco *e;
+
+e = malloc(qtd * sizeof(Endereco));
 
 if(e == NULL){
+    fprintf(stderr, "Erro ao alocar memoria\n");
     return 1;
 }
 
 free(e);
 ```
 
-### Strings
+### Índice
+
+```c
+IndiceCep *indice;
+
+indice = malloc(qtd * sizeof(IndiceCep));
+
+if(indice == NULL){
+    return 1;
+}
+
+free(indice);
+```
+
+### `memset`
+
+```c
+memset(p, 0, bytes);
+```
+
+---
+
+## 5.10 Strings
 
 ```c
 strcpy(destino, origem);
 strncpy(destino, origem, n);
 
 int r = strncmp(a, b, n);
+```
 
+```text
+strncmp:
+< 0 → a antes de b
+= 0 → iguais
+> 0 → a depois de b
+```
+
+### Criar nome
+
+```c
 sprintf(nome, "cep_%d.dat", i);
+```
 
+### Imprimir quantidade fixa
+
+```c
 printf("%.8s", e.cep);
 ```
 
-### Ordenação
+---
+
+## 5.11 `qsort`
+
+### Chamada
 
 ```c
 qsort(v, qtd, sizeof(Tipo), compara);
 ```
+
+```text
+compara → SEM ()
+```
+
+### Comparador (chave string genérica)
 
 ```c
 int compara(const void *a, const void *b){
@@ -2113,9 +2416,46 @@ int compara(const void *a, const void *b){
 }
 ```
 
+### Comparador `Endereco`
+
+```c
+int compara(const void *a, const void *b){
+    return strncmp(
+        ((Endereco*)a)->cep,
+        ((Endereco*)b)->cep,
+        8
+    );
+}
+```
+
+### Comparador `IndiceCep`
+
+```c
+int compara(const void *a, const void *b){
+    return strncmp(
+        ((IndiceCep*)a)->cep,
+        ((IndiceCep*)b)->cep,
+        8
+    );
+}
+```
+
+### Chave numérica
+
+```c
+int comparaNumero(const void *a, const void *b){
+    long x = ((Registro*)a)->valor;
+    long y = ((Registro*)b)->valor;
+
+    if(x < y) return -1;
+    if(x > y) return 1;
+    return 0;
+}
+```
+
 ---
 
-## 5.3 Programas para copiar e colar
+## 5.12 Programas para copiar e colar
 
 ### A. Copiar arquivo byte a byte
 
@@ -2206,76 +2546,27 @@ int main(int argc, char **argv){
 }
 ```
 
-⚠️ No último bloco:
+⚠️ No último bloco: `fwrite(buffer, sizeof(char), qtd, saida);` — é `qtd`, não `TAMANHO`.
+
+### C. Busca sequencial
 
 ```c
-fwrite(buffer, sizeof(char), qtd, saida);
-```
+Endereco e;
 
-é `qtd`, não `TAMANHO`.
-
-### C. Ler byte a byte e contar linhas
-
-```c
-int c;
-int count = 0;
-
-c = fgetc(f);
-
-while(c != EOF){
-    if(c == '\n'){
-        count++;
-    }
-
-    c = fgetc(f);
+while(fread(&e, sizeof(Endereco), 1, f) == 1){
+    /* tarefa */
 }
 ```
 
-### D. Contar cada byte
+Busca ordenada:
 
-```c
-int contador[256] = {0};
-int c;
-
-c = fgetc(f);
-
-while(c != EOF){
-    contador[c]++;
-    c = fgetc(f);
-}
-
-for(int i = 0; i < 256; i++){
-    if(contador[i] > 0){
-        printf("%c: %d\n", i, contador[i]);
-    }
-}
+```text
+atual < procurado → continua
+atual == procurado → achou
+atual > procurado → break
 ```
 
-### E. Descobrir quantidade de registros
-
-```c
-fseek(f, 0, SEEK_END);
-
-long tamanhoBytes = ftell(f);
-long qtd = tamanhoBytes / sizeof(Endereco);
-
-rewind(f);
-```
-
-### F. Ir para o registro `n`
-
-```c
-fseek(f, n * sizeof(Endereco), SEEK_SET);
-```
-
-### G. Ler o último registro
-
-```c
-fseek(f, -(long)sizeof(Endereco), SEEK_END);
-fread(&e, sizeof(Endereco), 1, f);
-```
-
-### H. Busca binária em arquivo ordenado
+### D. Busca binária
 
 ```c
 long inicio = 0;
@@ -2300,29 +2591,18 @@ while(inicio <= fim){
 }
 ```
 
-### I. Busca sequencial
+```text
+procurado == atual → achou
+procurado > atual  → direita
+procurado < atual  → esquerda
 
-```c
-Endereco e;
-
-fread(&e, sizeof(Endereco), 1, f);
-
-while(!feof(f)){
-    /* tarefa */
-
-    fread(&e, sizeof(Endereco), 1, f);
-}
+arquivo precisa estar ordenado
+cada tentativa → novo fseek + fread
 ```
 
-Ou:
+### E. Índice
 
-```c
-while(fread(&e, sizeof(Endereco), 1, f) == 1){
-    /* tarefa */
-}
-```
-
-### J. Índice
+Estrutura:
 
 ```c
 struct indiceCep{
@@ -2341,6 +2621,10 @@ IndiceCep *indice;
 
 indice = malloc(qtd * sizeof(IndiceCep));
 
+if(indice == NULL){
+    return 1;
+}
+
 rewind(f);
 
 for(long i = 0; i < qtd; i++){
@@ -2353,7 +2637,7 @@ for(long i = 0; i < qtd; i++){
 qsort(indice, qtd, sizeof(IndiceCep), compara);
 ```
 
-Depois de achar no índice:
+Acessar arquivo original depois de achar:
 
 ```c
 long posicao = indice[meio].posicao;
@@ -2362,31 +2646,14 @@ fseek(f, posicao * sizeof(Endereco), SEEK_SET);
 fread(&e, sizeof(Endereco), 1, f);
 ```
 
-### K. Comparador de `Endereco`
+Liberar:
 
 ```c
-int compara(const void *a, const void *b){
-    return strncmp(
-        ((Endereco*)a)->cep,
-        ((Endereco*)b)->cep,
-        8
-    );
-}
+free(indice);
+fclose(f);
 ```
 
-### L. Comparador de `IndiceCep`
-
-```c
-int compara(const void *a, const void *b){
-    return strncmp(
-        ((IndiceCep*)a)->cep,
-        ((IndiceCep*)b)->cep,
-        8
-    );
-}
-```
-
-### M. Ordenação externa — divisão
+### F. Ordenação externa — divisão
 
 ```c
 #define PARTES 8
@@ -2403,7 +2670,11 @@ rewind(cep);
 
 Endereco *e =
     malloc((divisao + 1) * sizeof(Endereco));
+```
 
+Ordenar cada parte:
+
+```c
 for(int i = 0; i < PARTES; i++){
     long quantidadeParte = divisao;
 
@@ -2411,31 +2682,16 @@ for(int i = 0; i < PARTES; i++){
         quantidadeParte++;
     }
 
-    fread(
-        e,
-        sizeof(Endereco),
-        quantidadeParte,
-        cep
-    );
+    fread(e, sizeof(Endereco), quantidadeParte, cep);
 
-    qsort(
-        e,
-        quantidadeParte,
-        sizeof(Endereco),
-        compara
-    );
+    qsort(e, quantidadeParte, sizeof(Endereco), compara);
 
     char nome[20];
     sprintf(nome, "cep_%d.dat", i);
 
     FILE *parte = fopen(nome, "wb");
 
-    fwrite(
-        e,
-        sizeof(Endereco),
-        quantidadeParte,
-        parte
-    );
+    fwrite(e, sizeof(Endereco), quantidadeParte, parte);
 
     fclose(parte);
 }
@@ -2443,7 +2699,15 @@ for(int i = 0; i < PARTES; i++){
 free(e);
 ```
 
-### N. Intercalação
+```text
+divisao = quantidade / PARTES
+resto   = quantidade % PARTES
+
+i < resto  → parte com divisao + 1
+i >= resto → parte com divisao
+```
+
+### G. Intercalação
 
 ```c
 void intercala(char *arqA, char *arqB, char *arqSaida){
@@ -2488,7 +2752,15 @@ void intercala(char *arqA, char *arqB, char *arqSaida){
 }
 ```
 
-### O. Intercalações com `PARTES = 8`
+Lógica:
+
+```text
+A < B → grava A → lê A
+B < A → grava B → lê B
+A == B → regra especial
+```
+
+### H. Intercalações — `PARTES = 8`
 
 ```c
 int arquivoNome = PARTES;
@@ -2508,9 +2780,98 @@ for(int i = 0; i < (PARTES - 1) * 2; i += 2){
 }
 ```
 
+```text
+PARTES = 8
+intercalações = PARTES - 1 = 7
+arquivo final = cep_14.dat
+```
+
 ---
 
-## 5.4 Contas e lembretes
+## 5.13 Modelos de lógica
+
+### Ler até acabar
+
+```c
+while(fread(&e, sizeof(Tipo), 1, f) == 1){
+    /* tarefa */
+}
+```
+
+### Lacuna
+
+```text
+atual != anterior + 1
+```
+
+### Busca sequencial ordenada
+
+```text
+atual < procurado → continua
+atual == procurado → achou
+atual > procurado → break
+```
+
+### Busca binária
+
+```text
+meio
+ ↓
+fseek
+ ↓
+fread
+ ↓
+compara
+ ↓
+menor → esquerda
+maior → direita
+```
+
+### Intercalação
+
+```text
+A < B → grava A, lê A
+B < A → grava B, lê B
+A == B → regra especial (soma)
+```
+
+### Média móvel / janela `k`
+
+```text
+lê k
+ ↓
+calcula
+ ↓
+volta k - 1
+ ↓
+calcula novamente
+```
+
+```c
+fseek(f, -(long)((k - 1) * sizeof(Tipo)), SEEK_CUR);
+```
+
+### Agrupamento (ex: por ano)
+
+```text
+chave mudou?
+    ↓
+fecha grupo anterior
+    ↓
+começa novo grupo
+
+depois do laço → trata o ÚLTIMO grupo
+```
+
+### Chave composta
+
+```c
+int chave = ano * 100 + mes;
+```
+
+---
+
+## 5.14 Contas e lembretes
 
 ### 📍 Posição
 
@@ -2531,14 +2892,12 @@ registros * sizeof(Tipo) → bytes
 
 ```text
 Tipo x;
-
 x   → conteúdo
 &x  → endereço
 ```
 
 ```text
 Tipo *x;
-
 x   → endereço
 *x  → conteúdo apontado
 ```
@@ -2556,13 +2915,7 @@ fread → itens/registros
 ```
 
 ```text
-ler
- ↓
-testar
- ↓
-usar
- ↓
-ler de novo
+ler → testar → usar → ler de novo
 ```
 
 ### 🔎 Busca
@@ -2588,29 +2941,14 @@ DEPOIS → break
 ```
 
 ```text
-busca no índice
-      ↓
-encontra posição
-      ↓
-fseek no arquivo original
-      ↓
-fread
+busca no índice → encontra posição → fseek no arquivo original → fread
 ```
 
 ### 📦 Ordenação externa
 
 ```text
-arquivo grande
-    ↓
-dividir
-    ↓
-qsort cada parte
-    ↓
-intercalar 2 a 2
-    ↓
-repetir
-    ↓
-1 arquivo
+arquivo grande → dividir → qsort cada parte →
+intercalar 2 a 2 → repetir → 1 arquivo
 ```
 
 ```text
@@ -2624,10 +2962,8 @@ arquivo final = cep_14.dat
 ```text
 divisao = quantidade / PARTES
 resto   = quantidade % PARTES
-```
 
-```text
-i < resto → divisao + 1
+i < resto  → divisao + 1
 i >= resto → divisao
 ```
 
@@ -2644,6 +2980,82 @@ qsort(..., compara) → sem ()
 wb → apaga
 ab → adiciona no final
 return 0 → final do main
+```
+
+---
+
+## 5.15 CHECKLIST — ANTES DE ENTREGAR
+
+### Arquivos
+
+```text
+[ ] Todo fopen foi testado?
+[ ] Todo fopen tem fclose?
+[ ] Todo fread/fwrite usa sizeof(Tipo) correto?
+[ ] fseek recebeu posição em BYTES?
+[ ] ftell está em long?
+[ ] %ld para long?
+[ ] fgetc usa int?
+```
+
+### Memória
+
+```text
+[ ] Todo malloc foi testado?
+[ ] Todo malloc tem free?
+[ ] malloc usa sizeof(Tipo) correto?
+[ ] memset recebeu o tamanho correto?
+```
+
+### Registros
+
+```text
+[ ] Registro começa no índice 0?
+[ ] fseek usa n * sizeof(Tipo)?
+[ ] sizeof corresponde ao tipo?
+```
+
+### Ponteiros
+
+```text
+[ ] Usei & quando precisava?
+[ ] Usei . ou -> corretamente?
+[ ] fread recebeu o endereço correto?
+```
+
+### Strings
+
+```text
+[ ] Usei strcmp/strncmp corretamente?
+[ ] Não comparei strings com ==?
+[ ] Reservei espaço para '\0' quando necessário?
+```
+
+### Ordenação / busca
+
+```text
+[ ] qsort recebeu compara sem ()?
+[ ] qsort recebeu sizeof correto?
+[ ] Critério de ordenação está correto?
+[ ] Busca binária usa fseek a cada tentativa?
+[ ] Arquivo está ordenado quando necessário?
+```
+
+### `argc` / `argv`
+
+```text
+[ ] Conferi argc?
+[ ] argv[0] / argv[1] / argv[2] estão corretos?
+```
+
+### `main` / entrega
+
+```text
+[ ] return 0; no final do main?
+[ ] Todos os arquivos foram fechados?
+[ ] Toda memória foi liberada?
+[ ] Não li além do fim do arquivo?
+[ ] Não deixei ponteiro sem inicializar?
 ```
 
 ---
