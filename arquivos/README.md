@@ -33,9 +33,20 @@ Material de consulta e revisão sobre arquivos, registros, memória, ponteiros, 
 - [4. Pegadinhas e lógica](#4-pegadinhas-e-lógica)
 - [5. Folha de cola](#5-folha-de-cola)
   - [5.1 Bibliotecas](#51-bibliotecas)
-  - [5.2 Funções](#52-funções)
-  - [5.3 Programas para copiar e colar](#53-programas-para-copiar-e-colar)
-  - [5.4 Contas e lembretes](#54-contas-e-lembretes)
+  - [5.2 Struct](#52-struct)
+  - [5.3 argc / argv](#53-argc--argv)
+  - [5.4 Arquivos](#54-arquivos)
+  - [5.5 fgetc / fputc](#55-fgetc--fputc)
+  - [5.6 fread / fwrite](#56-fread--fwrite)
+  - [5.7 fseek / ftell / rewind](#57-fseek--ftell--rewind)
+  - [5.8 Ponteiros](#58-ponteiros)
+  - [5.9 malloc / free / memset](#59-malloc--free--memset)
+  - [5.10 Strings](#510-strings)
+  - [5.11 qsort](#511-qsort)
+  - [5.12 Programas para copiar e colar](#512-programas-para-copiar-e-colar)
+  - [5.13 Modelos de lógica](#513-modelos-de-lógica)
+  - [5.14 Contas e lembretes](#514-contas-e-lembretes)
+  - [5.15 Checklist — antes de entregar](#515-checklist--antes-de-entregar)
 
 ---
 
