@@ -2197,18 +2197,26 @@ long pos = ftell(f); // posição atual
 rewind(f); // volta ao início
 ```
 
-⚠️ **Atenção ao `fread`:** ele lê o registro e **avança 1 posição**.
-Se precisar voltar até um registro específico depois de um `fread`, pode ser necessário considerar **+1 posição no deslocamento**.
+⚠️ **Atenção ao `fread`:** ele lê o registro e **avança 1 posição**.  
 
 ```c
 fread(&p, sizeof(Pagamento), 1, f); // lê → ponteiro avança 1
 ```
+
+Se precisar voltar até um registro específico depois de um `fread`, pode ser necessário usar **`fseek`**.
 
 Ex.: leu o 8º e quer ler o 6º:
 
 ```c
 fseek(f, -3 * sizeof(Pagamento), SEEK_CUR);
 fread(&p, sizeof(Pagamento), 1, f);
+```
+
+Caso após um `fread` tenha que fazer um `fwrite` **no mesmo registro lido**, faça:
+
+```c
+fseek(f, -1 * sizeof(Registro), SEEK_CUR);
+fwrite(&r, sizeof(Registro), 1, f);
 ```
 
 ---
