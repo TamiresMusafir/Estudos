@@ -43,9 +43,10 @@ Material de consulta e revisão sobre arquivos, registros, memória, ponteiros, 
   - [5.9 malloc / free / memset](#59-malloc--free--memset)
   - [5.10 Strings](#510-strings)
   - [5.11 qsort](#511-qsort)
-  - [5.12 Programas para copiar e colar](#512-programas-para-copiar-e-colar)
-  - [5.13 Contas e lembretes](#514-contas-e-lembretes)
-  - [5.14 Checklist — antes de entregar](#515-checklist--antes-de-entregar)
+  - [5.12 return](#512-return)
+  - [5.13 Programas para copiar e colar](#513-programas-para-copiar-e-colar)
+  - [5.14 Contas e lembretes](#514-contas-e-lembretes)
+  - [5.15 Checklist — antes de entregar](#515-checklist--antes-de-entregar)
 
 ---
 
@@ -2306,7 +2307,15 @@ qsort(v, qtd, sizeof(Tipo), compara);
 
 ---
 
-## 5.12 Programas para copiar e colar
+## 5.12 Return
+
+```c
+return valor; → função retorna um valor
+return 0;     → retorna 0 (ex.: sucesso)
+return -1;    → retorna -1 (ex.: não encontrou)
+```
+
+## 5.13 Programas para copiar e colar
 
 ### A. Copiar arquivo byte a byte
 
@@ -2675,7 +2684,7 @@ arquivo final = cep_14.dat
 ```
 ---
 
-## 5.13 Contas e lembretes
+## 5.14 Contas e lembretes
 
 ### 📍 Posição
 
@@ -2788,7 +2797,7 @@ return 0 → final do main
 
 ---
 
-## 5.14 CHECKLIST — ANTES DE ENTREGAR
+## 5.15 CHECKLIST — ANTES DE ENTREGAR
 
 ```text
 [ ] Todo fopen/malloc foi testado (== NULL)?
