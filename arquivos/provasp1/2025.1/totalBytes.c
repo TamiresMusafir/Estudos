@@ -22,8 +22,10 @@ int main(){
     long totalBytes = ftell(f);
     long totalRegistros = totalBytes / sizeof(Pagamento);
 
-    printf("Tamanho total de bytes: %ld", tamanhoBytes);
+    printf("Tamanho total de bytes: %ld", totalBytes);
     printf("Total de registros: %ld", totalRegistros);
 
     fclose(f);
+
+    return 0;
 }

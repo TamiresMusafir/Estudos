@@ -8,6 +8,8 @@ struct Pagamento{
     float valor;
 };
 
+typedef struct Pagamento Pagamento;
+
 float total_pago_mes_ano(int mes, int ano){
     FILE *f = fopen("beneficios.dat", "rb");
     Pagamento p;

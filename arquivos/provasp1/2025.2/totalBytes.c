@@ -6,7 +6,7 @@ struct COVID{
     int obitos;
 };
 
-typdef struct COVID COVID;
+typedef struct COVID COVID;
 
 main(){
     FILE *f = fopen("covid.dat", "rb");
@@ -24,4 +24,6 @@ main(){
     printf("Total de registros: %ld", totalRegistros);
 
     fclose(f);
+
+    return 0;
 }

@@ -8,6 +8,8 @@ struct Pagamento{
     float valor;
 };
 
+typedef struct Pagamento Pagamento;
+
 int main(){
     FILE *f = fopen("beneficios.dat", "ab");
     FILE *novo = fopen("novos.dat", "rb");
@@ -25,4 +27,6 @@ int main(){
 
     fclose(f);
     fclose(novo);
+
+    return 0;
 }
