@@ -2065,7 +2065,7 @@ FILE *f;
 
 f = fopen("arquivo.dat", "rb");
 
-if(f == NULL){
+if(!f){
     fprintf(stderr, "Erro ao abrir arquivo.\n");
     return 1;
 }
