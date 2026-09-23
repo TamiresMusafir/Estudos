@@ -2399,29 +2399,63 @@ int main(int argc, char **argv){
 
 ⚠️ No último bloco: `fwrite(buffer, sizeof(char), qtd, saida);` — é `qtd`, não `TAMANHO`.
 
-### C. Busca sequencial (arquivo ordenado)
+### C. Busca sequencial
+
+**Não ordenado → só verifica se achou**
+
+**`char[]`:**
 
 ```c
 Endereco e;
 
 while(fread(&e, sizeof(Endereco), 1, f) == 1){
-    int r = strncmp(chave, e.cep, 8);
-
-    if(r == 0){
+    if(strncmp(chave, e.cep, 8) == 0){
         /* achou */
         break;
-    }else if(r < 0){
-        break;   // já passou da chave, não tem mais como achar
     }
-    /* r > 0: continua lendo */
 }
+```
+
+**`int`:**
+
+```c
+Registro r;
+
+while(fread(&r, sizeof(Registro), 1, f) == 1){
+    if(id == r.id){
+        /* achou */
+        break;
+    }
+}
+```
+
+**Ordenado → pode parar quando passar da chave**
+
+```c
+int r = strncmp(chave, e.cep, 8);
+
+if(r == 0)
+    break;       // achou
+else if(r < 0)
+    break;       // passou da chave
+// r > 0 → continua
+```
+
+Para `int`:
+
+```c
+if(id == r.id)
+    break;       // achou
+else if(id < r.id)
+    break;       // passou
 ```
 
 ### D. Busca binária
 
+**Arquivo precisa estar ordenado.**
+
 ```c
-long inicio = 0;
-long fim = qtd - 1;
+long inicio = 0, fim = qtd - 1;
 
 while(inicio <= fim){
     long meio = (inicio + fim) / 2;
@@ -2443,8 +2477,9 @@ while(inicio <= fim){
 ```
 
 ```text
-arquivo precisa estar ordenado
-cada tentativa → novo fseek + fread
+Binária → cada tentativa = fseek + fread
+r > 0 → direita
+r < 0 → esquerda
 ```
 
 ### E. Compara
