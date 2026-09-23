@@ -2318,8 +2318,10 @@ qsort(v, qtd, sizeof(Tipo), compara);
 ## 5.12 Return
 
 ```c
+return        → void
 return valor; → função retorna um valor
 return 0;     → retorna 0 (ex.: sucesso)
+return 1;     → retorna 1 (ex.: erro)
 return -1;    → retorna -1 (ex.: não encontrou)
 ```
 
