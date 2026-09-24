@@ -15,7 +15,7 @@ void buscarRegistro(FILE *f, int id){
     while(fread(&r, sizeof(Registro), 1, f) == 1){
 
         if(id == r.id){
-            printf("ID: %d - Nome: %s - Especie: &s - Idade: %d - Peso: %f", r.id, r.nome, r.especie, r.idade, r.peso);
+            printf("ID: %d - Nome: %s - Especie: %s - Idade: %d - Peso: %f", r.id, r.nome, r.especie, r.idade, r.peso);
             return;
         }
     }
