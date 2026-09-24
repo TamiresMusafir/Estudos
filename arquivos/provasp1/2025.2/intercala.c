@@ -6,6 +6,8 @@ struct COVID{
     int obitos;
 };
 
+typedef struct COVID COVID;
+
 int compara(const void *a, const void *b){
     return(((COVID *)a)->dia - ((COVID*)b)->dia);
 }
