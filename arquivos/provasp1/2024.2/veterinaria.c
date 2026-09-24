@@ -23,16 +23,18 @@ void buscarRegistro(FILE *f, int id){
 }
 
 void incluirRegistro(FILE *f){
+    rewind(f);
+    
     Registro p, r;
 
     printf("Informe o id: \n");
     scanf("%d", &r.id);
 
     printf("Informe o nome: \n");
-    scanf("%s", &r.nome);
+    scanf("%s", r.nome);
 
     printf("Informe a espécie: \n");
-    scanf("%s", &r.especie);
+    scanf("%s", r.especie);
 
     printf("Informe a idade: \n");
     scanf("%d", &r.idade);
@@ -51,6 +53,8 @@ void incluirRegistro(FILE *f){
 }
 
 void alterarRegistro(FILE *f){
+    rewind(f);
+    
     Registro r;
     int id;
 
@@ -60,15 +64,14 @@ void alterarRegistro(FILE *f){
     while(fread(&r, sizeof(Registro), 1, f) == 1){
 
         if(id == r.id){
-            r.id = id;
             printf("ID: %d - Nome: %s - Especie: &s - Idade: %d - Peso: %f", r.id, r.nome, r.especie, r.idade, r.peso);
             printf("Digite os novos dados: \n");
 
             printf("Informe o nome: \n");
-            scanf("%s", &r.nome);
+            scanf("%s", r.nome);
 
             printf("Informe a espécie: \n");
-            scanf("%s", &r.especie);
+            scanf("%s", r.especie);
 
             printf("Informe a idade: \n");
             scanf("%d", &r.idade);
