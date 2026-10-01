@@ -10,4 +10,6 @@ md ou sh
 
 sha... funcoes de hash
 
- 
+/etc/shadow 
+
+ seek end com fwrite 
