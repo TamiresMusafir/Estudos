@@ -674,3 +674,21 @@ Diante disso, cabe ao Poder Legislativo aprovar um marco regulatório da intelig
 - Autoridade Nacional de Proteção de Dados (ANPD): gov.br/anpd
 - Tema 987 do STF e ADI 6387: portal.stf.jus.br
 - Tramitação do PL 2338/2023: camara.leg.br
+
+### 9. Redação
+
+Tema 1: Direito à intimidade na internet
+
+A Constituição Federal de 1988 protege a intimidade e a vida privada, e a Emenda Constitucional 115/2022 incluiu a proteção de dados entre os direitos fundamentais. Contudo, em um mundo em que cada clique deixa um rastro, esse direito enfrenta desafios inéditos. Assim, a intimidade na internet é ameaçada pela coleta massiva de dados e pelo consentimento meramente formal dos usuários.
+
+Em primeiro lugar, muitas plataformas lucram com publicidade direcionada e, por isso, estimulam a coleta máxima de informações. O caso Cambridge Analytica, em que dados de milhões de usuários foram usados para direcionar mensagens políticas, mostra como informações privadas podem servir a fins que o titular nunca imaginou. Ademais, o consentimento é frequentemente aparente: termos longos, técnicos e do tipo "aceitar tudo" levam a pessoa a autorizar o que não compreende, o que contraria a exigência de consentimento livre e informado da Lei Geral de Proteção de Dados (LGPD).
+
+Portanto, a Autoridade Nacional de Proteção de Dados deve ampliar a fiscalização, por meio de auditorias e da aplicação das sanções da LGPD, a fim de coibir abusos. Além disso, as escolas devem incluir educação digital no currículo, para que os usuários conheçam e exerçam seus direitos.
+
+Tema 2: Igualdade algorítmica
+
+O princípio da igualdade, previsto no artigo 5º da Constituição Federal, foi pensado para um mundo em que pessoas tomavam as decisões. Hoje, porém, algoritmos definem o que cada um vê na internet, quem recebe crédito e até quem é considerado suspeito. Embora tornem os serviços mais eficientes, esses sistemas podem reproduzir desigualdades por dependerem de dados históricos e por serem pouco transparentes.
+
+Primeiramente, o algoritmo aprende com dados produzidos por uma sociedade desigual. Em 2018, noticiou-se que uma ferramenta de recrutamento da Amazon, treinada com currículos majoritariamente masculinos, passou a penalizar candidatas mulheres. Logo, a discriminação não precisa ser programada: basta que o sistema aprenda o padrão, o que lhe dá aparência de objetividade. Além disso, a opacidade impede a contestação, pois quem tem o crédito negado por uma pontuação desconhecida não consegue se defender, ainda que o artigo 20 da LGPD garanta o direito à revisão de decisões automatizadas.
+
+Portanto, o Poder Legislativo deve aprovar um marco regulatório da inteligência artificial, com transparência e avaliação de impacto, e as empresas devem testar seus sistemas por grupos populacionais, a fim de evitar vieses e garantir a igualdade.
