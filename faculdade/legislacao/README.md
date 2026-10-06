@@ -6,18 +6,73 @@
 
 ---
 
-## 0. Plano de estudo para 2 dias
+## 0. Antes de começar: o que são os dois temas
 
-| Quando | O que fazer | Meta |
+*Explicação rápida, em linguagem simples, para entender os dois temas antes de estudar o restante do guia.*
+
+### 0.1 Intimidade na internet
+
+É o direito de manter privadas as coisas pessoais da sua vida, mesmo estando online.
+
+Na internet você deixa rastros o tempo todo:
+
+- o que pesquisa;
+- onde está (localização);
+- o que compra;
+- com quem fala;
+- que fotos e posts publica.
+
+Empresas e governos conseguem juntar esses rastros e saber muito sobre você, às vezes mais do que você contou a alguém. O tema pergunta: **até onde eles podem ir?**
+
+**Assuntos que costumam aparecer:**
+
+- anúncios que parecem "ler sua mente";
+- termos de uso que ninguém lê (consentimento de fachada);
+- vazamento de dados;
+- câmeras com reconhecimento facial;
+- a **LGPD**, a lei brasileira que protege os dados pessoais.
+
+### 0.2 Igualdade algorítmica
+
+É a ideia de que os sistemas automáticos da internet não podem tratar as pessoas de forma injusta.
+
+**Algoritmo** é uma sequência de regras que decide coisas por você, por exemplo:
+
+- o que aparece no seu feed;
+- se um banco libera crédito;
+- quais currículos uma empresa seleciona;
+- quem a polícia identifica como suspeito.
+
+**O problema:** o algoritmo aprende com dados do passado, e o passado tem preconceito.
+
+> **Exemplo:** se uma empresa contratou mais homens durante anos, o sistema pode concluir que homens "servem mais" para a vaga, sem ninguém ter programado isso.
+
+O tema pergunta: **como evitar que a tecnologia repita e aumente as desigualdades que já existem?**
+
+### 0.3 Como os dois se ligam
+
+- O primeiro tema é sobre **os dados que coletam de você**.
+- O segundo é sobre **o que fazem com esses dados para decidir coisas sobre você**.
+
+Quanto mais dados coletados e menos transparência, maior o risco de decisões injustas.
+
+```
+Você usa a internet → deixa rastros → coletam seus dados (TEMA 1)
+→ montam um perfil → algoritmos decidem com base nele (TEMA 2)
+→ se houver viés, a desigualdade se repete
+```
+
+### 0.4 Resumo para lembrar
+
+| | Intimidade na internet | Igualdade algorítmica |
 | --- | --- | --- |
-| Dia 1, manhã | Seção 1 (mapa geral) e Seção 2 (intimidade): ler conceitos, base legal e problemas | Explicar o tema em voz alta, sem olhar |
-| Dia 1, tarde | Seções 2.5 a 2.8 (argumentos, rebatimentos, teses, repertório) | Montar 2 teses próprias para o tema 1 |
-| Dia 1, noite | Seção 5.1 a 5.4 (esqueleto coringa): escrever 1 introdução + 1 desenvolvimento do tema 1 | Texto de 15 linhas, com tempo marcado |
-| Dia 2, manhã | Seção 3 (igualdade algorítmica): conceitos, de onde vem o viés, casos | Contar 3 casos reais de cabeça |
-| Dia 2, tarde | Seções 3.5 a 3.8 e Seção 4 (ponte entre os temas) | Montar 2 teses próprias para o tema 2 |
-| Dia 2, noite | Seção 5.5 a 5.9 e Seção 7 (autoteste): escrever 1 redação completa, sem consulta | Revisar com o checklist da 5.9 |
+| **Pergunta central** | O que podem saber e fazer com as minhas informações? | O sistema trata todo mundo de forma justa? |
+| **Palavra-chave** | Privacidade | Não discriminação |
+| **Problema principal** | Coleta excessiva, exposição e vazamento de dados | Viés nos dados e decisões automáticas injustas |
+| **Lei para citar** | LGPD; Constituição, art. 5º, X | LGPD (não discriminação e revisão de decisões automatizadas); Constituição, art. 5º |
+| **Solução típica** | Transparência, segurança e fiscalização | Auditoria, transparência e dados mais representativos |
 
-> **Se sobrar pouco tempo:** leia a seção 1, as caixas "Decore" de cada tema, o esqueleto da 5.1 e o quadro de leis da seção 6. Já dá para sustentar uma boa dissertação mesmo que o enunciado venha com formulação diferente.
+> **Próximo passo:** com isso claro, siga para a seção 1 (mapa geral) e depois para o Tema 1.
 
 ---
 
