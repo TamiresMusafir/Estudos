@@ -363,9 +363,31 @@ Qual é o problema?  →  Por que acontece?  →  Qual exemplo comprova?  →  Q
 
 ---
 
-## 9. Redações-modelo (para ver a estrutura funcionando)
+## 9. Redações-modelo de 15 linhas (para a prova)
 
-> Use como **estudo de estrutura**. Na prova, escreva com suas palavras. Estas redações são mais longas do que 15 linhas; se o limite for esse, corte o segundo exemplo de cada desenvolvimento e mantenha tese, dois argumentos e proposta.
+> Cerca de **175 a 180 palavras** cada, o que dá uns 15 linhas de A4 à mão (12 a 14 palavras por linha). Mantêm tese com dois eixos, dois argumentos, repertório e proposta de intervenção. Se passar do limite na sua letra, corte primeiro a frase de reforço do segundo argumento. Se sobrar espaço, acrescente uma frase de repertório (Orwell no tema 1; "o algoritmo não é neutro" no tema 2).
+
+### Redação curta 1: Direito à intimidade na internet
+
+A Constituição Federal protege a intimidade e a vida privada, e a Emenda Constitucional 115/2022 elevou a proteção de dados a direito fundamental. Contudo, em um mundo em que cada clique deixa um rastro, esse direito enfrenta desafios novos. Assim, a intimidade na internet é ameaçada pela coleta excessiva de dados e pelo consentimento meramente formal dos usuários.
+
+Em primeiro lugar, muitas plataformas lucram com publicidade direcionada e, por isso, incentivam a coleta máxima de informações. O caso Cambridge Analytica, em que dados de milhões de usuários foram usados para direcionar mensagens políticas, mostra como informações privadas servem a fins que o titular nunca imaginou. Ademais, termos longos, técnicos e do tipo "aceitar tudo" levam a pessoa a autorizar o que não compreende, o que contraria o consentimento livre e informado exigido pela Lei Geral de Proteção de Dados (LGPD).
+
+Portanto, a Autoridade Nacional de Proteção de Dados deve ampliar a fiscalização, por meio de auditorias e sanções, a fim de coibir abusos. Além disso, as escolas devem incluir educação digital no currículo, para que os usuários conheçam seus direitos.
+
+### Redação curta 2: Igualdade algorítmica
+
+O princípio da igualdade, previsto no artigo 5º da Constituição Federal, foi pensado para um mundo em que pessoas tomavam as decisões. Hoje, porém, algoritmos definem o que cada um vê na internet, quem recebe crédito e até quem é tratado como suspeito. Embora tornem os serviços mais eficientes, esses sistemas podem reproduzir desigualdades por dependerem de dados históricos e por serem pouco transparentes.
+
+Primeiramente, o algoritmo aprende com dados de uma sociedade desigual. Em 2018, noticiou-se que uma ferramenta de recrutamento da Amazon, treinada com currículos majoritariamente masculinos, passou a penalizar candidatas mulheres. Logo, a discriminação não precisa ser programada: basta que o sistema aprenda o padrão. Além disso, a opacidade impede a contestação, pois quem tem o crédito negado por uma pontuação desconhecida não consegue se defender, ainda que o artigo 20 da LGPD garanta a revisão de decisões automatizadas.
+
+Portanto, o Poder Legislativo deve aprovar um marco regulatório da inteligência artificial, com transparência e avaliação de impacto, e as empresas devem testar seus sistemas por grupos, a fim de evitar vieses.
+
+---
+
+## 10. Redações-modelo completas (para estudar a estrutura)
+
+> Estas têm cerca de **30 linhas** de A4 à mão (uns 310 palavras cada). Use como **estudo de estrutura**; para a prova de 15 linhas, use as versões curtas da seção 9.
 
 ### Redação 1: Direito à intimidade no contexto contemporâneo da internet
 
