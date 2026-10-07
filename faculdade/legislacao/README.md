@@ -373,7 +373,7 @@ A Constituição Federal protege a intimidade e a vida privada, e a Emenda Const
 
 Em primeiro lugar, muitas plataformas lucram com publicidade direcionada e, por isso, incentivam a coleta máxima de informações. O caso Cambridge Analytica, em que dados de milhões de usuários foram usados para direcionar mensagens políticas, mostra como informações privadas servem a fins que o titular nunca imaginou. Ademais, termos longos, técnicos e do tipo "aceitar tudo" levam a pessoa a autorizar o que não compreende, o que contraria o consentimento livre e informado exigido pela Lei Geral de Proteção de Dados (LGPD).
 
-Portanto, a Autoridade Nacional de Proteção de Dados deve ampliar a fiscalização, por meio de auditorias e sanções, a fim de coibir abusos. Além disso, as escolas devem incluir educação digital no currículo, para que os usuários conheçam seus direitos.
+Portanto, a Agência Nacional de Proteção de Dados deve ampliar a fiscalização, por meio de auditorias e sanções, a fim de coibir abusos. Além disso, as escolas devem incluir educação digital no currículo, para que os usuários conheçam seus direitos.
 
 ### Redação curta 2: Igualdade algorítmica
 
@@ -397,7 +397,7 @@ Em primeiro lugar, a lógica econômica de boa parte das plataformas transforma 
 
 Ademais, o consentimento, apresentado como garantia do usuário, é frequentemente aparente. Termos longos e técnicos, interfaces que induzem ao "aceitar tudo" e a ausência de alternativa real de uso fazem com que a autorização seja concedida sem compreensão. Soma-se a isso a fragilidade da segurança, evidenciada por vazamentos que expõem dados de milhões de brasileiros e alimentam golpes e fraudes. Assim, a mera existência da lei não impede que a intimidade seja violada na prática.
 
-Portanto, é necessário reforçar a proteção da intimidade digital. A Autoridade Nacional de Proteção de Dados deve ampliar a fiscalização e a aplicação das sanções previstas na LGPD, por meio de auditorias periódicas e da publicização das infrações, a fim de coibir o uso abusivo de dados. Paralelamente, as empresas devem adotar a privacidade desde a concepção de seus produtos, com termos claros e opções de configuração, enquanto as escolas devem incluir a educação digital no currículo. Dessa maneira, a intimidade deixará de ser moeda de troca para voltar a ser um direito exercido.
+Portanto, é necessário reforçar a proteção da intimidade digital. A Agência Nacional de Proteção de Dados deve ampliar a fiscalização e a aplicação das sanções previstas na LGPD, por meio de auditorias periódicas e da publicização das infrações, a fim de coibir o uso abusivo de dados. Paralelamente, as empresas devem adotar a privacidade desde a concepção de seus produtos, com termos claros e opções de configuração, enquanto as escolas devem incluir a educação digital no currículo. Dessa maneira, a intimidade deixará de ser moeda de troca para voltar a ser um direito exercido.
 
 ### Redação 2: Igualdade algorítmica no contexto contemporâneo da internet
 
