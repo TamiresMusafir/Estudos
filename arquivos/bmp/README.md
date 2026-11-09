@@ -1,64 +1,86 @@
-# 🖼️ Imagens BMP — Material de Estudo
+# 🖼️ Imagens BMP --- Material de Estudo
 
-Material de consulta e revisão sobre o formato BMP, estrutura do arquivo, pixels, cores, cabeçalho, padding e geração de imagens em C e Java.
+Material de consulta e revisão sobre o formato BMP, estrutura do
+arquivo, pixels, cores, cabeçalho, padding e geração de imagens em C e
+Java.
 
----
+------------------------------------------------------------------------
 
 ## 📑 Sumário
 
-- [1. Entendendo uma imagem BMP](#1-entendendo-uma-imagem-bmp)
-  - [1.1 O que é BMP?](#11-o-que-é-bmp)
-  - [1.2 Como uma imagem é armazenada](#12-como-uma-imagem-é-armazenada)
-  - [1.3 Bits, bytes e cores RGB](#13-bits-bytes-e-cores-rgb)
-  - [1.4 Ordem BGR no arquivo](#14-ordem-bgr-no-arquivo)
-- [2. Estrutura do arquivo BMP](#2-estrutura-do-arquivo-bmp)
-  - [2.1 Visão geral](#21-visão-geral)
-  - [2.2 Cabeçalho do arquivo — 14 bytes](#22-cabeçalho-do-arquivo--14-bytes)
-  - [2.3 Cabeçalho da imagem — 40 bytes](#23-cabeçalho-da-imagem--40-bytes)
-  - [2.4 Por que o cabeçalho tem 54 bytes?](#24-por-que-o-cabeçalho-tem-54-bytes)
-- [3. Calculando o tamanho da imagem](#3-calculando-o-tamanho-da-imagem)
-  - [3.1 Quantidade de pixels](#31-quantidade-de-pixels)
-  - [3.2 Tamanho dos pixels](#32-tamanho-dos-pixels)
-  - [3.3 O que é padding?](#33-o-que-é-padding)
-  - [3.4 Calculando o padding passo a passo](#34-calculando-o-padding-passo-a-passo)
-  - [3.5 Fórmulas para a prova](#35-fórmulas-para-a-prova)
-- [4. Gerando uma imagem BMP em C](#4-gerando-uma-imagem-bmp-em-c)
-  - [4.1 Bibliotecas e estrutura](#41-bibliotecas-e-estrutura)
-  - [4.2 Definindo largura e altura](#42-definindo-largura-e-altura)
-  - [4.3 Reservando memória](#43-reservando-memória)
-  - [4.4 Preenchendo o cabeçalho](#44-preenchendo-o-cabeçalho)
-  - [4.5 Preenchendo os pixels](#45-preenchendo-os-pixels)
-  - [4.6 Gravando o arquivo](#46-gravando-o-arquivo)
-  - [4.7 Entendendo o gradiente](#47-entendendo-o-gradiente)
-- [5. Gerando uma imagem BMP em Java](#5-gerando-uma-imagem-bmp-em-java)
-  - [5.1 Por que escrever os bytes manualmente?](#51-por-que-escrever-os-bytes-manualmente)
-  - [5.2 Escrevendo inteiros em Little Endian](#52-escrevendo-inteiros-em-little-endian)
-  - [5.3 Montando o cabeçalho](#53-montando-o-cabeçalho)
-  - [5.4 Escrevendo os pixels](#54-escrevendo-os-pixels)
-- [6. Comparação entre os códigos C e Java](#6-comparação-entre-os-códigos-c-e-java)
-- [7. Pegadinhas e pontos de atenção](#7-pegadinhas-e-pontos-de-atenção)
-- [8. Folha de cola](#8-folha-de-cola)
-- [9. Exercícios rápidos](#9-exercícios-rápidos)
+-   [1. Entendendo uma imagem BMP](#1-entendendo-uma-imagem-bmp)
+    -   [1.1 O que é BMP?](#11-o-que-é-bmp)
+    -   [1.2 Como uma imagem é
+        armazenada](#12-como-uma-imagem-é-armazenada)
+    -   [1.3 Bits, bytes e cores RGB](#13-bits-bytes-e-cores-rgb)
+    -   [1.4 Ordem BGR no arquivo](#14-ordem-bgr-no-arquivo)
+    -   [1.5 De onde vêm os 3 bytes por pixel?](#15-de-onde-vêm-os-3-bytes-por-pixel)
+-   [2. Estrutura do arquivo BMP](#2-estrutura-do-arquivo-bmp)
+    -   [2.1 Visão geral](#21-visão-geral)
+    -   [2.2 Cabeçalho do arquivo (14 bytes)](#22-cabeçalho-do-arquivo-14-bytes)
+    -   [2.3 Cabeçalho da imagem (40 bytes)](#23-cabeçalho-da-imagem-40-bytes)
+    -   [2.4 Por que o cabeçalho tem 54 bytes?](#24-por-que-o-cabeçalho-tem-54-bytes)
+-   [3. Calculando o tamanho da
+    imagem](#3-calculando-o-tamanho-da-imagem)
+    -   [3.1 Quantidade de pixels](#31-quantidade-de-pixels)
+    -   [3.2 Tamanho dos pixels](#32-tamanho-dos-pixels)
+    -   [3.3 O que é padding?](#33-o-que-é-padding)
+    -   [3.4 Calculando o padding passo a
+        passo](#34-calculando-o-padding-passo-a-passo)
+    -   [3.5 Fórmulas para a prova](#35-fórmulas-para-a-prova)
+    -   [3.6 Roteiro para calcular o
+        tamanho](#36-roteiro-para-calcular-o-tamanho)
+    -   [3.7 Macete para o padding](#37-macete-para-o-padding)
+-   [4. Gerando uma imagem BMP em C](#4-gerando-uma-imagem-bmp-em-c)
+    -   [4.1 Bibliotecas e estrutura](#41-bibliotecas-e-estrutura)
+    -   [4.2 Definindo largura e altura](#42-definindo-largura-e-altura)
+    -   [4.3 Reservando memória](#43-reservando-memória)
+    -   [4.4 Preenchendo o cabeçalho](#44-preenchendo-o-cabeçalho)
+    -   [4.5 Preenchendo os pixels](#45-preenchendo-os-pixels)
+    -   [4.6 Gravando o arquivo](#46-gravando-o-arquivo)
+    -   [4.7 Entendendo o gradiente](#47-entendendo-o-gradiente)
+    -   [4.8 Entendendo os dois for e a variável
+        k](#48-entendendo-os-dois-for-e-a-variável-k)
+    -   [4.9 Padding da struct e padding das
+        linhas](#49-padding-da-struct-e-padding-das-linhas)
+-   [5. Gerando uma imagem BMP em
+    Java](#5-gerando-uma-imagem-bmp-em-java)
+    -   [5.1 Por que escrever os bytes
+        manualmente?](#51-por-que-escrever-os-bytes-manualmente)
+    -   [5.2 Escrevendo inteiros em Little
+        Endian](#52-escrevendo-inteiros-em-little-endian)
+    -   [5.3 Montando o cabeçalho](#53-montando-o-cabeçalho)
+    -   [5.4 Escrevendo os pixels](#54-escrevendo-os-pixels)
+-   [6. Comparação entre os códigos C e
+    Java](#6-comparação-entre-os-códigos-c-e-java)
+-   [7. Pegadinhas e pontos de
+    atenção](#7-pegadinhas-e-pontos-de-atenção)
+-   [8. Folha de cola](#8-folha-de-cola)
+-   [9. Exercícios rápidos](#9-exercícios-rápidos)
 
----
+------------------------------------------------------------------------
 
 # 1. Entendendo uma imagem BMP
 
-> Antes de olhar o código, precisamos entender o que existe dentro do arquivo. Um BMP não é apenas uma imagem: é um conjunto de bytes organizados em uma estrutura específica.
+> Antes de olhar o código, precisamos entender o que existe dentro do
+> arquivo. Um BMP não é apenas uma imagem: é um conjunto de bytes
+> organizados em uma estrutura específica.
 
 ## 1.1 O que é BMP?
 
 BMP significa **Bitmap**.
 
-É um formato de imagem em que os pixels são armazenados no arquivo. Nos exemplos estudados, estamos usando:
+É um formato de imagem em que os pixels são armazenados no arquivo. Nos
+exemplos estudados, estamos usando:
 
-- imagem sem compressão;
-- 24 bits por pixel;
-- 3 bytes por pixel;
-- cabeçalho de 54 bytes;
-- componentes de cor de 8 bits cada.
+-   imagem sem compressão;
+-   24 bits por pixel;
+-   3 bytes por pixel;
+-   cabeçalho de 54 bytes;
+-   componentes de cor de 8 bits cada.
 
-Essas características são do modelo utilizado nos códigos. Existem outros tipos de BMP com configurações diferentes.
+Essas características são do modelo utilizado nos códigos. Existem
+outros tipos de BMP com configurações diferentes.
 
 ## 1.2 Como uma imagem é armazenada
 
@@ -66,7 +88,7 @@ Uma imagem é formada por pequenos pontos chamados **pixels**.
 
 Exemplo de uma imagem de 3 × 2:
 
-```text
+``` text
        largura = 3
        ┌────┬────┬────┐
 linha 1│ P1 │ P2 │ P3 │
@@ -78,7 +100,7 @@ linha 2│ P4 │ P5 │ P6 │
 
 Quantidade de pixels:
 
-```text
+``` text
 largura × altura
 
 3 × 2 = 6 pixels
@@ -88,15 +110,16 @@ Cada pixel representa uma cor.
 
 ## 1.3 Bits, bytes e cores RGB
 
-No modelo de 24 bits usado nos códigos, cada pixel possui três componentes:
+No modelo de 24 bits usado nos códigos, cada pixel possui três
+componentes:
 
-- R = Red (vermelho);
-- G = Green (verde);
-- B = Blue (azul).
+-   R = Red (vermelho);
+-   G = Green (verde);
+-   B = Blue (azul).
 
 Cada componente ocupa **8 bits**, ou seja, **1 byte**.
 
-```text
+``` text
 1 byte = 8 bits
 
 R → 8 bits = 1 byte
@@ -115,41 +138,109 @@ Um bit pode assumir dois valores: 0 ou 1.
 
 Com 8 bits, temos:
 
-```text
+``` text
 2⁸ = 256 combinações
 ```
 
 Assim, um componente de cor pode assumir 256 valores:
 
-```text
+``` text
 0 até 255
 ```
 
 Interpretação:
 
-```text
+``` text
 0   → ausência daquela componente
 255 → intensidade máxima daquela componente
 ```
 
 Por exemplo, no RGB:
 
-| Cor | R | G | B |
-|---|---:|---:|---:|
-| Vermelho | 255 | 0 | 0 |
-| Verde | 0 | 255 | 0 |
-| Azul | 0 | 0 | 255 |
-| Branco | 255 | 255 | 255 |
-| Preto | 0 | 0 | 0 |
-| Amarelo | 255 | 255 | 0 |
+  Cor            R     G     B
+  ---------- ----- ----- -----
+  Vermelho     255     0     0
+  Verde          0   255     0
+  Azul           0     0   255
+  Branco       255   255   255
+  Preto          0     0     0
+  Amarelo      255   255     0
 
-**Atenção:** 8 bits por componente é uma escolha do formato/configuração usada aqui. Não significa que toda imagem digital precise usar 8 bits por componente.
+**Atenção:** 8 bits por componente é uma escolha do formato/configuração
+usada aqui. Não significa que toda imagem digital precise usar 8 bits
+por componente.
+
+## 1.5 De onde vêm os 3 bytes por pixel?
+
+Não é que cada bit tenha três cores. O que acontece é que **cada pixel
+possui três componentes de cor**: vermelho, verde e azul.
+
+No BMP de 24 bits usado nos exemplos:
+
+``` text
+R (vermelho) = 8 bits
+G (verde)    = 8 bits
+B (azul)     = 8 bits
+              --------
+Total        = 24 bits
+```
+
+Como:
+
+``` text
+1 byte = 8 bits
+```
+
+Cada componente ocupa 1 byte. Portanto:
+
+``` text
+24 bits ÷ 8 = 3 bytes por pixel
+```
+
+Visualizando:
+
+``` text
+┌────────────┬────────────┬────────────┐
+│     R      │     G      │     B      │
+│  8 bits    │  8 bits    │  8 bits    │
+│  1 byte    │  1 byte    │  1 byte    │
+└────────────┴────────────┴────────────┘
+             3 bytes por pixel
+```
+
+### E se a imagem tiver outra quantidade de bits por pixel?
+
+A quantidade de bytes por pixel depende da profundidade de cor informada
+no cabeçalho:
+
+``` text
+bytes por pixel = bits por pixel ÷ 8
+```
+
+Exemplos:
+
+    Bits por pixel   Cálculo   Bytes por pixel
+  ---------------- --------- -----------------
+            8 bits     8 ÷ 8            1 byte
+           16 bits    16 ÷ 8           2 bytes
+           24 bits    24 ÷ 8           3 bytes
+           32 bits    32 ÷ 8           4 bytes
+
+No caso de 32 bits, é comum existir um quarto componente (alfa ou
+reservado, dependendo do formato/configuração). Não devemos continuar
+usando 3 bytes por pixel quando o enunciado informar 32 bits.
+
+**Para os códigos estudados:** o cabeçalho informa `bitsPorPixel = 24`,
+então usamos 3 bytes por pixel.
+
+------------------------------------------------------------------------
 
 ## 1.4 Ordem BGR no arquivo
 
-Embora normalmente falemos em RGB, no BMP de 24 bits os bytes dos pixels são gravados na ordem **BGR**:
+Embora normalmente falemos em RGB, no BMP de 24 bits os bytes dos pixels
+são gravados na ordem **BGR**:
 
-```text
+``` text
 Ordem lógica da cor:
 R → G → B
 
@@ -159,7 +250,7 @@ B → G → R
 
 Exemplo: vermelho puro.
 
-```text
+``` text
 RGB = (255, 0, 0)
 
 BMP armazena:
@@ -170,14 +261,14 @@ R = 255
 
 Em bytes:
 
-```text
+``` text
 [00000000] [00000000] [11111111]
      B          G          R
 ```
 
 No código C:
 
-```c
+``` c
 b->pixels[k++] = 0;           // Azul
 b->pixels[k++] = 0;           // Verde
 b->pixels[k++] = intensidade; // Vermelho
@@ -185,7 +276,7 @@ b->pixels[k++] = intensidade; // Vermelho
 
 Portanto, esse trecho gera tons de vermelho, não de azul.
 
----
+------------------------------------------------------------------------
 
 # 2. Estrutura do arquivo BMP
 
@@ -193,7 +284,7 @@ Portanto, esse trecho gera tons de vermelho, não de azul.
 
 No modelo usado nos exemplos, o arquivo é organizado assim:
 
-```text
+``` text
 ┌──────────────────────────────────┐
 │ Cabeçalho do arquivo             │ 14 bytes
 ├──────────────────────────────────┤
@@ -205,32 +296,41 @@ No modelo usado nos exemplos, o arquivo é organizado assim:
 
 Os dois cabeçalhos juntos ocupam:
 
-```text
+``` text
 14 + 40 = 54 bytes
 ```
 
 Os pixels começam no byte de posição 54.
 
-## 2.2 Cabeçalho do arquivo — 14 bytes
+## 2.2 Cabeçalho do arquivo (14 bytes)
 
 É a primeira parte do BMP.
 
-| Campo | Tamanho | Para que serve |
-|---|---:|---|
-| `magic` | 2 bytes | Identifica o arquivo como BMP (`BM`) |
-| `tamanhoArquivo` | 4 bytes | Tamanho total do arquivo |
-| `lixo` / reservado | 4 bytes | Campo reservado; nos exemplos recebe 0 |
-| `inicioArray` | 4 bytes | Posição em que começam os pixels |
+  ------------------------------------------------------------------------
+  Campo                                      Tamanho Para que serve
+  --------------------- ---------------------------- ---------------------
+  `magic`                                    2 bytes Identifica o arquivo
+                                                     como BMP (`BM`)
+
+  `tamanhoArquivo`                           4 bytes Tamanho total do
+                                                     arquivo
+
+  `lixo` / reservado                         4 bytes Campo reservado; nos
+                                                     exemplos recebe 0
+
+  `inicioArray`                              4 bytes Posição em que
+                                                     começam os pixels
+  ------------------------------------------------------------------------
 
 Total:
 
-```text
+``` text
 2 + 4 + 4 + 4 = 14 bytes
 ```
 
 ### Campo `magic`
 
-```c
+``` c
 b->magic[0] = 'B';
 b->magic[1] = 'M';
 ```
@@ -243,19 +343,19 @@ Eles identificam o formato do arquivo.
 
 Representa o tamanho total:
 
-```text
+``` text
 tamanhoArquivo = cabeçalho + dados dos pixels
 ```
 
 No exemplo sem padding:
 
-```text
+``` text
 tamanhoArquivo = 54 + (largura × altura × 3)
 ```
 
 ### Campo `inicioArray`
 
-```c
+``` c
 b->inicioArray = 54;
 ```
 
@@ -263,48 +363,48 @@ Indica que os dados dos pixels começam depois dos 54 bytes de cabeçalho.
 
 Não é a quantidade de pixels: é uma posição dentro do arquivo.
 
-## 2.3 Cabeçalho da imagem — 40 bytes
+## 2.3 Cabeçalho da imagem (40 bytes)
 
 Nos códigos, esse cabeçalho possui os seguintes campos:
 
-| Campo | Tamanho | Significado |
-|---|---:|---|
-| `tamCab2` | 4 bytes | Tamanho deste cabeçalho: 40 |
-| `largura` | 4 bytes | Largura em pixels |
-| `altura` | 4 bytes | Altura em pixels |
-| `planes` | 2 bytes | Deve ser 1 |
-| `bitsPorPixel` | 2 bytes | Profundidade de cor: 24 |
-| `compressao` | 4 bytes | 0 = sem compressão |
-| `tamanhoImagem` | 4 bytes | Tamanho dos dados dos pixels |
-| `resolucaoHorizontal` | 4 bytes | Resolução horizontal |
-| `resolucaoVertical` | 4 bytes | Resolução vertical |
-| `numeroCores` | 4 bytes | Número de cores da paleta; 0 neste modelo |
-| `coresImportantes` | 4 bytes | Cores importantes; 0 neste modelo |
+  Campo                     Tamanho Significado
+  ----------------------- --------- -------------------------------------------
+  `tamCab2`                 4 bytes Tamanho deste cabeçalho: 40
+  `largura`                 4 bytes Largura em pixels
+  `altura`                  4 bytes Altura em pixels
+  `planes`                  2 bytes Deve ser 1
+  `bitsPorPixel`            2 bytes Profundidade de cor: 24
+  `compressao`              4 bytes 0 = sem compressão
+  `tamanhoImagem`           4 bytes Tamanho dos dados dos pixels
+  `resolucaoHorizontal`     4 bytes Resolução horizontal
+  `resolucaoVertical`       4 bytes Resolução vertical
+  `numeroCores`             4 bytes Número de cores da paleta; 0 neste modelo
+  `coresImportantes`        4 bytes Cores importantes; 0 neste modelo
 
 Soma:
 
-```text
+``` text
 4 + 4 + 4 + 2 + 2 + 4 + 4 + 4 + 4 + 4 + 4
 = 40 bytes
 ```
 
 ### Campos que merecem atenção
 
-```c
+``` c
 b->largura = largura;
 b->altura = altura;
 ```
 
 Definem as dimensões da imagem.
 
-```c
+``` c
 b->planes = 1;
 b->bitsPorPixel = 24;
 ```
 
 Indicam uma imagem com 24 bits por pixel.
 
-```c
+``` c
 b->compressao = 0;
 ```
 
@@ -314,7 +414,7 @@ Indica que os pixels estão armazenados sem compressão, no modelo usado.
 
 Porque, neste modelo:
 
-```text
+``` text
 Cabeçalho do arquivo = 14 bytes
 Cabeçalho da imagem  = 40 bytes
 
@@ -323,7 +423,7 @@ Total = 14 + 40 = 54 bytes
 
 Visualmente:
 
-```text
+``` text
 Byte 0                                      Byte 53
   │                                           │
   ▼                                           ▼
@@ -335,9 +435,11 @@ Byte 0                                      Byte 53
   └── pixels começam no byte 54
 ```
 
-**Atenção:** 54 bytes não é uma regra para absolutamente todo BMP. É o tamanho do cabeçalho utilizado nesses exemplos, sem paleta ou cabeçalhos adicionais.
+**Atenção:** 54 bytes não é uma regra para absolutamente todo BMP. É o
+tamanho do cabeçalho utilizado nesses exemplos, sem paleta ou cabeçalhos
+adicionais.
 
----
+------------------------------------------------------------------------
 
 # 3. Calculando o tamanho da imagem
 
@@ -345,13 +447,13 @@ Byte 0                                      Byte 53
 
 Para descobrir quantos pixels existem:
 
-```text
+``` text
 quantidade de pixels = largura × altura
 ```
 
 Exemplo: imagem de 600 × 600.
 
-```text
+``` text
 600 × 600 = 360.000 pixels
 ```
 
@@ -359,19 +461,19 @@ Exemplo: imagem de 600 × 600.
 
 Como cada pixel ocupa 3 bytes:
 
-```text
+``` text
 dados dos pixels = quantidade de pixels × 3
 ```
 
 Ou:
 
-```text
+``` text
 dados dos pixels = largura × altura × 3
 ```
 
 Exemplo: 600 × 600:
 
-```text
+``` text
 600 × 600 × 3
 = 360.000 × 3
 = 1.080.000 bytes
@@ -379,7 +481,7 @@ Exemplo: 600 × 600:
 
 Se somarmos os 54 bytes de cabeçalho:
 
-```text
+``` text
 tamanho do arquivo = 54 + 1.080.000
 
 tamanho do arquivo = 1.080.054 bytes
@@ -389,27 +491,31 @@ Isso vale quando não há bytes de padding nas linhas.
 
 ## 3.3 O que é padding?
 
-O padding são bytes extras colocados **no final de cada linha de pixels**.
+O padding são bytes extras colocados **no final de cada linha de
+pixels**.
 
-No BMP, cada linha de pixels deve ocupar um número de bytes múltiplo de 4.
+No BMP, cada linha de pixels deve ocupar um número de bytes múltiplo de
+4.
 
-Como cada pixel de 24 bits ocupa 3 bytes, algumas larguras deixam a linha com um tamanho que não é divisível por 4.
+Como cada pixel de 24 bits ocupa 3 bytes, algumas larguras deixam a
+linha com um tamanho que não é divisível por 4.
 
 O padding completa essa linha até o próximo múltiplo de 4.
 
-**Importante:** padding não é uma cor, não é um pixel e não altera a imagem visualmente. São bytes extras usados para alinhamento.
+**Importante:** padding não é uma cor, não é um pixel e não altera a
+imagem visualmente. São bytes extras usados para alinhamento.
 
 ## 3.4 Calculando o padding passo a passo
 
 Imagine uma imagem com:
 
-```text
+``` text
 largura = 3 pixels
 ```
 
 Cada pixel ocupa 3 bytes:
 
-```text
+``` text
 3 pixels × 3 bytes = 9 bytes por linha
 ```
 
@@ -417,7 +523,7 @@ Mas 9 não é múltiplo de 4.
 
 Os múltiplos de 4 próximos são:
 
-```text
+``` text
 4, 8, 12, 16, 20...
 ```
 
@@ -425,13 +531,13 @@ O próximo múltiplo de 4 depois de 9 é 12.
 
 Então:
 
-```text
+``` text
 12 - 9 = 3 bytes de padding
 ```
 
 A linha fica assim:
 
-```text
+``` text
 ┌────────┬────────┬────────┬────────────────┐
 │ Pixel 1│ Pixel 2│ Pixel 3│ Padding        │
 │ 3 bytes│ 3 bytes│ 3 bytes│ 3 bytes        │
@@ -442,13 +548,13 @@ Total da linha = 12 bytes
 
 Se a imagem tiver 2 linhas:
 
-```text
+``` text
 12 bytes × 2 linhas = 24 bytes
 ```
 
 Separando:
 
-```text
+``` text
 Pixels:  9 × 2 = 18 bytes
 Padding: 3 × 2 =  6 bytes
 
@@ -457,22 +563,22 @@ Total:             24 bytes
 
 ### Mais exemplos
 
-| Largura | Bytes dos pixels por linha | Padding | Total da linha |
-|---:|---:|---:|---:|
-| 1 | 3 | 1 | 4 |
-| 2 | 6 | 2 | 8 |
-| 3 | 9 | 3 | 12 |
-| 4 | 12 | 0 | 12 |
-| 5 | 15 | 1 | 16 |
-| 6 | 18 | 2 | 20 |
-| 7 | 21 | 3 | 24 |
-| 8 | 24 | 0 | 24 |
+    Largura   Bytes dos pixels por linha   Padding   Total da linha
+  --------- ---------------------------- --------- ----------------
+          1                            3         1                4
+          2                            6         2                8
+          3                            9         3               12
+          4                           12         0               12
+          5                           15         1               16
+          6                           18         2               20
+          7                           21         3               24
+          8                           24         0               24
 
 Observe o padrão: o padding pode ser 0, 1, 2 ou 3 bytes.
 
 ### Exemplo com largura 5
 
-```text
+``` text
 5 pixels × 3 bytes = 15 bytes
 
 Próximo múltiplo de 4 = 16
@@ -482,35 +588,161 @@ Próximo múltiplo de 4 = 16
 
 Logo, a resposta é **1 byte**, não 3.
 
+## 3.6 Roteiro para calcular o tamanho
+
+Quando a questão fornecer largura, altura e bits por pixel, siga esta
+ordem. Assim, você não precisa tentar adivinhar qual multiplicação
+fazer.
+
+Exemplo:
+
+> Uma imagem BMP tem 800 × 600 pixels e 24 bits por pixel. Considere o
+> cabeçalho de 54 bytes e verifique o padding.
+
+**Passo 1 --- Descobrir quantos pixels existem**
+
+``` text
+largura × altura
+800 × 600 = 480.000 pixels
+```
+
+**Passo 2 --- Descobrir quantos bytes cada pixel ocupa**
+
+``` text
+bits por pixel ÷ 8
+24 ÷ 8 = 3 bytes por pixel
+```
+
+**Passo 3 --- Calcular os bytes de pixels de cada linha**
+
+``` text
+largura × bytes por pixel
+800 × 3 = 2.400 bytes por linha
+```
+
+**Passo 4 --- Verificar o padding**
+
+``` text
+2.400 % 4 = 0
+```
+
+Como o resto é zero, não precisa de padding.
+
+**Passo 5 --- Calcular o tamanho dos dados da imagem**
+
+``` text
+(tamanho da linha + padding) × altura
+(2.400 + 0) × 600
+= 1.440.000 bytes
+```
+
+**Passo 6 --- Somar o cabeçalho**
+
+``` text
+54 + 1.440.000 = 1.440.054 bytes
+```
+
+`<badge color="success">`{=html}Resultado`</badge>`{=html} O arquivo
+terá 1.440.054 bytes.
+
+### Sequência para lembrar
+
+``` text
+1. largura × altura
+   → quantidade de pixels
+
+2. bits por pixel ÷ 8
+   → bytes por pixel
+
+3. largura × bytes por pixel
+   → bytes de pixels por linha
+
+4. verificar o padding
+   → completar a linha até múltiplo de 4
+
+5. tamanho da linha × altura
+   → tamanho dos dados da imagem
+
+6. tamanho dos dados + cabeçalho
+   → tamanho total do arquivo
+```
+
+**Atenção:** quando existe padding, ele deve ser somado em cada linha,
+não apenas uma vez no arquivo.
+
+------------------------------------------------------------------------
+
+## 3.7 Macete para o padding
+
+Para BMP de 24 bits, primeiro calcule `largura × 3`. Depois, complete
+até o próximo múltiplo de 4.
+
+Exemplo com largura 7:
+
+``` text
+7 × 3 = 21 bytes por linha
+
+Múltiplos de 4:
+4, 8, 12, 16, 20, 24...
+
+Próximo múltiplo depois de 21 = 24
+
+24 - 21 = 3 bytes de padding
+```
+
+O padrão do padding se repete a cada quatro larguras:
+
+``` text
+largura 1 → padding 1
+largura 2 → padding 2
+largura 3 → padding 3
+largura 4 → padding 0
+largura 5 → padding 1
+largura 6 → padding 2
+largura 7 → padding 3
+largura 8 → padding 0
+```
+
+A fórmula continua sendo:
+
+``` text
+padding = (4 - ((largura × 3) % 4)) % 4
+```
+
+O macete ajuda a conferir o resultado, mas a fórmula é mais segura
+quando a largura muda.
+
+------------------------------------------------------------------------
+
 ## 3.5 Fórmulas para a prova
 
 Para BMP de 24 bits:
 
-```text
+``` text
 bytes dos pixels por linha = largura × 3
 ```
 
 Padding:
 
-```text
+``` text
 padding = (4 - ((largura × 3) % 4)) % 4
 ```
 
 Tamanho de uma linha:
 
-```text
+``` text
 tamanhoLinha = (largura × 3) + padding
 ```
 
 Tamanho total dos pixels:
 
-```text
+``` text
 tamanhoImagem = tamanhoLinha × altura
 ```
 
 Tamanho total do arquivo, neste modelo:
 
-```text
+``` text
 tamanhoArquivo = 54 + tamanhoImagem
 ```
 
@@ -518,13 +750,13 @@ tamanhoArquivo = 54 + tamanhoImagem
 
 Quando:
 
-```text
+``` text
 (largura × 3) % 4 = 0
 ```
 
 Nos exemplos estudados:
 
-```text
+``` text
 largura = 600
 
 600 × 3 = 1800
@@ -532,7 +764,7 @@ largura = 600
 padding = 0
 ```
 
-```text
+``` text
 largura = 800
 
 800 × 3 = 2400
@@ -540,9 +772,10 @@ largura = 800
 padding = 0
 ```
 
-Por isso os dois códigos apresentados conseguem gravar os pixels sem adicionar padding.
+Por isso os dois códigos apresentados conseguem gravar os pixels sem
+adicionar padding.
 
----
+------------------------------------------------------------------------
 
 # 4. Gerando uma imagem BMP em C
 
@@ -550,17 +783,17 @@ Por isso os dois códigos apresentados conseguem gravar os pixels sem adicionar 
 
 O código usa:
 
-```c
+``` c
 #include <stdio.h>
 #include <stdlib.h>
 ```
 
-- `stdio.h`: arquivo e funções como `fopen`, `fwrite` e `fclose`.
-- `stdlib.h`: memória dinâmica, como `malloc` e `free`.
+-   `stdio.h`: arquivo e funções como `fopen`, `fwrite` e `fclose`.
+-   `stdlib.h`: memória dinâmica, como `malloc` e `free`.
 
 A estrutura representa o cabeçalho e, no final, os dados dos pixels:
 
-```c
+``` c
 #pragma pack(1)
 
 typedef struct _BMP BMP;
@@ -587,21 +820,25 @@ struct _BMP {
 
 ### O que significa `#pragma pack(1)`?
 
-Pede ao compilador para não inserir bytes de alinhamento entre os campos da estrutura.
+Pede ao compilador para não inserir bytes de alinhamento entre os campos
+da estrutura.
 
-Isso é importante porque queremos que a estrutura tenha exatamente a organização esperada pelo cabeçalho BMP.
+Isso é importante porque queremos que a estrutura tenha exatamente a
+organização esperada pelo cabeçalho BMP.
 
 No código apresentado, o cabeçalho ocupa 54 bytes.
 
 ### O que significa `unsigned char pixels[]`?
 
-É um membro de tamanho flexível: os pixels ficam depois dos campos do cabeçalho, no mesmo bloco de memória.
+É um membro de tamanho flexível: os pixels ficam depois dos campos do
+cabeçalho, no mesmo bloco de memória.
 
-O tamanho dos pixels será reservado junto com a estrutura usando `malloc`.
+O tamanho dos pixels será reservado junto com a estrutura usando
+`malloc`.
 
 ## 4.2 Definindo largura e altura
 
-```c
+``` c
 int largura = 600;
 int altura = 600;
 ```
@@ -610,7 +847,7 @@ A imagem terá 600 pixels de largura e 600 pixels de altura.
 
 Quantidade de pixels:
 
-```text
+``` text
 600 × 600 = 360.000
 ```
 
@@ -618,7 +855,7 @@ Quantidade de pixels:
 
 No código:
 
-```c
+``` c
 int tamanhoImagem = largura * altura * 3;
 int tamanhoArquivo = sizeof(BMP) + tamanhoImagem;
 
@@ -627,14 +864,14 @@ BMP *b = (BMP*) malloc(tamanhoArquivo);
 
 Passo a passo:
 
-1. Cada pixel ocupa 3 bytes.
-2. Multiplicamos largura × altura × 3.
-3. Somamos o tamanho do cabeçalho.
-4. `malloc` reserva esse espaço na memória.
+1.  Cada pixel ocupa 3 bytes.
+2.  Multiplicamos largura × altura × 3.
+3.  Somamos o tamanho do cabeçalho.
+4.  `malloc` reserva esse espaço na memória.
 
 Com os valores do exemplo:
 
-```text
+``` text
 tamanhoImagem = 600 × 600 × 3
 tamanhoImagem = 1.080.000 bytes
 
@@ -642,11 +879,12 @@ tamanhoArquivo = 54 + 1.080.000
 tamanhoArquivo = 1.080.054 bytes
 ```
 
-O `sizeof(BMP)` representa o tamanho da estrutura sem os pixels flexíveis. Com o empacotamento usado no código, são 54 bytes.
+O `sizeof(BMP)` representa o tamanho da estrutura sem os pixels
+flexíveis. Com o empacotamento usado no código, são 54 bytes.
 
 Depois, o programa verifica:
 
-```c
+``` c
 if (b == NULL) {
     return 1;
 }
@@ -658,7 +896,7 @@ Se `malloc` não conseguir reservar memória, retorna `NULL`.
 
 O código define os campos:
 
-```c
+``` c
 b->magic[0] = 'B';
 b->magic[1] = 'M';
 
@@ -682,26 +920,27 @@ b->numeroCores = 0;
 b->coresImportantes = 0;
 ```
 
-A ideia é preencher os metadados que descrevem a imagem antes de escrever os pixels.
+A ideia é preencher os metadados que descrevem a imagem antes de
+escrever os pixels.
 
 Resumo dos principais valores:
 
-| Campo | Valor | Significado |
-|---|---:|---|
-| `magic` | `BM` | Arquivo BMP |
-| `inicioArray` | 54 | Pixels começam no byte 54 |
-| `tamCab2` | 40 | Cabeçalho de imagem com 40 bytes |
-| `largura` | 600 | 600 pixels |
-| `altura` | 600 | 600 pixels |
-| `planes` | 1 | Valor exigido pelo formato |
-| `bitsPorPixel` | 24 | 3 bytes por pixel |
-| `compressao` | 0 | Sem compressão |
+  Campo              Valor Significado
+  ---------------- ------- ----------------------------------
+  `magic`             `BM` Arquivo BMP
+  `inicioArray`         54 Pixels começam no byte 54
+  `tamCab2`             40 Cabeçalho de imagem com 40 bytes
+  `largura`            600 600 pixels
+  `altura`             600 600 pixels
+  `planes`               1 Valor exigido pelo formato
+  `bitsPorPixel`        24 3 bytes por pixel
+  `compressao`           0 Sem compressão
 
 ## 4.5 Preenchendo os pixels
 
 Trecho do código:
 
-```c
+``` c
 int k = 0;
 
 for(int i = 0; i < altura; i++) {
@@ -717,12 +956,12 @@ for(int i = 0; i < altura; i++) {
 
 Existem dois `for`:
 
-- `i`: percorre as linhas;
-- `j`: percorre os pixels de cada linha.
+-   `i`: percorre as linhas;
+-   `j`: percorre os pixels de cada linha.
 
 Para cada pixel, são gravados três bytes.
 
-```text
+``` text
 B → 0
 G → 0
 R → intensidade
@@ -738,7 +977,7 @@ A cada componente gravado, fazemos `k++`.
 
 Um pixel ocupa três posições:
 
-```text
+``` text
 pixels[k]     → B
 pixels[k + 1] → G
 pixels[k + 2] → R
@@ -746,9 +985,106 @@ pixels[k + 2] → R
 
 Depois de gravar as três componentes, `k` avançou 3 posições.
 
+## 4.8 Entendendo os dois for e a variável k
+
+Os dois laços percorrem a imagem inteira:
+
+``` c
+for (int i = 0; i < altura; i++) {
+    for (int j = 0; j < largura; j++) {
+        // escreve um pixel
+    }
+}
+```
+
+Pense em uma imagem de 4 colunas por 3 linhas:
+
+``` text
+          j = 0   j = 1   j = 2   j = 3
+        ┌───────┬───────┬───────┬───────┐
+i = 0   │       │       │       │       │
+        ├───────┼───────┼───────┼───────┤
+i = 1   │       │       │       │       │
+        ├───────┼───────┼───────┼───────┤
+i = 2   │       │       │       │       │
+        └───────┴───────┴───────┴───────┘
+```
+
+-   `i` controla a linha atual.
+-   `j` controla a coluna/pixel dentro daquela linha.
+-   O `for` de dentro percorre todos os pixels de uma linha.
+-   Quando termina uma linha, o `for` de fora avança para a próxima.
+
+### Para que serve `k`?
+
+O vetor `pixels[]` é uma sequência contínua de bytes. A variável `k`
+indica em qual posição devemos gravar o próximo byte.
+
+Como cada pixel ocupa 3 bytes:
+
+``` c
+b->pixels[k++] = 0;           // B
+b->pixels[k++] = 0;           // G
+b->pixels[k++] = intensidade; // R
+```
+
+Se `k` começar em zero, o primeiro pixel ocupa:
+
+``` text
+pixels[0] = B
+pixels[1] = G
+pixels[2] = R
+```
+
+O segundo pixel ocupa:
+
+``` text
+pixels[3] = B
+pixels[4] = G
+pixels[5] = R
+```
+
+E assim por diante. O `k++` usa a posição atual e depois avança uma
+posição.
+
+**Não confunda:** `i` e `j` indicam a posição do pixel na imagem; `k`
+indica a posição do byte no vetor.
+
+------------------------------------------------------------------------
+
+## 4.9 Padding da struct e padding das linhas
+
+A palavra *padding* aparece em dois contextos diferentes neste estudo:
+
+**1. Padding da estrutura (`#pragma pack(1)`)**
+
+É o preenchimento que o compilador poderia inserir entre os campos de
+uma `struct` para alinhamento na memória.
+
+No código C, `#pragma pack(1)` pede que não sejam inseridos esses
+espaços entre os campos.
+
+**2. Padding das linhas do BMP**
+
+São bytes extras no final de cada linha de pixels para que o tamanho da
+linha seja múltiplo de 4.
+
+``` text
+Padding da struct:
+organização dos campos na memória
+
+Padding da imagem:
+bytes extras no final de cada linha de pixels
+```
+
+São coisas diferentes. O `#pragma pack(1)` não elimina a necessidade do
+padding das linhas do BMP.
+
+------------------------------------------------------------------------
+
 ## 4.6 Gravando o arquivo
 
-```c
+``` c
 FILE *f = fopen("seila.bmp", "wb");
 
 fwrite(b, tamanhoArquivo, 1, f);
@@ -759,20 +1095,22 @@ free(b);
 
 Passo a passo:
 
-1. `fopen` abre/cria o arquivo em modo binário para escrita.
-2. `fwrite` grava o bloco inteiro: cabeçalho + pixels.
-3. `fclose` fecha o arquivo.
-4. `free` libera a memória reservada por `malloc`.
+1.  `fopen` abre/cria o arquivo em modo binário para escrita.
+2.  `fwrite` grava o bloco inteiro: cabeçalho + pixels.
+3.  `fclose` fecha o arquivo.
+4.  `free` libera a memória reservada por `malloc`.
 
 O modo `wb` cria o arquivo ou substitui seu conteúdo anterior.
 
-**Atenção:** o código de aula não verifica se `fopen` retornou `NULL`. Em um programa mais robusto, essa verificação deve ser feita antes de chamar `fwrite`.
+**Atenção:** o código de aula não verifica se `fopen` retornou `NULL`.
+Em um programa mais robusto, essa verificação deve ser feita antes de
+chamar `fwrite`.
 
 ## 4.7 Entendendo o gradiente
 
 A intensidade é calculada por:
 
-```c
+``` c
 int intensidade = 255 - ((255 * i) / (altura - 1));
 ```
 
@@ -780,12 +1118,12 @@ int intensidade = 255 - ((255 * i) / (altura - 1));
 
 Com altura 600:
 
-- na primeira linha (`i = 0`), a intensidade é 255;
-- na última linha (`i = 599`), a intensidade é 0.
+-   na primeira linha (`i = 0`), a intensidade é 255;
+-   na última linha (`i = 599`), a intensidade é 0.
 
 A conta da primeira linha:
 
-```text
+``` text
 255 - ((255 × 0) / 599)
 = 255 - 0
 = 255
@@ -793,7 +1131,7 @@ A conta da primeira linha:
 
 A conta da última linha:
 
-```text
+``` text
 255 - ((255 × 599) / 599)
 = 255 - 255
 = 0
@@ -803,20 +1141,23 @@ Isso cria uma variação gradual de vermelho.
 
 ### Atenção à orientação vertical do BMP
 
-Quando a altura do BMP é positiva, as linhas são armazenadas de baixo para cima.
+Quando a altura do BMP é positiva, as linhas são armazenadas de baixo
+para cima.
 
-Por isso, a primeira linha gravada pelo laço corresponde à parte inferior da imagem.
+Por isso, a primeira linha gravada pelo laço corresponde à parte
+inferior da imagem.
 
 No código:
 
-```text
+``` text
 primeira linha gravada → vermelho máximo → parte inferior
 última linha gravada   → vermelho zero   → parte superior
 ```
 
-Visualmente, o gradiente aparece com a parte superior escura e a parte inferior vermelha.
+Visualmente, o gradiente aparece com a parte superior escura e a parte
+inferior vermelha.
 
----
+------------------------------------------------------------------------
 
 # 5. Gerando uma imagem BMP em Java
 
@@ -824,18 +1165,22 @@ Visualmente, o gradiente aparece com a parte superior escura e a parte inferior 
 
 No C, o programa preenche uma estrutura e grava seu conteúdo.
 
-No Java, o exemplo escreve cada campo do cabeçalho diretamente no arquivo:
+No Java, o exemplo escreve cada campo do cabeçalho diretamente no
+arquivo:
 
-```java
+``` java
 OutputStream saida = new FileOutputStream("teste.bmp");
 DataOutputStream dout = new DataOutputStream(saida);
 ```
 
 O `DataOutputStream` oferece métodos para escrever números e bytes.
 
-Mas existe um detalhe importante: `writeInt` escreve inteiros em **Big Endian** por padrão, enquanto os campos numéricos do BMP são armazenados em **Little Endian**.
+Mas existe um detalhe importante: `writeInt` escreve inteiros em **Big
+Endian** por padrão, enquanto os campos numéricos do BMP são armazenados
+em **Little Endian**.
 
-Por isso o código cria métodos auxiliares para inverter a ordem dos bytes.
+Por isso o código cria métodos auxiliares para inverter a ordem dos
+bytes.
 
 ## 5.2 Escrevendo inteiros em Little Endian
 
@@ -843,27 +1188,28 @@ Por isso o código cria métodos auxiliares para inverter a ordem dos bytes.
 
 Imagine o número representado por quatro bytes:
 
-```text
+``` text
 A1 B2 C3 D4
 ```
 
 Big Endian grava primeiro o byte mais significativo:
 
-```text
+``` text
 A1 B2 C3 D4
 ```
 
 Little Endian grava primeiro o menos significativo:
 
-```text
+``` text
 D4 C3 B2 A1
 ```
 
-O BMP utilizado no exemplo espera Little Endian para os campos numéricos.
+O BMP utilizado no exemplo espera Little Endian para os campos
+numéricos.
 
 ### Método para escrever 4 bytes
 
-```java
+``` java
 public static void escreveIntInvertido(DataOutputStream dout, int x)
         throws IOException {
 
@@ -879,11 +1225,12 @@ public static void escreveIntInvertido(DataOutputStream dout, int x)
 }
 ```
 
-O método separa o inteiro em quatro bytes e escreve primeiro o byte menos significativo.
+O método separa o inteiro em quatro bytes e escreve primeiro o byte
+menos significativo.
 
 A ideia é:
 
-```text
+``` text
 inteiro de 4 bytes
       ↓
 separar em b1, b2, b3 e b4
@@ -893,7 +1240,7 @@ escrever b1 → b2 → b3 → b4
 
 ### Método para escrever 2 bytes
 
-```java
+``` java
 public static void escreveInt2Invertido(DataOutputStream dout, int x)
         throws IOException {
 
@@ -905,23 +1252,26 @@ public static void escreveInt2Invertido(DataOutputStream dout, int x)
 }
 ```
 
-Esse método é usado para campos de 2 bytes, como `planes` e `bitsPorPixel`.
+Esse método é usado para campos de 2 bytes, como `planes` e
+`bitsPorPixel`.
 
 ### O que significam `&` e `>>`?
 
-O operador `&` faz uma operação AND bit a bit. As máscaras selecionam a parte do inteiro que queremos extrair.
+O operador `&` faz uma operação AND bit a bit. As máscaras selecionam a
+parte do inteiro que queremos extrair.
 
 O operador `>>` desloca os bits para a direita.
 
 Neste código, eles são usados para separar os bytes de um inteiro.
 
-Não é necessário decorar toda a operação antes de entender a finalidade: **o método divide o número em bytes e os grava na ordem Little Endian**.
+Não é necessário decorar toda a operação antes de entender a finalidade:
+**o método divide o número em bytes e os grava na ordem Little Endian**.
 
 ## 5.3 Montando o cabeçalho
 
 O começo do `main`:
 
-```java
+``` java
 dout.write((byte)'B');
 dout.write((byte)'M');
 
@@ -944,15 +1294,15 @@ escreveIntInvertido(dout, 0);
 
 A ordem de escrita segue a estrutura do BMP:
 
-1. `BM`;
-2. tamanho total do arquivo;
-3. campo reservado;
-4. posição inicial dos pixels;
-5. tamanho do cabeçalho da imagem;
-6. largura;
-7. altura;
-8. planos;
-9. bits por pixel;
+1.  `BM`;
+2.  tamanho total do arquivo;
+3.  campo reservado;
+4.  posição inicial dos pixels;
+5.  tamanho do cabeçalho da imagem;
+6.  largura;
+7.  altura;
+8.  planos;
+9.  bits por pixel;
 10. compressão;
 11. tamanho dos pixels;
 12. resolução horizontal;
@@ -966,7 +1316,7 @@ Porque o valor é zero.
 
 Em qualquer ordem, seus quatro bytes continuam sendo:
 
-```text
+``` text
 00 00 00 00
 ```
 
@@ -974,7 +1324,7 @@ Então a ordem não altera o resultado.
 
 ### Conferindo os tamanhos do exemplo Java
 
-```text
+``` text
 largura = 800
 altura = 600
 
@@ -990,7 +1340,7 @@ arquivo = 1.440.054 bytes
 
 A largura 800 não precisa de padding:
 
-```text
+``` text
 800 × 3 = 2400
 
 2400 % 4 = 0
@@ -1000,7 +1350,7 @@ A largura 800 não precisa de padding:
 
 Trecho:
 
-```java
+``` java
 for(int i = 0; i < 600; i++) {
     int cor = ((600 - i) * 0xff) / 600;
 
@@ -1014,58 +1364,74 @@ for(int i = 0; i < 600; i++) {
 
 Novamente:
 
-- `i` percorre as linhas;
-- `j` percorre os pixels da linha;
-- cada pixel recebe três bytes.
+-   `i` percorre as linhas;
+-   `j` percorre os pixels da linha;
+-   cada pixel recebe três bytes.
 
 A ordem gravada é BGR:
 
-```text
+``` text
 B = cor
 G = cor
 R = 0
 ```
 
-Como azul e verde recebem o mesmo valor e vermelho recebe zero, a cor resultante varia entre tons de ciano e preto.
+Como azul e verde recebem o mesmo valor e vermelho recebe zero, a cor
+resultante varia entre tons de ciano e preto.
 
 A variável `cor` muda conforme a linha:
 
-```java
+``` java
 int cor = ((600 - i) * 0xff) / 600;
 ```
 
 O valor começa próximo de 255 e diminui à medida que `i` aumenta.
 
-Como a altura é positiva, a primeira linha gravada fica na parte inferior da imagem.
+Como a altura é positiva, a primeira linha gravada fica na parte
+inferior da imagem.
 
 Ao final:
 
-```java
+``` java
 dout.close();
 saida.close();
 ```
 
-O fechamento de `dout` já fecha o fluxo subjacente (`saida`), então chamar `saida.close()` depois é redundante, embora apareça no código de aula.
+O fechamento de `dout` já fecha o fluxo subjacente (`saida`), então
+chamar `saida.close()` depois é redundante, embora apareça no código de
+aula.
 
----
+------------------------------------------------------------------------
 
 # 6. Comparação entre os códigos C e Java
 
-| Etapa | C | Java |
-|---|---|---|
-| Criar arquivo | `fopen` | `FileOutputStream` |
-| Escrever dados | `fwrite` | `DataOutputStream` |
-| Cabeçalho | Preenche uma `struct` | Escreve campo por campo |
-| Ordem dos bytes | Depende da representação da máquina; o código pressupõe o layout esperado | Métodos auxiliares escrevem Little Endian |
-| Pixels | Vetor `pixels[]` | Chamadas a `dout.write` |
-| Memória | `malloc` e `free` | Gerenciada pela JVM |
-| Fechar | `fclose` | `close` |
+  -----------------------------------------------------------------------
+  Etapa                   C                       Java
+  ----------------------- ----------------------- -----------------------
+  Criar arquivo           `fopen`                 `FileOutputStream`
+
+  Escrever dados          `fwrite`                `DataOutputStream`
+
+  Cabeçalho               Preenche uma `struct`   Escreve campo por campo
+
+  Ordem dos bytes         Depende da              Métodos auxiliares
+                          representação da        escrevem Little Endian
+                          máquina; o código       
+                          pressupõe o layout      
+                          esperado                
+
+  Pixels                  Vetor `pixels[]`        Chamadas a `dout.write`
+
+  Memória                 `malloc` e `free`       Gerenciada pela JVM
+
+  Fechar                  `fclose`                `close`
+  -----------------------------------------------------------------------
 
 ### Diferença principal
 
 No C:
 
-```text
+``` text
 monta a estrutura na memória
           ↓
 preenche os pixels
@@ -1075,7 +1441,7 @@ grava o bloco inteiro
 
 No Java:
 
-```text
+``` text
 abre o fluxo de saída
           ↓
 escreve o cabeçalho campo por campo
@@ -1083,70 +1449,76 @@ escreve o cabeçalho campo por campo
 escreve os pixels
 ```
 
-Os dois códigos produzem um BMP, mas constroem o arquivo de maneiras diferentes.
+Os dois códigos produzem um BMP, mas constroem o arquivo de maneiras
+diferentes.
 
----
+------------------------------------------------------------------------
 
 # 7. Pegadinhas e pontos de atenção
 
 ## 📦 Pixels e cores
 
-- 1 byte = 8 bits.
-- 8 bits permitem 256 valores: 0 até 255.
-- No BMP de 24 bits, cada componente ocupa 1 byte.
-- Cada pixel ocupa 3 bytes.
-- A ordem gravada é BGR, não RGB.
-- 24 bits = 3 bytes.
+-   1 byte = 8 bits.
+-   8 bits permitem 256 valores: 0 até 255.
+-   No BMP de 24 bits, cada componente ocupa 1 byte.
+-   Cada pixel ocupa 3 bytes.
+-   A ordem gravada é BGR, não RGB.
+-   24 bits = 3 bytes.
+-   Para descobrir os bytes por pixel, divida os bits por pixel por 8.
+-   32 bits por pixel correspondem a 4 bytes por pixel.
 
 ## 📐 Dimensões e tamanho
 
-- Quantidade de pixels = largura × altura.
-- Bytes dos pixels por linha = largura × 3.
-- Não esqueça o padding quando a linha não for múltipla de 4.
-- O tamanho total dos pixels considera o padding de todas as linhas.
-- O tamanho total do arquivo soma cabeçalho + dados dos pixels.
+-   Quantidade de pixels = largura × altura.
+-   Bytes dos pixels por linha = largura × 3.
+-   Não esqueça o padding quando a linha não for múltipla de 4.
+-   O tamanho total dos pixels considera o padding de todas as linhas.
+-   O tamanho total do arquivo soma cabeçalho + dados dos pixels.
 
 ## 🧱 Cabeçalho
 
-- No modelo dos exemplos, o cabeçalho tem 54 bytes.
-- 14 bytes do cabeçalho do arquivo + 40 bytes do cabeçalho da imagem.
-- `BM` identifica o arquivo.
-- `inicioArray = 54` indica onde começam os pixels.
-- `bitsPorPixel = 24` indica 3 bytes por pixel.
-- `compressao = 0` indica ausência de compressão neste modelo.
+-   No modelo dos exemplos, o cabeçalho tem 54 bytes.
+-   14 bytes do cabeçalho do arquivo + 40 bytes do cabeçalho da imagem.
+-   `BM` identifica o arquivo.
+-   `inicioArray = 54` indica onde começam os pixels.
+-   `bitsPorPixel = 24` indica 3 bytes por pixel.
+-   `compressao = 0` indica ausência de compressão neste modelo.
 
 ## ⚠️ Padding
 
-- Padding é colocado no final de cada linha.
-- Não é pixel e não representa uma cor.
-- Pode ter 0, 1, 2 ou 3 bytes.
-- Largura 3 → 3 bytes de padding.
-- Largura 5 → 1 byte de padding.
-- Largura 4 → nenhum padding.
-- Os exemplos com largura 600 e 800 não precisam de padding.
+-   Padding é colocado no final de cada linha.
+-   Não é pixel e não representa uma cor.
+-   Pode ter 0, 1, 2 ou 3 bytes.
+-   Largura 3 → 3 bytes de padding.
+-   Largura 5 → 1 byte de padding.
+-   Largura 4 → nenhum padding.
+-   Os exemplos com largura 600 e 800 não precisam de padding.
 
 ## 🧭 Orientação
 
-- BMP com altura positiva armazena as linhas de baixo para cima.
-- A primeira linha gravada corresponde à parte inferior.
-- Não confunda a ordem em que o laço percorre as linhas com a orientação visual final.
+-   BMP com altura positiva armazena as linhas de baixo para cima.
+-   A primeira linha gravada corresponde à parte inferior.
+-   Não confunda a ordem em que o laço percorre as linhas com a
+    orientação visual final.
 
 ## 💻 C e Java
 
-- `#pragma pack(1)` evita padding entre os campos da `struct`.
-- `unsigned char` representa um byte sem sinal.
-- `malloc` reserva memória; `free` libera.
-- `fwrite` grava o bloco de memória.
-- `DataOutputStream.writeInt` usa Big Endian por padrão.
-- O código Java usa métodos auxiliares para escrever campos numéricos em Little Endian.
+-   `#pragma pack(1)` evita padding entre os campos da `struct`; não
+    elimina o padding das linhas BMP.
+-   `unsigned char` representa um byte sem sinal.
+-   `malloc` reserva memória; `free` libera.
+-   `fwrite` grava o bloco de memória.
+-   `DataOutputStream.writeInt` usa Big Endian por padrão.
+-   O código Java usa métodos auxiliares para escrever campos numéricos
+    em Little Endian.
 
----
+------------------------------------------------------------------------
 
 # 8. Folha de cola
 
 ## 🧮 Bits e bytes
 
-```text
+``` text
 1 byte = 8 bits
 
 2⁸ = 256 valores
@@ -1159,11 +1531,15 @@ G = 1 byte
 B = 1 byte
 
 24 bits = 3 bytes por pixel
+
+bytes por pixel = bits por pixel ÷ 8
+
+32 bits = 4 bytes por pixel
 ```
 
 ## 🎨 Ordem das cores
 
-```text
+``` text
 RGB lógico: R → G → B
 
 BMP no arquivo: B → G → R
@@ -1175,7 +1551,7 @@ BMP = (0, 0, 255)
 
 ## 📐 Tamanho
 
-```text
+``` text
 quantidade de pixels = largura × altura
 
 bytes por pixel = 3
@@ -1193,7 +1569,7 @@ tamanho do arquivo = 54 + tamanho da imagem
 
 ## 🧱 Cabeçalho
 
-```text
+``` text
 File Header = 14 bytes
 
 Info Header = 40 bytes
@@ -1203,9 +1579,9 @@ Total = 54 bytes
 pixels começam no byte 54
 ```
 
-## 🧩 Padding — exemplos
+## 🧩 Padding --- exemplos
 
-```text
+``` text
 largura 1 → 3 bytes de pixels → 1 padding
 largura 2 → 6 bytes de pixels → 2 padding
 largura 3 → 9 bytes de pixels → 3 padding
@@ -1218,14 +1594,14 @@ largura 8 → 24 bytes de pixels → 0 padding
 
 ## 🔁 Orientação
 
-```text
+``` text
 altura positiva → linhas armazenadas de baixo para cima
 
 primeira linha gravada → parte inferior da imagem
 última linha gravada   → parte superior da imagem
 ```
 
----
+------------------------------------------------------------------------
 
 # 9. Exercícios rápidos
 
@@ -1233,28 +1609,52 @@ Tente responder antes de olhar o gabarito.
 
 ### 1. Quantos bytes ocupa um pixel neste BMP de 24 bits?
 
+```{=html}
 <details>
-<summary>Ver resposta</summary>
-
+```
+```{=html}
+<summary>
+```
+Ver resposta
+```{=html}
+</summary>
+```
 3 bytes: 1 para vermelho, 1 para verde e 1 para azul.
 
+```{=html}
 </details>
-
+```
 ### 2. Por que um componente de cor pode assumir valores de 0 a 255?
 
+```{=html}
 <details>
-<summary>Ver resposta</summary>
+```
+```{=html}
+<summary>
+```
+Ver resposta
+```{=html}
+</summary>
+```
+Porque ele ocupa 8 bits. Com 8 bits existem 2⁸ = 256 combinações,
+numeradas de 0 até 255.
 
-Porque ele ocupa 8 bits. Com 8 bits existem 2⁸ = 256 combinações, numeradas de 0 até 255.
-
+```{=html}
 </details>
-
+```
 ### 3. Uma imagem tem largura 4. Quantos bytes de pixels existem em cada linha? Precisa de padding?
 
+```{=html}
 <details>
-<summary>Ver resposta</summary>
-
-```text
+```
+```{=html}
+<summary>
+```
+Ver resposta
+```{=html}
+</summary>
+```
+``` text
 4 × 3 = 12 bytes
 
 12 é múltiplo de 4.
@@ -1262,14 +1662,22 @@ Porque ele ocupa 8 bits. Com 8 bits existem 2⁸ = 256 combinações, numeradas 
 Padding = 0.
 ```
 
+```{=html}
 </details>
-
+```
 ### 4. Uma imagem tem largura 5. Quanto padding existe por linha?
 
+```{=html}
 <details>
-<summary>Ver resposta</summary>
-
-```text
+```
+```{=html}
+<summary>
+```
+Ver resposta
+```{=html}
+</summary>
+```
+``` text
 5 × 3 = 15 bytes
 
 Próximo múltiplo de 4 = 16
@@ -1277,14 +1685,22 @@ Próximo múltiplo de 4 = 16
 16 - 15 = 1 byte de padding.
 ```
 
+```{=html}
 </details>
-
+```
 ### 5. Qual é o tamanho dos dados dos pixels de uma imagem 10 × 2, considerando o padding?
 
+```{=html}
 <details>
-<summary>Ver resposta</summary>
-
-```text
+```
+```{=html}
+<summary>
+```
+Ver resposta
+```{=html}
+</summary>
+```
+``` text
 Bytes de pixels por linha:
 10 × 3 = 30
 
@@ -1300,37 +1716,56 @@ Duas linhas:
 32 × 2 = 64 bytes
 ```
 
+```{=html}
 </details>
-
+```
 ### 6. Qual é o tamanho total do arquivo para essa imagem 10 × 2, no modelo de cabeçalho de 54 bytes?
 
+```{=html}
 <details>
-<summary>Ver resposta</summary>
-
-```text
+```
+```{=html}
+<summary>
+```
+Ver resposta
+```{=html}
+</summary>
+```
+``` text
 54 + 64 = 118 bytes
 ```
 
+```{=html}
 </details>
-
+```
 ### 7. No BMP, a sequência gravada para um pixel vermelho puro é RGB ou BGR?
 
+```{=html}
 <details>
-<summary>Ver resposta</summary>
-
+```
+```{=html}
+<summary>
+```
+Ver resposta
+```{=html}
+</summary>
+```
 BGR.
 
-Vermelho puro é RGB (255, 0, 0), mas os bytes no arquivo são (0, 0, 255).
+Vermelho puro é RGB (255, 0, 0), mas os bytes no arquivo são (0, 0,
+255).
 
+```{=html}
 </details>
+```
 
----
+------------------------------------------------------------------------
 
 # 🧠 Ideia central do BMP
 
 Para entender os códigos, pense no arquivo em duas grandes partes:
 
-```text
+``` text
 BMP
  │
  ├──► CABEÇALHO
@@ -1349,7 +1784,7 @@ BMP
 
 A sequência de raciocínio para resolver exercícios é:
 
-```text
+``` text
 1. Identificar largura e altura
           ↓
 2. Identificar bits por pixel
@@ -1367,7 +1802,7 @@ A sequência de raciocínio para resolver exercícios é:
 
 O mais importante é não misturar três coisas diferentes:
 
-```text
+``` text
 COR       → valores de R, G e B
 PIXEL     → conjunto de 3 bytes
 PADDING   → bytes extras no final de cada linha
