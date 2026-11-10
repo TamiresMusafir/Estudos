@@ -1,57 +1,54 @@
+# BUSCA SEQUENCIAL DE CEP
+#
+# Percorre o arquivo cep.dat registro por registro,
+# comparando o CEP de cada registro com o CEP procurado.
+# Não utiliza Hash nem índice auxiliar.
 
-import struct
-import codecs
-import sys
+# BIBLIOTECAS:
+import struct   # Interpreta dados binários e separa os campos dos registros.
+import codecs   # Converte bytes em texto (decode).
+import sys      # Permite receber o CEP como argumento pelo terminal.
 
-# Caminho do arquivo que contém os registros de CEP
-fileName = "data/cep.dat"
 
-# Formato dos registros armazenados no arquivo
-# Cada registro possui 300 bytes, divididos em 7 campos
-cepFormat = "72s72s72s72s2s8s2s"
+# CONFIGURAÇÕES DO ARQUIVO:
+fileName = "data/cep.dat"             # Caminho do arquivo de CEPs.
+cepFormat = "72s72s72s72s2s8s2s"     # Formato dos 7 campos de cada registro.
+encoding = "latin1"                   # Codificação dos textos armazenados.
 
-# Codificação utilizada para interpretar os textos do arquivo
-encoding = "latin1"
+recordSize = struct.calcsize(cepFormat)  # Calcula o tamanho de cada registro (300 bytes).
 
-# Calcula o tamanho de cada registro em bytes (300 bytes)
-recordSize = struct.calcsize(cepFormat)
 
-# Verifica se o CEP foi informado como argumento no terminal
+# ENTRADA DO CEP:
 if len(sys.argv) >= 2:
-    cepProcurado = sys.argv[1]
+    cepProcurado = sys.argv[1]  # Recebe o CEP informado pelo terminal.
 else:
-    # Caso contrário, solicita o CEP ao usuário
-    cepProcurado = input("Entre com o cep: ")
+    cepProcurado = input("Entre com o cep: ")  # Solicita o CEP ao usuário.
 
-# Converte o CEP digitado de texto para bytes,
-# permitindo compará-lo com os dados binários do arquivo
+# Converte o CEP de texto para bytes, permitindo compará-lo
+# com o CEP armazenado no arquivo binário.
 cepProcurado = cepProcurado.encode('latin1')
 
-# Abre o arquivo em modo de leitura binária
-f = open(fileName, "rb")
 
-# Inicia a busca sequencial: percorre o arquivo registro por registro
+# BUSCA SEQUENCIAL:
+f = open(fileName, "rb")  # Abre o arquivo em modo de leitura binária.
+
 while True:
+    line = f.read(recordSize)  # Lê o próximo registro (300 bytes).
 
-    # Lê o próximo registro (300 bytes)
-    line = f.read(recordSize)
+    if line == b"":  # Verifica se chegou ao final do arquivo (EOF).
+        break         # Encerra o laço quando não existem mais registros.
 
-    # Verifica se chegou ao final do arquivo (EOF)
-    if line == b"":
-        break
-
-    # Separa os 300 bytes nos 7 campos definidos em cepFormat
+    # Separa os 300 bytes nos 7 campos definidos em cepFormat.
     record = struct.unpack(cepFormat, line)
 
-    # Compara o CEP do registro (posição 5) com o CEP procurado
+    # Compara o CEP do registro (posição 5) com o CEP procurado.
     if record[5] == cepProcurado:
 
-        # Se encontrar, decodifica os campos de bytes para texto
-        # e imprime as informações do endereço
+        # Se encontrar, decodifica os bytes para texto e imprime os dados.
         print(codecs.decode(record[0], encoding))  # Logradouro
         print(codecs.decode(record[1], encoding))  # Bairro
         print(codecs.decode(record[2], encoding))  # Cidade
         print(codecs.decode(record[4], encoding))  # UF
 
-# Fecha o arquivo após terminar a busca
+# Fecha o arquivo após terminar a busca.
 f.close()
