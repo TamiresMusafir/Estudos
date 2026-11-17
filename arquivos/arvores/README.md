@@ -1,6 +1,6 @@
 # Árvores B e B+ — guia de estudo
 
-Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **conceito** e em **desenhar/calcular** as árvores, que é o que cai na prova. Não há código aqui; a última seção só liga os conceitos ao `ArvoreB.c` de estudo.
+Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **conceito** e em **desenhar/calcular** as árvores, que é o que cai na prova, mais o uso da árvore B em código (você **não** implementa a árvore, só chama as funções dela). O código aparece em dois lugares: a [seção 15](#15-ligação-com-o-código-de-estudo) liga os conceitos ao `ArvoreB.c` de estudo, e a [seção 18](#18-código-da-p2-usar-a-árvore-b-como-caixa-preta) mostra como **usar** uma árvore B pronta (a P2 pede isso).
 
 > Os exemplos foram conferidos por simulação. Os exercícios resolvidos vêm da P2 de 2023.1 (Prof. Renato Mauro). Convenções de desenho variam de professor para professor: veja a [seção 2](#2-convenções-usadas-aqui) e confirme as do seu.
 
@@ -22,6 +22,8 @@ Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **co
 14. [Erros comuns](#14-erros-comuns)
 15. [Ligação com o código de estudo](#15-ligação-com-o-código-de-estudo)
 16. [Cola de prova](#16-cola-de-prova)
+17. [Teoria cobrada na P2: respostas-modelo](#17-teoria-cobrada-na-p2-respostas-modelo)
+18. [Código da P2: usar a árvore B como caixa-preta](#18-código-da-p2-usar-a-árvore-b-como-caixa-preta)
 
 ---
 
@@ -221,6 +223,9 @@ Remova da **folha**. Se houver underflow, redistribua ou funda com o irmão, com
 | Busca | pode terminar num nó interno | **sempre até a folha** |
 | Busca por faixa | ruim (percorrer em ordem pela árvore toda) | **ótima** (lista de folhas) |
 | Split de folha | a chave do meio sobe | a primeira da direita é **copiada** |
+| Folhas | independentes | **encadeadas** em lista (simples ou dupla) |
+
+Por que a B+ é mais eficiente para arquivos indexados: (1) nós internos só com chave e ponteiro de bloco → mais filhos por bloco → **árvore mais baixa**; (2) as folhas encadeadas permitem **varrer em ordem** e responder **faixas** sem subir e descer pela árvore. A [seção 17](#17-teoria-cobrada-na-p2-respostas-modelo) tem a resposta-modelo.
 
 ---
 
@@ -361,6 +366,10 @@ Se o seu professor subir a chave do **meio-direita**, os desenhos mudam (por exe
 - Contar a altura começando em 0 numa prova que conta níveis (ou ao contrário). Declare o que usou.
 - Na B+, parar a busca ao achar a chave num nó interno. É só guia: desça até a folha.
 - Chamar de "B+" uma estrutura em que **cada nó tem ponteiro de dados**: isso é árvore **B**.
+- No código: guardar na árvore o **número** do registro (`posicao++`). A prova pede o **offset em bytes**; use `ftell` **antes** do `fread` (ou `i * sizeof(Registro)`).
+- No código: escrever `1004` ou `1008` no lugar de `sizeof(Registro)`. Com o padding o tamanho pode não ser `8 + 1000`.
+- Esquecer de **fechar a árvore** (`closeTree`) depois de usar: sem isso o índice pode não ser gravado.
+- Dizer que o custo de `diferencaArquivos` é só `log n`. Faltou o fator **m** (uma busca por registro do arquivo2).
 
 ---
 
@@ -396,5 +405,149 @@ O `ArvoreB.h`/`ArvoreB.c` implementam uma árvore **B** (cada elemento tem `posi
 | Chaves até a altura `h` | `f^h − 1` |
 | Máx. de chaves, altura `h` | `n^h − 1` |
 | Mín. de chaves, altura `h` | `2·⌈n/2⌉^(h−1) − 1` |
+| Mín. após split (n ponteiros) | `⌊(n−1)/2⌋ = ⌈n/2⌉ − 1` |
+| Offset em bytes (registro fixo) | `i · sizeof(Registro)`, ou `ftell` antes do `fread` |
+| Custo de `m` buscas na árvore | `m · log n` (≈ `m · altura` leituras de bloco) |
 
 **Split na B:** a chave do meio **sobe**. **Split de folha na B+:** a primeira da direita é **copiada**. **Split de interno na B+:** a do meio **sobe**.
+
+---
+
+## 17. Teoria cobrada na P2: respostas-modelo
+
+Essas são as perguntas de teoria de uma P2 corrigida (questão 3, 0,3 ponto cada). Respostas curtas, no tamanho que cabe na prova.
+
+### 3(a) Diferença entre árvore B e B+
+
+> Na **árvore B**, chaves e ponteiros para os dados ficam em **todos os nós**, e cada chave aparece uma única vez. Na **B+**, os dados (ou ponteiros para eles) ficam **só nas folhas**; os nós internos guardam apenas **chaves-guia** (cópias) e ponteiros para filhos, só para direcionar a busca. A B+ é mais eficiente para arquivos indexados porque (1) os nós internos, sem ponteiros de dados, comportam **mais filhos por bloco**, o que diminui a altura, e (2) as **folhas são encadeadas**, o que permite percorrer em ordem e fazer consultas por intervalo sem voltar pela árvore.
+
+### 3(b) Hash como índice
+
+| | Hash | Árvore B+ |
+|---|---|---|
+| Consulta por **igualdade** | **O(1)** médio | O(log n) |
+| Consulta por **intervalo** | **não serve** (a função espalha as chaves) | **ótima**: desce uma vez e segue as folhas |
+| **Ordenação** das chaves | não mantém | mantém (folhas em ordem) |
+| Colisões | existem; degradam a busca (listas longas) | não há |
+| Crescimento | tabela fixa; exige **rehash** para crescer | cresce sozinha por splits |
+
+> Resumo: hash é ótimo para **igualdade**, ruim para **intervalo e ordenação**; a B+ é boa nas duas, com custo um pouco maior por busca.
+
+### 3(d) Como o split garante os 50% mínimos
+
+> Um nó só é dividido quando **estoura**: ao inserir numa página cheia (máximo `n − 1` chaves), ela passa a ter `n` chaves. A chave do **meio sobe** para o pai e as outras `n − 1` se repartem em duas páginas com `⌊(n−1)/2⌋` e `⌈(n−1)/2⌉` chaves, ou seja, **pelo menos `⌈n/2⌉ − 1`**, que é o mínimo exigido (metade da capacidade). Como nenhuma página é dividida antes de encher, nenhuma nasce abaixo disso. A **raiz** é exceção, pois pode ter menos.
+
+Conferência numérica: `n = 24` → estoura com 24 chaves, 1 sobe, sobram 23 → **12 e 11**; o mínimo é `⌈24/2⌉ − 1 = 11`. ✔ Com `n = 3`: 3 chaves, 1 sobe, sobram 2 → 1 e 1; mínimo `⌈3/2⌉ − 1 = 1`. ✔
+
+Se a raiz estoura, nasce uma **raiz nova** com a chave que subiu e a árvore cresce em altura (é assim que ela cresce: **por cima**, sempre balanceada).
+
+---
+
+## 18. Código da P2: usar a árvore B como caixa-preta
+
+A questão 4 (2,8 pontos, a de maior peso) **não pede para implementar a árvore**. O enunciado dá a árvore pronta e quatro funções:
+
+| Função | O que faz |
+|---|---|
+| `void* openTree(const char* nomeArquivo)` | abre (ou cria) o arquivo de índice e devolve a árvore |
+| `bool findKey(void* tree, long key, long* offset)` | busca a chave; se achar, devolve `true` e grava o offset em `*offset` |
+| `void insertKey(void* tree, long key, long offset)` | insere o par chave → offset |
+| `void closeTree(void* tree)` | fecha a árvore |
+
+O registro tem tamanho fixo:
+
+```c
+typedef struct { long chave; char dados[1000]; } Registro;
+```
+
+### A ideia
+
+O **arquivo de dados** guarda os registros; a **árvore** é um índice **chave → offset em bytes** (onde o registro começa no arquivo de dados). Para ler um registro: busca a chave na árvore, recebe o offset, faz `fseek(f, offset, SEEK_SET)` e `fread`. Mesma ideia do índice no fim de um livro.
+
+Cuidados:
+- O offset é em **bytes**, não o número do registro. Pegue com `ftell(f)` **antes** do `fread`.
+- Use sempre `sizeof(Registro)`. Aqui ele vale **1008** (8 + 1000), mas não escreva o número.
+- `dados[1000]` pode não ter `'\0'`: imprima com `%.1000s`.
+- Abra os arquivos em modo **binário** (`"rb"`, `"wb"`).
+
+### (a) Construir o índice
+
+```c
+void indexaArquivo(const char* nomeDados, const char* nomeIndice) {
+    FILE* f = fopen(nomeDados, "rb");
+    if (!f) { printf("Erro ao abrir %s\n", nomeDados); return; }
+    void* arv = openTree(nomeIndice);
+    Registro r;
+    long offset = ftell(f);                       // ftell ANTES do fread
+    while (fread(&r, sizeof(Registro), 1, f) == 1) {
+        insertKey(arv, r.chave, offset);
+        offset = ftell(f);                        // início do próximo registro
+    }
+    closeTree(arv);
+    fclose(f);
+}
+```
+
+### (b) Buscar uma chave e imprimir `dados`
+
+```c
+void imprimeDados(const char* nomeDados, const char* nomeIndice, long chave) {
+    void* arv = openTree(nomeIndice);
+    long offset;
+    if (!findKey(arv, chave, &offset)) {
+        printf("Chave %ld nao encontrada\n", chave);
+        closeTree(arv);
+        return;
+    }
+    FILE* f = fopen(nomeDados, "rb");
+    if (f) {
+        Registro r;
+        fseek(f, offset, SEEK_SET);
+        if (fread(&r, sizeof(Registro), 1, f) == 1)
+            printf("%.1000s\n", r.dados);
+        fclose(f);
+    }
+    closeTree(arv);
+}
+```
+
+### (c) Registros que estão no arquivo2 e **não** no arquivo1
+
+A assinatura já recebe `indiceArquivo1`, ou seja, o índice do arquivo1 **já existe**. Percorre-se o arquivo2 sequencialmente e, para cada registro, pergunta-se à árvore se a chave existe.
+
+```c
+void diferencaArquivos(const char* arquivo1, const char* arquivo2,
+                       const char* indiceArquivo1, const char* arquivoSaida) {
+    FILE* f2  = fopen(arquivo2, "rb");
+    FILE* out = fopen(arquivoSaida, "wb");
+    if (!f2 || !out) {
+        printf("Erro ao abrir arquivos\n");
+        if (f2) fclose(f2);
+        if (out) fclose(out);
+        return;
+    }
+    void* arv = openTree(indiceArquivo1);
+    Registro r;
+    long offset;                                  // não é usado: só interessa se achou
+    while (fread(&r, sizeof(Registro), 1, f2) == 1)
+        if (!findKey(arv, r.chave, &offset))      // não está no arquivo1
+            fwrite(&r, sizeof(Registro), 1, out);
+    closeTree(arv);
+    fclose(f2);
+    fclose(out);
+}
+```
+
+O parâmetro `arquivo1` não é lido: só o seu índice. Se o enunciado dissesse que o índice **não existe**, chame antes `indexaArquivo(arquivo1, indiceArquivo1)`.
+
+Esse código foi compilado e testado com uma árvore "de mentira" (lista em arquivo) no lugar da árvore B. Teste: arquivo1 = 10, 20, …, 100; arquivo2 = 5, 10, …, 100. A saída foi 5, 15, 25, …, 95 (os 10 que não estão no arquivo1), e a busca por uma chave ausente imprimiu a mensagem.
+
+### (d) Custo
+
+Seja `n` o número de registros do arquivo1 e `m` o do arquivo2.
+
+> Lê-se o arquivo2 **uma vez**, sequencialmente (`m` registros), e faz-se **uma busca na árvore por registro**: **O(m · log n)**. Cada busca custa a **altura** da árvore em leituras de bloco (poucas, pois a árvore é baixa e larga). O arquivo1 **não** é lido, só o índice. Se o índice precisasse ser construído, somaria **O(n · log n)**.
+
+Compare com a alternativa sem índice: para cada registro do arquivo2, varrer o arquivo1 inteiro daria **O(m · n)**.
+
+Erro comum nessa resposta: escrever só `O(log n)` ou `O(2·log n)`. Falta o fator **m**: o `log n` é o custo de **uma** busca, e são `m` buscas.
