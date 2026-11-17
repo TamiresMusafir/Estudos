@@ -1,10 +1,34 @@
-# Árvores B e B+ — guia de estudo
+# Árvores B e B+: guia de estudo
 
-Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **conceito** e em **desenhar/calcular** as árvores, que é o que cai na prova, mais o uso da árvore B em código (você **não** implementa a árvore, só chama as funções dela). O código aparece em dois lugares: a [seção 15](#15-ligação-com-o-código-de-estudo) liga os conceitos ao `ArvoreB.c` de estudo, e a [seção 18](#18-código-da-p2-usar-a-árvore-b-como-caixa-preta) mostra como **usar** uma árvore B pronta (a P2 pede isso).
+Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **conceito**, em **desenhar/calcular** as árvores e em **usar** uma árvore B pronta em código (você **não** implementa a árvore, só chama as funções dela).
 
-> Os exemplos foram conferidos por simulação. Os exercícios resolvidos vêm da P2 de 2023.1 (Prof. Renato Mauro). Convenções de desenho variam de professor para professor: veja a [seção 2](#2-convenções-usadas-aqui) e confirme as do seu.
+> Os exemplos foram conferidos por simulação. Os exercícios resolvidos vêm da P2 de 2023.1 (Prof. Renato Mauro) e de uma P2 corrigida. Convenções de desenho variam de professor para professor: veja a [seção 2](#2-convenções-usadas-aqui) e confirme as do seu.
+
+## Resumo em 30 segundos
+
+- Árvore B/B+ é um **índice em disco**. O que custa caro é **ler bloco**, então custo da busca = **altura** da árvore.
+- **Nó = um bloco.** `n` = máximo de **ponteiros para filhos**; chaves por nó = **n − 1**.
+- **Árvore B:** chave **e** ponteiro de dado em **todo** nó.
+- **Árvore B+:** ponteiro de dado **só nas folhas**; nós internos só **guiam**; folhas **encadeadas**.
+- **B+ é melhor** porque fica **mais baixa** (nó interno menor por chave) e atende **faixa e ordem** pelas folhas.
+- **Split:** o nó estourou → a chave do meio **sobe** (na folha da B+, a chave é **copiada**).
+- **Hash:** ótimo para igualdade; não serve para faixa nem ordem.
+
+## Como usar este guia
+
+| Se a questão pede... | Vá para |
+|---|---|
+| Explicar a diferença B x B+, quando usar, por que uma é mais eficiente | [seção 9](#9-b-x-b-diferença-quando-usar-e-por-que-uma-é-mais-eficiente) e [seção 14](#14-teoria-cobrada-na-p2-respostas-modelo) |
+| Desenhar a árvore inserindo uma sequência | [seção 6](#6-árvore-b-inserção), [seção 8](#8-árvore-b-estrutura-e-operações) e [seção 13](#13-para-treinar) |
+| Calcular `n`, chaves máximas e mínimas pelo bloco | [seção 10](#10-a-conta-do-bloco-explicada-passo-a-passo) e [seção 4](#4-árvore-b-propriedades) |
+| Quantas chaves até certo nível ou altura | [seção 11](#11-ocupação-média-níveis-e-altura) |
+| Explicar por que o split garante 50% | [seção 14](#14-teoria-cobrada-na-p2-respostas-modelo) |
+| Escrever código usando a árvore B pronta | [seção 15](#15-código-da-p2-usar-a-árvore-b-como-caixa-preta) |
+| Revisar na véspera | [seção 18](#18-cola-de-prova) e [seção 17](#17-erros-comuns) |
 
 ## Índice
+
+**Parte 1: Conceito**
 
 1. [Por que existem](#1-por-que-existem)
 2. [Convenções usadas aqui](#2-convenções-usadas-aqui)
@@ -14,16 +38,22 @@ Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **co
 6. [Árvore B: inserção](#6-árvore-b-inserção)
 7. [Árvore B: remoção](#7-árvore-b-remoção)
 8. [Árvore B+: estrutura e operações](#8-árvore-b-estrutura-e-operações)
-9. [Comparação entre B e B+](#9-comparação-entre-b-e-b)
-10. [Dimensionamento pelo bloco de disco](#10-dimensionamento-pelo-bloco-de-disco)
+9. [B x B+: diferença, quando usar e por que uma é mais eficiente](#9-b-x-b-diferença-quando-usar-e-por-que-uma-é-mais-eficiente)
+
+**Parte 2: Contas**
+
+10. [A conta do bloco explicada passo a passo](#10-a-conta-do-bloco-explicada-passo-a-passo)
 11. [Ocupação média, níveis e altura](#11-ocupação-média-níveis-e-altura)
+
+**Parte 3: Prova**
+
 12. [Exercícios resolvidos](#12-exercícios-resolvidos)
 13. [Para treinar](#13-para-treinar)
-14. [Erros comuns](#14-erros-comuns)
-15. [Ligação com o código de estudo](#15-ligação-com-o-código-de-estudo)
-16. [Cola de prova](#16-cola-de-prova)
-17. [Teoria cobrada na P2: respostas-modelo](#17-teoria-cobrada-na-p2-respostas-modelo)
-18. [Código da P2: usar a árvore B como caixa-preta](#18-código-da-p2-usar-a-árvore-b-como-caixa-preta)
+14. [Teoria cobrada na P2: respostas-modelo](#14-teoria-cobrada-na-p2-respostas-modelo)
+15. [Código da P2: usar a árvore B como caixa-preta](#15-código-da-p2-usar-a-árvore-b-como-caixa-preta)
+16. [Ligação com o código de estudo](#16-ligação-com-o-código-de-estudo)
+17. [Erros comuns](#17-erros-comuns)
+18. [Cola de prova](#18-cola-de-prova)
 
 ---
 
@@ -64,6 +94,13 @@ A ideia: **um nó = um bloco de disco**, com muitas chaves e muitos filhos. A á
 | Split | Dividir um nó que estourou em dois |
 | Merge (fusão) | Juntar dois nós irmãos que ficaram pequenos |
 | Fator de ocupação | Quanto do nó está preenchido, em média (ex.: 70%) |
+
+### Ponteiro de bloco x ponteiro de dado
+
+- **Ponteiro de bloco (`Pb`)** aponta para **outro nó da árvore** (um filho). Serve para **descer** na árvore. No `ArvoreB.c`: `paginaEsquerda` e `paginaDireita`.
+- **Ponteiro de dado (`Pr`)** aponta para o **registro de verdade**, no arquivo de dados. Serve para **ler o registro** depois de achar a chave. No `ArvoreB.c`: `posicaoRegistro`.
+
+Exemplo com o índice de CEP: a busca desce pela árvore usando ponteiros de bloco. Ao achar a chave, o ponteiro de dado diz "esse CEP está no byte 48.210 do arquivo de CEPs", e então se faz o `fseek` até lá.
 
 ---
 
@@ -212,38 +249,139 @@ Remova da **folha**. Se houver underflow, redistribua ou funda com o irmão, com
 
 ---
 
-## 9. Comparação entre B e B+
+## 9. B x B+: diferença, quando usar e por que uma é mais eficiente
+
+### A diferença em uma figura
+
+```
+B   (todo nó):    P0 | K1 R1 | P1 | K2 R2 | P2           P = ponteiro de bloco (filho)
+B+  nó interno:   P0 | K1    | P1 | K2    | P2           K = chave
+B+  folha:        K1 R1 | K2 R2 | K3 R3 | ──► próxima folha      R = ponteiro de dado
+```
+
+Em uma frase: na **B**, todo nó guarda chave **e** ponteiro de dado. Na **B+**, só a **folha** guarda o ponteiro de dado; o nó interno é só uma **placa de direção** ("menores que K vão por aqui, maiores por ali").
 
 | | Árvore B | Árvore B+ |
 |---|---|---|
 | Ponteiros de dados | em **todos** os nós | **só nas folhas** |
 | Chave repetida | nunca | guias dos internos repetem chaves das folhas |
 | Chaves por nó interno | menos (cada chave carrega um ponteiro de dados) | **mais** (só chave + ponteiro de bloco) |
-| Altura | maior | **menor** (nós internos mais largos) |
+| Altura | maior | **menor** |
 | Busca | pode terminar num nó interno | **sempre até a folha** |
-| Busca por faixa | ruim (percorrer em ordem pela árvore toda) | **ótima** (lista de folhas) |
+| Busca por faixa | ruim | **ótima** (lista de folhas) |
 | Split de folha | a chave do meio sobe | a primeira da direita é **copiada** |
 | Folhas | independentes | **encadeadas** em lista (simples ou dupla) |
 
-Por que a B+ é mais eficiente para arquivos indexados: (1) nós internos só com chave e ponteiro de bloco → mais filhos por bloco → **árvore mais baixa**; (2) as folhas encadeadas permitem **varrer em ordem** e responder **faixas** sem subir e descer pela árvore. A [seção 17](#17-teoria-cobrada-na-p2-respostas-modelo) tem a resposta-modelo.
+### Por que a B+ é mais eficiente
+
+**1. Árvore mais baixa, logo menos leituras de disco.** Sem o ponteiro de dado, cada chave do nó interno ocupa menos bytes, então cabem **mais filhos por bloco** (a conta está na [seção 10](#10-a-conta-do-bloco-explicada-passo-a-passo)). Com bloco de 512 bytes, `V = 9`, `Pr = 7`, `Pb = 6`: a B tem `n = 24` e o nó interno da B+ tem `n = 34`. Para guardar **1 milhão de registros** (nós cheios, melhor caso):
+
+| | Cálculo | Níveis (= leituras por busca) |
+|---|---|---|
+| B (n = 24) | 24⁴ − 1 = 331.775 (não basta); 24⁵ − 1 = 7.962.623 | **5** |
+| B+ (internos n = 34, folhas de 31 chaves) | 34² · 31 = 35.836 (não basta); 34³ · 31 = 1.218.424 | **4** |
+
+Uma leitura de disco a menos em **toda** busca.
+
+**2. Folhas encadeadas.** Para "todos os CEPs entre A e B", a B+ desce uma vez até o A e **anda pela lista de folhas** até chegar ao B. Na B, os registros da faixa estão espalhados por nós internos e folhas, e é preciso subir e descer pela árvore.
+
+**3. Custo previsível.** Na B+ a busca custa sempre a altura. A B às vezes acha a chave num nó interno e para antes, mas quase todas as chaves estão no último nível, então esse ganho é pequeno.
+
+### Quando usar cada uma
+
+| Preciso de... | Use | Por quê |
+|---|---|---|
+| Consulta por **faixa**, ou listar **em ordem** | **B+** | folhas encadeadas |
+| Muitas buscas por chave exata num arquivo grande | **B+** | altura menor |
+| **Só** igualdade, sem faixa e sem ordem | **hash** | O(1) médio (veja a [seção 14](#14-teoria-cobrada-na-p2-respostas-modelo)) |
+| Índice geral de arquivo ou banco de dados | **B+** | é a mais usada em índices |
+| A prova pediu "árvore B" | **B** | siga o enunciado |
+
+Na prática, a B+ é a escolha padrão para índices em disco. A B é o passo didático para chegar nela, e é cobrada em prova porque a B+ é uma variação dela.
 
 ---
 
-## 10. Dimensionamento pelo bloco de disco
+---
 
-Dados: tamanho do bloco `B`, da chave `V`, do ponteiro de dados `Pr` e do ponteiro de bloco `Pb`. O nó tem que **caber em um bloco**.
+## 10. A conta do bloco explicada passo a passo
 
-| Nó | Condição | Resolver para |
-|---|---|---|
-| **B** (qualquer) | `n·Pb + (n−1)·(Pr + V) ≤ B` | `n` |
-| **B+ interno** | `n·Pb + (n−1)·V ≤ B` | `n` |
-| **B+ folha** | `k·(V + Pr) + Pb ≤ B` (o `Pb` é o ponteiro da próxima folha) | `k` chaves |
+Em vez de decorar a fórmula, entenda de onde ela sai. A pergunta é: **qual o maior `n` para o nó ainda caber em um bloco?** Quanto maior o `n`, mais filhos e mais baixa a árvore.
 
-Passo a passo para não errar:
+Dados do exemplo: bloco `B = 512` bytes, chave `V = 9`, ponteiro de dado `Pr = 7`, ponteiro de bloco `Pb = 6`.
 
-1. Substitua os números.
-2. **Distribua o `(n−1)`**: `22n − 16 ≤ 512`. É o erro mais comum esquecer o `−16`.
-3. Isole `n` e **arredonde para baixo** (precisa caber).
+### Passo 1: o que tem dentro de um nó da árvore B
+
+Um nó com `n = 4`, desenhado:
+
+```
+P0 | K1 R1 | P1 | K2 R2 | P2 | K3 R3 | P3
+```
+
+São **4 ponteiros de bloco** (P), **3 chaves** (K) e **3 ponteiros de dado** (R). Em geral: **`n` ponteiros de bloco, `n−1` chaves, `n−1` ponteiros de dado**.
+
+Por que uma chave a menos que ponteiros? São como cercas e pastos: 3 cercas dividem o terreno em 4 pastos. Cada chave é uma cerca e cada filho é um pasto (a faixa de valores entre duas chaves).
+
+### Passo 2: somar os bytes
+
+| Parte | Quantidade | Bytes cada | Total |
+|---|---|---|---|
+| ponteiros de bloco | `n` | `Pb` | `n·Pb` |
+| chaves | `n−1` | `V` | `(n−1)·V` |
+| ponteiros de dado | `n−1` | `Pr` | `(n−1)·Pr` |
+
+Somando: `n·Pb + (n−1)·V + (n−1)·Pr`. Como chave e ponteiro de dado sempre andam juntos, junta-se o `(n−1)`:
+
+> **`n·Pb + (n−1)·(Pr + V) ≤ B`**
+
+O `(Pr + V)` é o "pacote" chave + ponteiro de dado: aqui, 7 + 9 = **16 bytes**. O `(n−1)` é quantos pacotes cabem no nó.
+
+### Passo 3: colocar os números e resolver
+
+```
+6·n + 16·(n−1) ≤ 512
+6n + 16n − 16  ≤ 512      ← o 16·(n−1) vira 16n − 16 (é daqui que vem o "−16")
+22n − 16       ≤ 512
+22n            ≤ 528
+n              ≤ 24
+```
+
+**Prova real** (sempre faça): 24 ponteiros de bloco = 24·6 = 144 bytes; 23 pacotes = 23·16 = 368 bytes; total **512**. Cabe exatamente. Com `n = 25`: 150 + 384 = 534 > 512, não cabe.
+
+Se a divisão não for exata, **arredonde para baixo** (o nó tem que caber).
+
+### B+ nó interno: sem o `Pr`
+
+O nó interno da B+ não tem ponteiro de dado, então o pacote é só a chave (9 bytes):
+
+```
+6·n + 9·(n−1) ≤ 512  →  15n − 9 ≤ 512  →  15n ≤ 521  →  n ≤ 34,7  →  n = 34
+```
+
+Prova real: 34·6 = 204; 33·9 = 297; total 501 ≤ 512. Com `n = 35` seriam 516, não cabe. **O pacote menor (9 em vez de 16) é o que faz caberem mais filhos** (34 contra 24).
+
+### B+ folha: sem filhos
+
+A folha não tem filhos. Ela guarda `k` chaves, cada uma com seu ponteiro de dado (pacote `V + Pr = 16`), mais **um** ponteiro de bloco: o da próxima folha.
+
+```
+k·16 + 6 ≤ 512  →  16k ≤ 506  →  k ≤ 31,6  →  k = 31
+```
+
+Prova real: 31·16 = 496, mais 6 = 502 ≤ 512. Com `k = 32` seriam 518, não cabe. Na folha não existe "n−1": são **k chaves**.
+
+### Resumo
+
+| Nó | Contém | Condição | Resolver para |
+|---|---|---|---|
+| **B** (qualquer) | n·Pb, (n−1)·chave, (n−1)·Pr | `n·Pb + (n−1)·(Pr + V) ≤ B` | `n` |
+| **B+ interno** | n·Pb, (n−1)·chave | `n·Pb + (n−1)·V ≤ B` | `n` |
+| **B+ folha** | k·chave, k·Pr, 1·Pb | `k·(V + Pr) + Pb ≤ B` | `k` |
+
+Receita de 4 passos: (1) liste o que tem no nó; (2) monte a soma de bytes; (3) **distribua o `(n−1)`**; (4) isole `n`, arredonde para baixo e faça a prova real.
+
+Para o `V`, `Pr` e `Pb` da sua prova, basta trocar os números. A estrutura da conta não muda.
+
+---
 
 ---
 
@@ -274,7 +412,7 @@ Para **n = 3**:
 
 Como obter o mínimo para a altura `h`: a raiz tem 1 chave e 2 filhos; todos os outros nós têm o **mínimo** de chaves (⌈n/2⌉ − 1) e de filhos (⌈n/2⌉).
 
-Observação: em simulação, o mínimo calculado pela fórmula coincidiu com o que a **inserção em ordem crescente** produz para n = 3 e n = 5 (ordens ímpares). Para ordem **par** (ex.: 4), a inserção com a convenção desta seção 2 precisou de mais chaves (10, e não 7) para chegar a altura 3. Se a prova pedir isso, veja se o enunciado fala em "inserir" (depende da convenção do split) ou só em "estrutura mínima".
+Observação: em simulação, o mínimo calculado pela fórmula coincidiu com o que a **inserção em ordem crescente** produz para n = 3 e n = 5 (ordens ímpares). Para ordem **par** (ex.: 4), a inserção com a convenção da [seção 2](#2-convenções-usadas-aqui) precisou de mais chaves (10, e não 7) para chegar a altura 3. Se a prova pedir isso, veja se o enunciado fala em "inserir" (depende da convenção do split) ou só em "estrutura mínima".
 
 ---
 
@@ -354,66 +492,7 @@ Se o seu professor subir a chave do **meio-direita**, os desenhos mudam (por exe
 
 ---
 
-## 14. Erros comuns
-
-- Tratar `n` como número de **chaves**. `n` é o número de **ponteiros**; chaves = `n − 1`.
-- Esquecer de distribuir o `(n−1)` na conta do bloco (`22n − 16`, e não `22n`).
-- Usar `Pr` no nó **interno** da B+ (ele não tem ponteiro de dados).
-- Na B+, **mover** a chave no split de folha. Na folha ela é **copiada**; só no nó interno ela sobe.
-- Esquecer que a **raiz** pode ter só 1 chave, e que o mínimo de ⌈n/2⌉ − 1 vale para os **outros** nós.
-- Esquecer de **reordenar** as chaves ao inserir no meio do nó.
-- Esquecer que, se a raiz estoura, **nasce uma raiz nova** e a altura sobe.
-- Contar a altura começando em 0 numa prova que conta níveis (ou ao contrário). Declare o que usou.
-- Na B+, parar a busca ao achar a chave num nó interno. É só guia: desça até a folha.
-- Chamar de "B+" uma estrutura em que **cada nó tem ponteiro de dados**: isso é árvore **B**.
-- No código: guardar na árvore o **número** do registro (`posicao++`). A prova pede o **offset em bytes**; use `ftell` **antes** do `fread` (ou `i * sizeof(Registro)`).
-- No código: escrever `1004` ou `1008` no lugar de `sizeof(Registro)`. Com o padding o tamanho pode não ser `8 + 1000`.
-- Esquecer de **fechar a árvore** (`closeTree`) depois de usar: sem isso o índice pode não ser gravado.
-- Dizer que o custo de `diferencaArquivos` é só `log n`. Faltou o fator **m** (uma busca por registro do arquivo2).
-
----
-
-## 15. Ligação com o código de estudo
-
-O `ArvoreB.h`/`ArvoreB.c` implementam uma árvore **B** (cada elemento tem `posicaoRegistro`, em todas as páginas).
-
-| Conceito | No código |
-|---|---|
-| Nó / bloco | `ArvoreB_Pagina` (7.216 bytes no Linux 64 bits) |
-| Chave + ponteiro de dados | `chave` + `posicaoRegistro` no `ArvoreB_Elemento` |
-| Ponteiros de bloco | offsets em bytes no arquivo: `paginaEsquerda` e `paginaDireita` |
-| Máximo de chaves | `TAM_PAG` = 300 (logo, **n = 301 ponteiros**: 1 `paginaEsquerda` + 300 `paginaDireita`) |
-| Ponteiro nulo / folha | offset 0; folha quando `paginaEsquerda == 0` |
-| Split | `ArvoreB_Split`: sobe o elemento de índice `TAM_PAG/2` |
-| Raiz nova | `ArvoreB_Insere` cria a raiz e atualiza o cabeçalho |
-| Ponteiro de dados | número do registro no arquivo de dados (CEP) |
-
----
-
-## 16. Cola de prova
-
-| Quero | Fórmula |
-|---|---|
-| Ordem `n` da B | `n·Pb + (n−1)·(Pr+V) ≤ B` |
-| Ordem `n` da B+ (interno) | `n·Pb + (n−1)·V ≤ B` |
-| Chaves por folha da B+ | `k·(V+Pr) + Pb ≤ B` |
-| Chaves máx. por nó | `n − 1` |
-| Chaves mín. (não raiz) | `⌈n/2⌉ − 1` |
-| Ponteiros médios | `f = ocupação × n` |
-| Nós no nível `k` (raiz = 1) | `f^(k−1)` |
-| Chaves no nível `k` | `f^(k−1) · (f−1)` |
-| Chaves até a altura `h` | `f^h − 1` |
-| Máx. de chaves, altura `h` | `n^h − 1` |
-| Mín. de chaves, altura `h` | `2·⌈n/2⌉^(h−1) − 1` |
-| Mín. após split (n ponteiros) | `⌊(n−1)/2⌋ = ⌈n/2⌉ − 1` |
-| Offset em bytes (registro fixo) | `i · sizeof(Registro)`, ou `ftell` antes do `fread` |
-| Custo de `m` buscas na árvore | `m · log n` (≈ `m · altura` leituras de bloco) |
-
-**Split na B:** a chave do meio **sobe**. **Split de folha na B+:** a primeira da direita é **copiada**. **Split de interno na B+:** a do meio **sobe**.
-
----
-
-## 17. Teoria cobrada na P2: respostas-modelo
+## 14. Teoria cobrada na P2: respostas-modelo
 
 Essas são as perguntas de teoria de uma P2 corrigida (questão 3, 0,3 ponto cada). Respostas curtas, no tamanho que cabe na prova.
 
@@ -443,7 +522,7 @@ Se a raiz estoura, nasce uma **raiz nova** com a chave que subiu e a árvore cre
 
 ---
 
-## 18. Código da P2: usar a árvore B como caixa-preta
+## 15. Código da P2: usar a árvore B como caixa-preta
 
 A questão 4 (2,8 pontos, a de maior peso) **não pede para implementar a árvore**. O enunciado dá a árvore pronta e quatro funções:
 
@@ -551,3 +630,62 @@ Seja `n` o número de registros do arquivo1 e `m` o do arquivo2.
 Compare com a alternativa sem índice: para cada registro do arquivo2, varrer o arquivo1 inteiro daria **O(m · n)**.
 
 Erro comum nessa resposta: escrever só `O(log n)` ou `O(2·log n)`. Falta o fator **m**: o `log n` é o custo de **uma** busca, e são `m` buscas.
+
+---
+
+## 16. Ligação com o código de estudo
+
+O `ArvoreB.h`/`ArvoreB.c` implementam uma árvore **B** (cada elemento tem `posicaoRegistro`, em todas as páginas).
+
+| Conceito | No código |
+|---|---|
+| Nó / bloco | `ArvoreB_Pagina` (7.216 bytes no Linux 64 bits) |
+| Chave + ponteiro de dados | `chave` + `posicaoRegistro` no `ArvoreB_Elemento` |
+| Ponteiros de bloco | offsets em bytes no arquivo: `paginaEsquerda` e `paginaDireita` |
+| Máximo de chaves | `TAM_PAG` = 300 (logo, **n = 301 ponteiros**: 1 `paginaEsquerda` + 300 `paginaDireita`) |
+| Ponteiro nulo / folha | offset 0; folha quando `paginaEsquerda == 0` |
+| Split | `ArvoreB_Split`: sobe o elemento de índice `TAM_PAG/2` |
+| Raiz nova | `ArvoreB_Insere` cria a raiz e atualiza o cabeçalho |
+| Ponteiro de dados | número do registro no arquivo de dados (CEP) |
+
+---
+
+## 17. Erros comuns
+
+- Tratar `n` como número de **chaves**. `n` é o número de **ponteiros**; chaves = `n − 1`.
+- Esquecer de distribuir o `(n−1)` na conta do bloco (`22n − 16`, e não `22n`).
+- Usar `Pr` no nó **interno** da B+ (ele não tem ponteiro de dados).
+- Na B+, **mover** a chave no split de folha. Na folha ela é **copiada**; só no nó interno ela sobe.
+- Esquecer que a **raiz** pode ter só 1 chave, e que o mínimo de ⌈n/2⌉ − 1 vale para os **outros** nós.
+- Esquecer de **reordenar** as chaves ao inserir no meio do nó.
+- Esquecer que, se a raiz estoura, **nasce uma raiz nova** e a altura sobe.
+- Contar a altura começando em 0 numa prova que conta níveis (ou ao contrário). Declare o que usou.
+- Na B+, parar a busca ao achar a chave num nó interno. É só guia: desça até a folha.
+- Chamar de "B+" uma estrutura em que **cada nó tem ponteiro de dados**: isso é árvore **B**.
+- No código: guardar na árvore o **número** do registro (`posicao++`). A prova pede o **offset em bytes**; use `ftell` **antes** do `fread` (ou `i * sizeof(Registro)`).
+- No código: escrever `1004` ou `1008` no lugar de `sizeof(Registro)`. Com o padding o tamanho pode não ser `8 + 1000`.
+- Esquecer de **fechar a árvore** (`closeTree`) depois de usar: sem isso o índice pode não ser gravado.
+- Dizer que o custo de `diferencaArquivos` é só `log n`. Faltou o fator **m** (uma busca por registro do arquivo2).
+
+---
+
+## 18. Cola de prova
+
+| Quero | Fórmula |
+|---|---|
+| Ordem `n` da B | `n·Pb + (n−1)·(Pr+V) ≤ B` |
+| Ordem `n` da B+ (interno) | `n·Pb + (n−1)·V ≤ B` |
+| Chaves por folha da B+ | `k·(V+Pr) + Pb ≤ B` |
+| Chaves máx. por nó | `n − 1` |
+| Chaves mín. (não raiz) | `⌈n/2⌉ − 1` |
+| Ponteiros médios | `f = ocupação × n` |
+| Nós no nível `k` (raiz = 1) | `f^(k−1)` |
+| Chaves no nível `k` | `f^(k−1) · (f−1)` |
+| Chaves até a altura `h` | `f^h − 1` |
+| Máx. de chaves, altura `h` | `n^h − 1` |
+| Mín. de chaves, altura `h` | `2·⌈n/2⌉^(h−1) − 1` |
+| Mín. após split (n ponteiros) | `⌊(n−1)/2⌋ = ⌈n/2⌉ − 1` |
+| Offset em bytes (registro fixo) | `i · sizeof(Registro)`, ou `ftell` antes do `fread` |
+| Custo de `m` buscas na árvore | `m · log n` (≈ `m · altura` leituras de bloco) |
+
+**Split na B:** a chave do meio **sobe**. **Split de folha na B+:** a primeira da direita é **copiada**. **Split de interno na B+:** a do meio **sobe**.
