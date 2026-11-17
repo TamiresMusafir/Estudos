@@ -61,10 +61,12 @@ Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **co
 
 No disco, o que custa caro é **ler um bloco**. Comparar chaves na memória é quase de graça. Então o custo de uma busca se mede em **quantos blocos são lidos**.
 
-| Estrutura (700 mil registros) | Leituras de disco por busca |
+| Estrutura (exemplo: arquivo de CEPs com 700 mil registros) | Leituras de disco por busca |
 |---|---|
 | Árvore binária balanceada (1 chave por nó) | ≈ 20 (log₂ 700.000) |
 | Árvore B com ~300 chaves por nó | 2 ou 3 |
+
+Os dois números são **ilustrativos**: 700 mil é o tamanho de um arquivo de CEPs de exemplo, e 300 chaves por nó é o `TAM_PAG` do `ArvoreB.c` de estudo. Os 20 vêm de log₂ 700.000 ≈ 19,4 (uma árvore binária desce um nível por comparação, então precisa de cerca de 20 níveis).
 
 A ideia: **um nó = um bloco de disco**, com muitas chaves e muitos filhos. A árvore fica **baixa e larga**, e a altura é o número de leituras.
 
@@ -77,6 +79,7 @@ A ideia: **um nó = um bloco de disco**, com muitas chaves e muitos filhos. A á
 - **Split (divisão):** o nó estoura quando passa de n − 1 chaves. Com `k` chaves após o estouro, **sobe a chave de índice ⌊(k−1)/2⌋** (contando de 0). Se `k` é ímpar, é a do meio exato; se é par, é a **do meio-esquerda**. Outro professor pode subir a do meio-direita: o desenho muda, a lógica não.
 - **Split de folha na B+:** a metade esquerda fica com ⌈k/2⌉ chaves.
 - Em prova, **escreva a convenção que usou** em uma linha.
+- **De onde vêm os números dos exemplos:** cada exemplo diz a origem do seu número. Quando é só para ter números pequenos, está escrito "exemplo". Quando vem de uma prova (P2 2023.1), foram valores **dados no enunciado** daquela prova, e **mudam** de prova para prova: o que vale é o método, não o número.
 
 ---
 
@@ -93,7 +96,7 @@ A ideia: **um nó = um bloco de disco**, com muitas chaves e muitos filhos. A á
 | Underflow | Nó com chaves de menos após uma remoção |
 | Split | Dividir um nó que estourou em dois |
 | Merge (fusão) | Juntar dois nós irmãos que ficaram pequenos |
-| Fator de ocupação | Quanto do nó está preenchido, em média (ex.: 70%) |
+| Fator de ocupação | Quanto do nó está preenchido, em média. Ex.: 70% quer dizer que o nó tem, em média, 70% da sua capacidade ocupada (o professor informa esse valor no enunciado) |
 
 ### Ponteiro de bloco x ponteiro de dado
 
@@ -127,7 +130,7 @@ Regras:
 | Nó que **não é raiz** | no mínimo **⌈n/2⌉ − 1** | no mínimo **⌈n/2⌉** |
 | **Raiz** | no mínimo **1** | no mínimo **2** (se não for folha) |
 
-Exemplo, n = 24: máximo 23 chaves; mínimo em nó não raiz ⌈24/2⌉ − 1 = **11** chaves.
+Exemplo, n = 24 (valor que sai da conta do bloco da P2 2023.1, veja a [seção 10](#10-a-conta-do-bloco-explicada-passo-a-passo)): máximo 23 chaves; mínimo em nó não raiz ⌈24/2⌉ − 1 = **11** chaves.
 
 ---
 
@@ -164,6 +167,8 @@ Regras:
 6. Se a **raiz** estourar, nasce uma **raiz nova** com 1 chave, e a **altura aumenta em 1**. A árvore cresce **por cima**, e é por isso que continua balanceada.
 
 ### Exemplo: n = 3 (máximo 2 chaves por nó), inserindo 1, 2, 3, 4, 5, 6, 7
+
+`n = 3` e as chaves 1 a 7 foram escolhidos só para ter uma árvore pequena, em que o split aparece logo. Numa prova, o `n` e a sequência vêm no enunciado.
 
 | Insere | O que acontece | Árvore (nível por nível) |
 |---|---|---|
@@ -274,12 +279,20 @@ Em uma frase: na **B**, todo nó guarda chave **e** ponteiro de dado. Na **B+**,
 
 ### Por que a B+ é mais eficiente
 
-**1. Árvore mais baixa, logo menos leituras de disco.** Sem o ponteiro de dado, cada chave do nó interno ocupa menos bytes, então cabem **mais filhos por bloco** (a conta está na [seção 10](#10-a-conta-do-bloco-explicada-passo-a-passo)). Com bloco de 512 bytes, `V = 9`, `Pr = 7`, `Pb = 6`: a B tem `n = 24` e o nó interno da B+ tem `n = 34`. Para guardar **1 milhão de registros** (nós cheios, melhor caso):
+**1. Árvore mais baixa, logo menos leituras de disco.** Sem o ponteiro de dado, cada chave do nó interno ocupa menos bytes, então cabem **mais filhos por bloco** (a conta está na [seção 10](#10-a-conta-do-bloco-explicada-passo-a-passo)). Para ver o efeito, usei os valores do enunciado da P2 de 2023.1: bloco de 512 bytes, chave de 9 bytes, ponteiro de dado de 7 e ponteiro de bloco de 6 (o que é cada um está explicado na [seção 3](#3-vocabulário) e a conta na seção 10). Com eles, a B tem `n = 24` filhos por nó e o nó interno da B+ tem `n = 34`. Em outra prova os valores serão outros, mas a conclusão (B+ cabe mais filhos) é a mesma. Para guardar um arquivo **hipotético de 1 milhão de registros** (nós cheios, melhor caso), conte os **nós por nível**. Cada nível multiplica o anterior pelo número de filhos:
 
-| | Cálculo | Níveis (= leituras por busca) |
+| Nível | B (24 filhos por nó) | B+ (34 filhos por nó) |
 |---|---|---|
-| B (n = 24) | 24⁴ − 1 = 331.775 (não basta); 24⁵ − 1 = 7.962.623 | **5** |
-| B+ (internos n = 34, folhas de 31 chaves) | 34² · 31 = 35.836 (não basta); 34³ · 31 = 1.218.424 | **4** |
+| 1 (raiz) | 1 nó | 1 nó |
+| 2 | 24 nós | 34 nós |
+| 3 | 576 nós | 1.156 nós |
+| 4 | 13.824 nós | **39.304 folhas** |
+| 5 | **331.776 folhas** | não precisa |
+
+- **B+:** os dados ficam só nas folhas. Com 4 níveis há 39.304 folhas × 31 chaves = **1.218.424** chaves, o que cobre o milhão. Com 3 níveis seriam só 1.156 × 31 = 35.836.
+- **B:** cada nó tem até 23 chaves. Com 4 níveis são 14.425 nós × 23 = **331.775** chaves, que não basta, então precisa do nível 5 (no total, 24⁵ − 1 = 7.962.623).
+
+A B+ guarda os dados no último nível, mas **chega lá mais depressa**: como o nó interno não carrega ponteiro de dado, cabem 34 filhos em vez de 24, e a árvore se abre mais rápido a cada nível.
 
 Uma leitura de disco a menos em **toda** busca.
 
@@ -307,7 +320,16 @@ Na prática, a B+ é a escolha padrão para índices em disco. A B é o passo di
 
 Em vez de decorar a fórmula, entenda de onde ela sai. A pergunta é: **qual o maior `n` para o nó ainda caber em um bloco?** Quanto maior o `n`, mais filhos e mais baixa a árvore.
 
-Dados do exemplo: bloco `B = 512` bytes, chave `V = 9`, ponteiro de dado `Pr = 7`, ponteiro de bloco `Pb = 6`.
+Os números do exemplo vêm do enunciado da P2 de 2023.1. São medidas em **bytes**, dadas pelo professor:
+
+| Símbolo | O que é | Valor nessa prova |
+|---|---|---|
+| `B` | tamanho do bloco | 512 bytes |
+| `V` | tamanho da chave | 9 bytes |
+| `Pr` | tamanho do ponteiro de dado | 7 bytes |
+| `Pb` | tamanho do ponteiro de bloco | 6 bytes |
+
+Não decore esses valores: em outra prova eles mudam. Decore a **conta**.
 
 ### Passo 1: o que tem dentro de um nó da árvore B
 
@@ -389,7 +411,9 @@ Para o `V`, `Pr` e `Pb` da sua prova, basta trocar os números. A estrutura da c
 
 ### Ocupação média (ex.: 70%)
 
-1. Ponteiros por nó: `f = 0,7 · n`, arredondado (ex.: 0,7 × 24 = 16,8 → **17**).
+O 70% é um exemplo da P2 2023.1: o enunciado disse que os nós, em média, ficam 70% cheios. Em outra prova a porcentagem pode ser outra.
+
+1. Ponteiros por nó: `f = 0,7 · n`, arredondado (ex.: 0,7 × 24 = 16,8 → **17**; o 24 é o `n` da conta do bloco).
 2. Chaves por nó: `f − 1`.
 3. Nível `k` (a raiz é o nível 1):
    - nós no nível `k` = `f^(k−1)`
@@ -403,7 +427,7 @@ Para o `V`, `Pr` e `Pb` da sua prova, basta trocar os números. A estrutura da c
 | **Máximo** de chaves | `n^h − 1` |
 | **Mínimo** de chaves | `2 · ⌈n/2⌉^(h−1) − 1` |
 
-Para **n = 3**:
+Para **n = 3** (escolhido só para ter números pequenos):
 
 | h | 1 | 2 | 3 | 4 |
 |---|---|---|---|---|
@@ -445,7 +469,7 @@ Estrutura mínima: raiz com 1 chave + 2 filhos com 1 chave + 4 folhas com 1 chav
 
 ### Exercício extra, com outros números
 
-Dados: `B = 1024`, `V = 12`, `Pr = 8`, `Pb = 4`.
+Dados: `B = 1024`, `V = 12`, `Pr = 8`, `Pb = 4`. (Valores **inventados por mim para treino**, não são de nenhuma prova; servem para você refazer a conta com números diferentes.)
 
 | Pergunta | Conta | Resposta |
 |---|---|---|
