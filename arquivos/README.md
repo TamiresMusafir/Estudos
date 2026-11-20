@@ -2,6 +2,22 @@
 
 Material de consulta e revisão sobre arquivos, registros, memória, ponteiros, busca, índices e ordenação externa em C.
 
+## 🧭 Índice geral: P1 e P2
+
+| Prova | Matéria | Onde está |
+|---|---|---|
+| **P1** | Arquivos em C: `FILE *`, registros, `fseek`/`fread`, busca binária, índice em memória, ordenação externa e intercalação | Este README, a partir do [Sumário](#-sumário) (partes 1 a 5), e as pastas [`manipulacao-basica/`](manipulacao-basica), [`busca-binaria/`](busca-binaria), [`ordenacao/`](ordenacao), [`intercala/`](intercala), [`bmp/`](bmp), [`folha-de-cola/`](folha-de-cola) e [`provasp1/`](provasp1) |
+| **P2** | Árvore B/B+, hash e árvore de Huffman | [Parte P2 deste README](#-p2--árvores-b-e-b-hash-e-huffman) e as pastas [`arvores/`](arvores), [`hash/`](hash), [`arvore-huf/`](arvore-huf) e [`provasp2/`](provasp2) |
+
+### Índice da P2
+
+- [P2.1 Árvores B e B+](#p21-árvores-b-e-b)
+- [P2.2 Hash](#p22-hash)
+- [P2.3 Código e árvore de Huffman](#p23-código-e-árvore-de-huffman)
+- [P2.4 Cola de prova da P2](#p24-cola-de-prova-da-p2)
+
+---
+
 ## 📑 Sumário
 
 - [1. Conceitos principais](#1-conceitos-principais)
@@ -2887,3 +2903,50 @@ arquivo não cabe na memória?
 precisa comparar registros em sequência?
     → busca sequencial
 ```
+
+---
+
+# 🧪 P2 — Árvores B e B+, hash e Huffman
+
+> Esta parte é **só da P2**. Tudo acima dela é P1. Cada assunto tem um guia completo na sua pasta; aqui fica o resumo e o caminho. A prova de base é a [P2 2026.1](provasp2/p2-2026.1.pdf) e o [mapa questão → onde estudar](provasp2/README.md#mapa-da-prova-p2-20261-questão--onde-estudar) está na pasta `provasp2/`.
+
+## P2.1 Árvores B e B+
+
+Guia completo: [`arvores/README.md`](arvores/README.md). Código de estudo: [`ArvoreB.c`](arvores/ArvoreB.c) e [`ArboreB.h`](arvores/ArboreB.h).
+
+- Árvore B/B+ é um **índice em disco**: o custo é **ler bloco**, então custo da busca = **altura**.
+- **Nó = um bloco.** `n` = máximo de ponteiros para filhos; chaves por nó = `n − 1`.
+- **B:** chave **e** ponteiro de dado em todo nó. **B+:** ponteiro de dado **só nas folhas**, folhas **encadeadas**, mais baixa e boa para faixa.
+- **Split:** o nó estoura, a chave do meio **sobe** (na folha da B+, a chave é **copiada**). Por isso todo nó não raiz fica com pelo menos `⌈n/2⌉ − 1` chaves.
+- **Conta do bloco:** B `n·Pb + (n−1)(Pr+V) ≤ B`; B+ interno `n·Pb + (n−1)·V ≤ B`; folha B+ `k(V+Pr) + Pb ≤ B`. Os tamanhos `B`, `V`, `Pr`, `Pb` vêm do enunciado.
+- **Código da prova (questão 4):** a árvore é um índice **chave → offset em bytes**. Pegue o offset com `ftell` **antes** do `fread`. Veja a [seção 15](arvores/README.md#15-código-da-p2-usar-a-árvore-b-como-caixa-preta).
+
+## P2.2 Hash
+
+Guia completo: [`hash/README.md`](hash/README.md). Scripts do trabalho dos CEPs: [`hash2.py`](hash/hash2.py), [`CriaIndice.py`](hash/CriaIndice.py), [`ProcuraIndice.py`](hash/ProcuraIndice.py), [`NUmeroColisoes.py`](hash/NUmeroColisoes.py), [`leArquivoCEP.py`](hash/leArquivoCEP.py).
+
+- `h(k) = k mod m`, e o registro vai para `seek(posição × tamanho da entrada)`.
+- **Encadeamento externo:** a área de colisão começa na posição `m`. `Próximo = 0` é o fim da lista, e o novo registro entra logo após a entrada primária.
+- **Fator de carga** `α = n/m`. Acessos médios com sucesso ≈ `1 + α/2`.
+- **Hash x B+:** hash é ótimo para **igualdade**, mas não serve para **faixa** nem **ordem**.
+- Exemplo resolvido: [P2 2026.1 questão 2](hash/README.md#8-exemplo-completo-p2-questão-2) (11 posições primárias, 10 chaves do enunciado).
+
+## P2.3 Código e árvore de Huffman
+
+Guia completo: [`arvore-huf/README.md`](arvore-huf/README.md). Programas de estudo: [`contafrequencia.c`](arvore-huf/contafrequencia.c) (conta os 256 valores de byte) e [`histograma.py`](arvore-huf/histograma.py) (desenha o gráfico).
+
+- **Algoritmo guloso com heap mínimo:** junte sempre os dois nós de **menor frequência** até sobrar um. Esquerda = 0, direita = 1, e o código é **livre de prefixo**.
+- **Custo** = soma de (frequência × tamanho do código) = soma dos pesos dos nós internos. Com `n` símbolos há `n − 1` junções e `2n − 1` nós.
+- **Empates** geram árvores diferentes, mas com o **mesmo custo**.
+- Exemplo resolvido: [P2 2026.1 questão 1](arvore-huf/README.md#11-exercício-resolvido-p2-questão-1) (símbolos A–H do enunciado, custo 444 bits contra 492 bits com 3 bits fixos por símbolo).
+
+## P2.4 Cola de prova da P2
+
+| Se a questão pede... | Faça | Guia |
+|---|---|---|
+| Árvore de Huffman e códigos | Heap mínimo, junte os 2 menores, esquerda 0 e direita 1 | [Huffman](arvore-huf/README.md#11-exercício-resolvido-p2-questão-1) |
+| Tabela de hash com colisões | `k mod m`, colisão vai para a próxima posição livre da área de colisão e encadeia | [Hash](hash/README.md#8-exemplo-completo-p2-questão-2) |
+| Desenhar árvore B ou B+ | Insira em ordem, split ao estourar, escreva a convenção usada | [B/B+](arvores/README.md#6-árvore-b-inserção) |
+| Calcular `n` pelo bloco | Monte a soma de bytes, isole `n`, arredonde para baixo e faça a prova real | [B/B+](arvores/README.md#10-a-conta-do-bloco-explicada-passo-a-passo) |
+| Diferença B x B+, hash, heap, split | Respostas curtas | [B/B+](arvores/README.md#14-teoria-cobrada-na-p2-respostas-modelo) |
+| Código com índice em árvore B | `ftell` antes do `fread`, `insertKey`, `findKey`, `fseek` | [B/B+](arvores/README.md#15-código-da-p2-usar-a-árvore-b-como-caixa-preta) |

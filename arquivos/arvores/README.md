@@ -4,6 +4,35 @@ Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **co
 
 > Os exemplos foram conferidos por simulação. Os exercícios resolvidos vêm da P2 de 2023.1 (Prof. Renato Mauro) e de uma P2 corrigida. Convenções de desenho variam de professor para professor: veja a [seção 2](#2-convenções-usadas-aqui) e confirme as do seu.
 
+## Índice
+
+**Parte 1: Conceito**
+
+- [1. Por que existem](#1-por-que-existem)
+- [2. Convenções usadas aqui](#2-convenções-usadas-aqui)
+- [3. Vocabulário](#3-vocabulário)
+- [4. Árvore B: propriedades](#4-árvore-b-propriedades)
+- [5. Árvore B: busca](#5-árvore-b-busca)
+- [6. Árvore B: inserção](#6-árvore-b-inserção)
+- [7. Árvore B: remoção](#7-árvore-b-remoção)
+- [8. Árvore B+: estrutura e operações](#8-árvore-b-estrutura-e-operações)
+- [9. B x B+: diferença, quando usar e por que uma é mais eficiente](#9-b-x-b-diferença-quando-usar-e-por-que-uma-é-mais-eficiente)
+
+**Parte 2: Contas**
+
+- [10. A conta do bloco explicada passo a passo](#10-a-conta-do-bloco-explicada-passo-a-passo)
+- [11. Ocupação média, níveis e altura](#11-ocupação-média-níveis-e-altura)
+
+**Parte 3: Prova**
+
+- [12. Exercícios resolvidos](#12-exercícios-resolvidos)
+- [13. Para treinar](#13-para-treinar)
+- [14. Teoria cobrada na P2: respostas-modelo](#14-teoria-cobrada-na-p2-respostas-modelo)
+- [15. Código da P2: usar a árvore B como caixa-preta](#15-código-da-p2-usar-a-árvore-b-como-caixa-preta)
+- [16. Ligação com o código de estudo](#16-ligação-com-o-código-de-estudo)
+- [17. Erros comuns](#17-erros-comuns)
+- [18. Cola de prova](#18-cola-de-prova)
+
 ## Resumo em 30 segundos
 
 - Árvore B/B+ é um **índice em disco**. O que custa caro é **ler bloco**, então custo da busca = **altura** da árvore.
@@ -26,34 +55,6 @@ Material de **Organização de Estruturas de Arquivos** (CEFET/RJ). Foco em **co
 | Escrever código usando a árvore B pronta | [seção 15](#15-código-da-p2-usar-a-árvore-b-como-caixa-preta) |
 | Revisar na véspera | [seção 18](#18-cola-de-prova) e [seção 17](#17-erros-comuns) |
 
-## Índice
-
-**Parte 1: Conceito**
-
-1. [Por que existem](#1-por-que-existem)
-2. [Convenções usadas aqui](#2-convenções-usadas-aqui)
-3. [Vocabulário](#3-vocabulário)
-4. [Árvore B: propriedades](#4-árvore-b-propriedades)
-5. [Árvore B: busca](#5-árvore-b-busca)
-6. [Árvore B: inserção](#6-árvore-b-inserção)
-7. [Árvore B: remoção](#7-árvore-b-remoção)
-8. [Árvore B+: estrutura e operações](#8-árvore-b-estrutura-e-operações)
-9. [B x B+: diferença, quando usar e por que uma é mais eficiente](#9-b-x-b-diferença-quando-usar-e-por-que-uma-é-mais-eficiente)
-
-**Parte 2: Contas**
-
-10. [A conta do bloco explicada passo a passo](#10-a-conta-do-bloco-explicada-passo-a-passo)
-11. [Ocupação média, níveis e altura](#11-ocupação-média-níveis-e-altura)
-
-**Parte 3: Prova**
-
-12. [Exercícios resolvidos](#12-exercícios-resolvidos)
-13. [Para treinar](#13-para-treinar)
-14. [Teoria cobrada na P2: respostas-modelo](#14-teoria-cobrada-na-p2-respostas-modelo)
-15. [Código da P2: usar a árvore B como caixa-preta](#15-código-da-p2-usar-a-árvore-b-como-caixa-preta)
-16. [Ligação com o código de estudo](#16-ligação-com-o-código-de-estudo)
-17. [Erros comuns](#17-erros-comuns)
-18. [Cola de prova](#18-cola-de-prova)
 
 ---
 
@@ -713,3 +714,4 @@ O `ArvoreB.h`/`ArvoreB.c` implementam uma árvore **B** (cada elemento tem `posi
 | Custo de `m` buscas na árvore | `m · log n` (≈ `m · altura` leituras de bloco) |
 
 **Split na B:** a chave do meio **sobe**. **Split de folha na B+:** a primeira da direita é **copiada**. **Split de interno na B+:** a do meio **sobe**.
+
