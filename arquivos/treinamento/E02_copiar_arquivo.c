@@ -1,6 +1,6 @@
-#include <stdio.h>
-
 // Crie o programa copia que recebe origem e destino e copia com fgetc/fputc. Se o segundo fopen falhar, feche o primeiro.
+
+#include <stdio.h>
 
 int main(int argc, char** argv){
     FILE *entrada, *saida;
