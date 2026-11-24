@@ -58,9 +58,17 @@ O material é um só, em duas partes: **P1** (arquivos em C) e **P2** (árvores 
   - [P2.1 Árvores B e B+](#p21-árvores-b-e-b)
   - [P2.2 Hash](#p22-hash)
   - [P2.3 Código e árvore de Huffman](#p23-código-e-árvore-de-huffman)
-  - [P2.4 Folha de Cola da P2 (mesclada com a P1)](#p24-folha-de-cola-da-p2-mesclada-com-a-p1)
-  - [P2.5 Mapa: questão → guia de estudo](#p25-mapa-questão--guia-de-estudo)
+  - [P2.4 Mapa: questão → guia de estudo](#p24-mapa-questão--guia-de-estudo)
 - Guias completos, nas pastas: [`arvores/`](arvores/README.md) · [`hash/`](hash/README.md) · [`arvore-huf/`](arvore-huf/README.md) · [`provasp2/`](provasp2/README.md)
+
+- [6. Folha de cola da P2](#6-folha-de-cola-da-p2)
+  - [6.1 Respostas objetivas (para copiar)](#61-respostas-objetivas-para-copiar)
+  - [6.2 Pior caso e melhor caso](#62-pior-caso-e-melhor-caso)
+  - [6.3 Árvore B e B+: como funciona e as contas](#63-árvore-b-e-b-como-funciona-e-as-contas)
+  - [6.4 Hash com encadeamento externo](#64-hash-com-encadeamento-externo)
+  - [6.5 Huffman](#65-huffman)
+  - [6.6 Código com índice em árvore B (questão 4 da P2)](#66-código-com-índice-em-árvore-b-questão-4-da-p2)
+  - [6.7 Checklist — antes de entregar a P2](#67-checklist--antes-de-entregar-a-p2)
 
 ### 🧠 Fechamento
 
@@ -2880,25 +2888,38 @@ Guia completo: [`arvore-huf/README.md`](arvore-huf/README.md). Programas de estu
 - **Empates** geram árvores diferentes, mas com o **mesmo custo**.
 - Exemplo resolvido: [P2 2026.1 questão 1](arvore-huf/README.md#11-exercício-resolvido-p2-questão-1) (símbolos A–H do enunciado, custo 444 bits contra 492 bits com 3 bits fixos por símbolo).
 
-## P2.4 Folha de Cola da P2 (mesclada com a P1)
+## P2.4 Mapa: questão → guia de estudo
 
-Folha única para consulta na prova. **A parte da P1 é a [seção 5](#5-folha-de-cola)** (arquivos em C: `fseek`, `ftell`, `fread`, `qsort`, busca, índice, ordenação externa), que o código da P2 reaproveita. Abaixo, a parte da P2: respostas objetivas, pior e melhor caso, funcionamento de árvore B/B+, hash e Huffman, e o código da questão 4. Os números `1`, `2`, `3.2`... abaixo são as seções desta folha.
+| Se a questão pede... | Faça | Guia |
+|---|---|---|
+| Árvore de Huffman e códigos | Heap mínimo, junte os 2 menores, esquerda 0 e direita 1 | [Huffman](arvore-huf/README.md#11-exercício-resolvido-p2-questão-1) |
+| Tabela de hash com colisões | `k mod m`, colisão vai para a próxima posição livre da área de colisão e encadeia | [Hash](hash/README.md#8-exemplo-completo-p2-questão-2) |
+| Desenhar árvore B ou B+ | Insira em ordem, split ao estourar, escreva a convenção usada | [B/B+](arvores/README.md#6-árvore-b-inserção) |
+| Calcular `n` pelo bloco | Monte a soma de bytes, isole `n`, arredonde para baixo e faça a prova real | [B/B+](arvores/README.md#10-a-conta-do-bloco-explicada-passo-a-passo) |
+| Diferença B x B+, hash, heap, split | Respostas curtas | [B/B+](arvores/README.md#14-teoria-cobrada-na-p2-respostas-modelo) |
+| Código com índice em árvore B | `ftell` antes do `fread`, `insertKey`, `findKey`, `fseek` | [B/B+](arvores/README.md#15-código-da-p2-usar-a-árvore-b-como-caixa-preta) |
+
+---
+
+# 6. Folha de Cola da P2
+
+> Folha para consulta na prova, no mesmo formato da [seção 5](#5-folha-de-cola) (que é a folha da P1 e cobre arquivos em C: `fseek`, `ftell`, `fread`, `qsort`, busca, índice, ordenação externa; o código da P2 reaproveita tudo isso). Aqui ficam as respostas objetivas, pior e melhor caso, funcionamento de árvore B/B+, hash e Huffman, e o código da questão 4.
 
 | Se a questão pede... | Vá a |
 |---|---|
-| Explicar / diferença B × B+, hash × árvore, heap, split | 1 |
-| Múltipla escolha de árvore B/B+ | 1.2 |
-| Pior caso / melhor caso / custo | 2 |
-| Calcular n pelo bloco, quantas chaves, altura | 3.2, 3.3 |
-| Desenhar inserção ou remoção em árvore B | 3.4, 3.5 |
-| Tabela de hash com colisões | 4 |
-| Árvore e códigos de Huffman | 5 |
-| Código com índice em árvore B (`openTree`, `findKey`...) | 6 |
+| Explicar / diferença B × B+, hash × árvore, heap, split | [6.1](#61-respostas-objetivas-para-copiar) |
+| Múltipla escolha de árvore B/B+ | 6.1.2 |
+| Pior caso / melhor caso / custo | [6.2](#62-pior-caso-e-melhor-caso) |
+| Calcular n pelo bloco, quantas chaves, altura | 6.3.2 e 6.3.3 |
+| Desenhar inserção ou remoção em árvore B | 6.3.4 e 6.3.5 |
+| Tabela de hash com colisões | [6.4](#64-hash-com-encadeamento-externo) |
+| Árvore e códigos de Huffman | [6.5](#65-huffman) |
+| Código com índice em árvore B (`openTree`, `findKey`...) | [6.6](#66-código-com-índice-em-árvore-b-questão-4-da-p2) |
 | Qualquer código em C (arquivos, busca, `qsort`...) | [seção 5](#5-folha-de-cola) |
 
-### 1. Respostas objetivas (para copiar)
+## 6.1 Respostas objetivas (para copiar)
 
-#### 1.1 Diferença entre árvore B e árvore B+
+### 6.1.1 Diferença entre árvore B e árvore B+
 
 ```text
 ÁRVORE B   chaves E dados (ou ponteiros p/ dados) ficam em TODOS os nós,
@@ -2916,7 +2937,7 @@ POR QUE A B+ É MAIS EFICIENTE EM ARQUIVO INDEXADO
  3. toda busca desce até a folha → custo parecido para qualquer chave
 ```
 
-#### 1.2 Múltipla escolha (A10)
+### 6.1.2 Múltipla escolha (A10)
 
 ```text
 Onde ficam as chaves reais (com dados) na B+?        (b) apenas nas folhas
@@ -2925,7 +2946,7 @@ Principal vantagem da B+ sobre a B?                  (a) busca sequencial
 O que é exclusivo da B e não da B+?                  (a) chaves nos nós internos
 ```
 
-#### 1.3 Hash como índice: vantagens e desvantagens
+### 6.1.3 Hash como índice: vantagens e desvantagens
 
 ```text
 VANTAGENS
@@ -2938,7 +2959,7 @@ DESVANTAGENS
   muitas colisões → listas longas → pode chegar a O(n)
 ```
 
-#### 1.4 Hash × árvore B/B+
+### 6.1.4 Hash × árvore B/B+
 
 ```text
 Organização  árvore: nós ligados por ponteiros      hash: função calcula a posição
@@ -2956,7 +2977,7 @@ A ordem de inserção se perde no hash porque a posição vem de h(k),
 não da ordem de chegada.
 ```
 
-#### 1.5 Split e o mínimo de 50% de ocupação
+### 6.1.5 Split e o mínimo de 50% de ocupação
 
 ```text
 O nó só divide quando ESTOURA (n chaves, sendo n o grau).
@@ -2966,7 +2987,7 @@ cada metade fica com pelo menos ⌈n/2⌉ − 1 chaves = o mínimo permitido.
 Ex.: grau 5 → estoura com 5 chaves → 2 + (1 que sobe) + 2   (mínimo = 2) ✓
 ```
 
-#### 1.6 Huffman
+### 6.1.6 Huffman
 
 ```text
 POR QUE USAR HEAP: a cada passo é preciso achar os 2 menores pesos e devolver
@@ -2983,7 +3004,7 @@ CÓDIGO LIVRE DE PREFIXO: nenhum código é começo de outro → dá para decodi
 sem separador.
 ```
 
-#### 1.7 Por que a árvore B é um bom índice em disco
+### 6.1.7 Por que a árvore B é um bom índice em disco
 
 ```text
 Cada nó = 1 bloco = 1 leitura de disco.
@@ -2992,7 +3013,7 @@ Nó grande (muitas chaves) → árvore BAIXA → poucas leituras.
 Balanceada: todas as folhas no mesmo nível; cresce pela RAIZ.
 ```
 
-#### 1.8 Índice (chave → posição)
+### 6.1.8 Índice (chave → posição)
 
 ```text
 O arquivo de dados não muda; o índice guarda pares (chave, posição em bytes).
@@ -3001,7 +3022,7 @@ Vantagem: busca rápida sem ordenar o arquivo de dados.
 Custo: espaço extra, e se o arquivo for reordenado o índice precisa ser refeito.
 ```
 
-#### 1.9 Custo de "arquivo2 menos arquivo1" com árvore B (D2d)
+### 6.1.9 Custo de "arquivo2 menos arquivo1" com árvore B (D2d)
 
 ```text
 uma busca na árvore B para CADA registro de arquivo2:  n2 × O(log n1)
@@ -3010,9 +3031,8 @@ mais a leitura sequencial de arquivo2 e a escrita da saída
 (se o índice do arquivo1 ainda precisar ser construído: O((n1 + n2) · log n1))
 ```
 
----
 
-### 2. Pior caso e melhor caso
+## 6.2 Pior caso e melhor caso
 
 | Operação | Melhor caso | Pior caso |
 |---|---|---|
@@ -3036,11 +3056,10 @@ altura h de uma árvore com N chaves e m filhos por nó ≈ log_m (N)
 árvore cheia: N = m^h − 1  →  h = log_m (N + 1)
 ```
 
----
 
-### 3. Árvore B e B+: como funciona e as contas
+## 6.3 Árvore B e B+: como funciona e as contas
 
-#### 3.1 Grau, chaves e filhos
+### 6.3.1 Grau, chaves e filhos
 
 O grau **n** é o máximo de **filhos (ponteiros)**. As chaves ficam entre os ponteiros: sempre uma a menos.
 
@@ -3061,7 +3080,7 @@ todas as folhas no mesmo nível
 
 ⚠️ 1 chave é válido em grau 3 e 4. **0 chaves** fora da raiz não é (é o que a remoção precisa consertar).
 
-#### 3.2 Conta do bloco (A1, A9)
+### 6.3.2 Conta do bloco (A1, A9)
 
 O nó inteiro tem que **caber em um bloco**. Some os bytes, isole `n` e **arredonde para baixo**.
 
@@ -3094,7 +3113,7 @@ struct { int qt; int chaves[N]; int valores[N]; int filhos[N+1]; }
 
 ⚠️ **n** = ponteiros; **N** da struct = chaves. "Adequado" = o **maior** que cabe. Confira se o tamanho vem em bytes ou em `int`.
 
-#### 3.3 Quantas chaves cabem · altura · páginas novas
+### 6.3.3 Quantas chaves cabem · altura · páginas novas
 
 Nó cheio com **N chaves** tem **m = N + 1 filhos**. Cada nível multiplica os nós por **m**.
 
@@ -3123,7 +3142,7 @@ A6 (folhas no nível 7, raiz no nível 0, inserir 1 chave):
 
 ⚠️ Nível 3 = 17 **×** 17 (não 17 + 1). Raiz no nível 0 ou 1? **Conte os níveis.**
 
-#### 3.4 Inserção (split)
+### 6.3.4 Inserção (split)
 
 ```text
 1. desce até a folha e insere EM ORDEM
@@ -3146,7 +3165,7 @@ A3 (grau 5, máx 4 chaves): inserir 6 na folha [2 3 5 7]
 
 ⚠️ Na **B+**, ao dividir uma folha a chave do meio é **copiada** para o pai (continua na folha).
 
-#### 3.5 Remoção
+### 6.3.5 Remoção
 
 ```text
 1. tira a chave da folha. Ainda tem o mínimo?  PARE.
@@ -3175,7 +3194,7 @@ Fusão (A4, grau 4, mín 1):
 
 ⚠️ Irmão com exatamente o mínimo **não** empresta.
 
-#### 3.6 B+ em resumo
+### 6.3.6 B+ em resumo
 
 ```text
 B+  → dados SÓ nas folhas
@@ -3186,9 +3205,8 @@ B+  → dados SÓ nas folhas
 B   → chave e ponteiro de dado em todo nó
 ```
 
----
 
-### 4. Hash com encadeamento externo
+## 6.4 Hash com encadeamento externo
 
 ```text
 h(k) = k mod 11      posições 0 a 10
@@ -3242,9 +3260,8 @@ Fator de carga  α = n / m      acessos médios com sucesso ≈ 1 + α/2
 Perguntas comuns: nº de colisões · tamanho da maior lista · onde ela começa
 ```
 
----
 
-### 5. Huffman
+## 6.5 Huffman
 
 ```text
 1. liste os símbolos com as frequências
@@ -3280,9 +3297,8 @@ n símbolos → n − 1 junções · 2n − 1 nós
 
 ⚠️ Custo **não** é só o peso da raiz. Empate muda a árvore, **não** o custo. Escreva qual lado é 0.
 
----
 
-### 6. Código com índice em árvore B (questão 4 da P2)
+## 6.6 Código com índice em árvore B (questão 4 da P2)
 
 A árvore é um índice em disco: **chave → posição em bytes** do registro no arquivo de dados. Na prova (P2 2026.1) vêm prontas estas funções:
 
@@ -3384,7 +3400,7 @@ long chave = atol(tmp);
 
 Nota de estudo: o `ArvoreB.c` do guia usa nomes diferentes (`ArvoreB_Abre`, `ArvoreB_Insere(arvore, chave, pos)`, `ArvoreB_Busca` devolve **-1** se não achar; o 0 é posição válida). Na prova, use as funções que o enunciado der.
 
-#### Checklist — P2
+## 6.7 Checklist — antes de entregar a P2
 
 ```text
 [ ] Raiz no nível 0 ou 1?
@@ -3401,19 +3417,6 @@ Nota de estudo: o `ArvoreB.c` do guia usa nomes diferentes (`ArvoreB_Abre`, `Arv
 ```
 
 ---
-
----
-
-## P2.5 Mapa: questão → guia de estudo
-
-| Se a questão pede... | Faça | Guia |
-|---|---|---|
-| Árvore de Huffman e códigos | Heap mínimo, junte os 2 menores, esquerda 0 e direita 1 | [Huffman](arvore-huf/README.md#11-exercício-resolvido-p2-questão-1) |
-| Tabela de hash com colisões | `k mod m`, colisão vai para a próxima posição livre da área de colisão e encadeia | [Hash](hash/README.md#8-exemplo-completo-p2-questão-2) |
-| Desenhar árvore B ou B+ | Insira em ordem, split ao estourar, escreva a convenção usada | [B/B+](arvores/README.md#6-árvore-b-inserção) |
-| Calcular `n` pelo bloco | Monte a soma de bytes, isole `n`, arredonde para baixo e faça a prova real | [B/B+](arvores/README.md#10-a-conta-do-bloco-explicada-passo-a-passo) |
-| Diferença B x B+, hash, heap, split | Respostas curtas | [B/B+](arvores/README.md#14-teoria-cobrada-na-p2-respostas-modelo) |
-| Código com índice em árvore B | `ftell` antes do `fread`, `insertKey`, `findKey`, `fseek` | [B/B+](arvores/README.md#15-código-da-p2-usar-a-árvore-b-como-caixa-preta) |
 
 ---
 
