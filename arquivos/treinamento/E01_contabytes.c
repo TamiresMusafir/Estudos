@@ -1,6 +1,6 @@
-#include <stdio.h>
-
 // Crie o programa contabytes que recebe um arquivo e imprime quantos bytes e quantas linhas ('\n') ele tem. Leia com fgetc.
+
+#include <stdio.h>
 
 #define MAX 256
 
