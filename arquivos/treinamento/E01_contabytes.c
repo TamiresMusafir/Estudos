@@ -4,7 +4,7 @@
 
 #define MAX 256
 
-int main(int argc, char** argv[]){
+int main(int argc, char** argv){
     FILE *entrada;
     int c;
     int contador[MAX] = {0};
