@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main(int argc, char** argv){
+int main(int argc, char** argv[]){
     FILE *entrada;
     int c;
     int contador[256] = {0};
