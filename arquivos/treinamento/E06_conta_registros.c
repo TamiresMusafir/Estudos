@@ -14,7 +14,6 @@ struct Endereco{
 
 typedef struct Endereco Endereco;
 
-
 long contaRegistros(FILE *f){
 
     fseek(f, 0, SEEK_END);
@@ -22,20 +21,40 @@ long contaRegistros(FILE *f){
     rewind(f);
     
     long registros = tamanho / sizeof(Endereco);
+
+    return registros;
 }
 
 int main(int argc, char** argv){
     FILE *arquivo = fopen("cep.dat", "rb");
+    Endereco primeiro, ultimo;
 
     if(!arquivo){
         fprintf(stderr, "Não foi possível abrir o arquivo");
         return 1;
     }
 
-    int registros = contaRegistros(arquivo);
+    long registros = contaRegistros(arquivo);
 
-    printf("Quantidade de Registros: %ld", registros);
+    if(registros == 0){
+        fprintf(stderr, "Sem registros no arquivo.\n");
+        fclose(arquivo);
+        return 1;
+    }
 
-    long primeiro = fread(arquivo, 1, sizeof(Endereco), arquivo)
+    fread(&primeiro, sizeof(Endereco), 1, arquivo);
 
+    fseek(arquivo, -1 * sizeof(Endereco), SEEK_END);
+
+    fread(&ultimo, sizeof(Endereco), 1, arquivo);
+
+    rewind(arquivo);
+
+    printf("Quantidade de Registros: %ld\n", registros);
+    printf("Primeiro cep: %.8s\n", primeiro.cep);
+    printf("Último cep: %.8s\n", ultimo.cep);
+
+    fclose(arquivo);
+
+    return 0;
 }
