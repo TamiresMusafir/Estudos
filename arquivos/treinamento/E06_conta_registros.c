@@ -35,7 +35,7 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    arquivo = fopen("cep.dat", "rb");
+    arquivo = fopen(argv[1], "rb");
 
     if(!arquivo){
         fprintf(stderr, "Não foi possível abrir o arquivo");
