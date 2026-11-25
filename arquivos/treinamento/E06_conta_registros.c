@@ -26,8 +26,16 @@ long contaRegistros(FILE *f){
 }
 
 int main(int argc, char** argv){
-    FILE *arquivo = fopen("cep.dat", "rb");
+    FILE *arquivo;
     Endereco primeiro, ultimo;
+
+    if(argc != 2){
+        fprintf(stderr, "Erro na chamada do comando.\n");
+        fprintf(stderr, "Uso: %s [ARQUIVO ORIGEM].\n", argv[0]);
+        return 1;
+    }
+
+    arquivo = fopen("cep.dat", "rb");
 
     if(!arquivo){
         fprintf(stderr, "Não foi possível abrir o arquivo");
@@ -47,8 +55,6 @@ int main(int argc, char** argv){
     fseek(arquivo, -1 * sizeof(Endereco), SEEK_END);
 
     fread(&ultimo, sizeof(Endereco), 1, arquivo);
-
-    rewind(arquivo);
 
     printf("Quantidade de Registros: %ld\n", registros);
     printf("Primeiro cep: %.8s\n", primeiro.cep);
