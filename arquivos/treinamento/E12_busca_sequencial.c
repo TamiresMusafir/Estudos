@@ -20,7 +20,6 @@ long buscaSequencial(FILE *f, char *cep, long *lidos){
     Endereco registro;
     long pos = -1;
 
-
     while(fread(&registro, sizeof(Endereco), 1, f) == 1){
         (*lidos)++;
         pos++;
@@ -31,7 +30,6 @@ long buscaSequencial(FILE *f, char *cep, long *lidos){
 
     return -1;
 }
-
 
 int main(int argc, char** argv){
     FILE *arquivo;
