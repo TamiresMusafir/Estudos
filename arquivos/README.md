@@ -3124,30 +3124,79 @@ A3 (grau 5, máx 4 chaves): inserir 6 na folha [2 3 5 7]
 
 ### 6.3.5 Remoção
 
+Mínimo de chaves (não raiz): **m = ⌈n/2⌉ − 1** (grau 3 e 4 → 1; grau 5 e 6 → 2). Ficar com **menos que m** chaves = "estourou para baixo" (underflow) e é preciso consertar.
+
+**Passo 0 — a chave está em folha ou em nó interno?**
+
 ```
-1. tira a chave da folha. Ainda tem o mínimo?  PARE.
-2. um irmão tem MAIS que o mínimo?  EMPRESTA (rotação):
-      o separador do PAI desce  ·  a chave do irmão sobe
-3. senão FUNDE:  folha + separador do pai + irmão  = um nó só
-4. o pai perdeu uma chave: volta ao passo 1 no pai.
-   raiz vazia some (altura − 1)
+em FOLHA        → vai direto ao passo 1
+em NÓ INTERNO   → troque pela PREDECESSORA (maior chave da subárvore da esquerda,
+                  que sempre está numa folha), ou pela sucessora; copie-a para o lugar
+                  e REMOVA A CÓPIA DA FOLHA. A partir daí é remoção em folha (passo 1).
+                  Diga qual das duas usou.
 ```
+
+**Passo 1 — tirar da folha.** Sobrou pelo menos m chaves? **PARE.** Acabou, nada mais muda.
+
+**Passo 2 — a folha ficou com menos que m. Olhe os irmãos ao lado (mesmo pai). Existe um com MAIS que m?**
+
+```
+SIM → EMPRESTA (rotação). O pai não perde nem ganha chave:
+        1) o separador do PAI (o que fica entre você e o irmão) DESCE para a sua folha
+        2) a chave do irmão mais PERTO do separador SOBE para o lugar dele no pai
+           (irmão da esquerda: sobe a MAIOR dele · irmão da direita: sobe a MENOR dele)
+        PARE.
+
+NÃO (todos os irmãos têm exatamente m) → FUNDE:
+        sua folha + separador do PAI + irmão  = UM nó só
+        o separador DESCE e nada sobe → o PAI PERDE uma chave
+        o nó fundido sempre cabe (fica com 2m chaves, que é no máximo n − 1)
+        vá ao passo 3.
+```
+
+**Passo 3 — o pai perdeu uma chave.** Repita o passo 2, agora com o pai no papel de "folha": ele ainda tem pelo menos m? PARE. Senão, tente emprestar de um irmão do pai; se não der, funde com ele (descendo o separador do avô). Pode subir até a raiz.
+
+**Raiz:** a raiz só precisa de 1 chave. Se ela ficar **sem nenhuma** (porque uma fusão levou a última chave dela para baixo), ela **some**: o nó fundido vira a nova raiz e a árvore perde um nível (altura − 1).
+
+Resumo do que **desce**, do que **sobe** e do que **some**:
+
+| Situação | O que desce | O que sobe | O pai |
+|---|---|---|---|
+| Empresta | separador do pai | 1 chave do irmão | continua com o mesmo número de chaves |
+| Funde | separador do pai | nada | perde 1 chave (pode precisar de conserto) |
+| Raiz sem chaves | | | a raiz some; o nó fundido é a nova raiz |
+
+**Ordem de tentativa** (convenção; escreva qual usou): primeiro o irmão da **esquerda**, depois o da **direita**, e só então funde.
 
 ```
 Empréstimo (A5c, grau 5, mín 2):
   raiz [65]   folhas [40 50 60]  [70 80]      remover 80
-  [70] ficou com 1 (< 2); irmão [40 50 60] tem 3 → empresta
+  [70] ficou com 1 (< 2); irmão [40 50 60] tem 3 (> 2) → empresta
   o 65 DESCE · o 60 SOBE  →  raiz [60]   folhas [40 50]  [65 70]
 
-Fusão (A4, grau 4, mín 1):
+Fusão simples (A4, grau 4, mín 1):
   raiz [70]   folhas [60]  [80]               remover 60
-  [60] fica VAZIA; irmão [80] só tem o mínimo → não empresta
+  [60] fica VAZIA; irmão [80] só tem o mínimo (1) → não empresta
   funde: vazia + 70 + [80] = [70 80]; a raiz fica sem chaves e some
+
+Fusão em cascata (grau 3, mín 1, máx 2):
+  raiz [30]    nível 2: [15] [45]    folhas: [10] [20] [40] [50]      remover 10
+  1) folha [10] fica vazia; irmão [20] tem 1 (= mín) → funde: [] + 15 + [20] = [15 20]
+  2) o pai [15] perdeu a chave e ficou vazio; irmão [45] tem 1 (= mín) → funde:
+     [] + 30 (separador da raiz) + [45] = [30 45]
+  3) a raiz ficou sem chaves → some
+  resultado: raiz [30 45]   folhas [15 20] [40] [50]      (altura caiu de 3 para 2)
+
+Remoção em nó interno (mesma árvore original acima, remover 30):
+  30 está na raiz → predecessora = maior chave da subárvore da esquerda = 20
+  raiz vira [20] e apaga-se o 20 da folha → folha vazia → mesmo caminho da cascata
+  resultado: raiz [20 45]   folhas [10 15] [40] [50]
 ```
 
-⚠️ Remoção de chave em nó interno: troque pela predecessora (ou sucessora) da folha e remova lá. Diga qual regra usou.
-⚠️ Irmão com exatamente o mínimo não empresta. Confira que a chave removida sumiu (nem como separador).
-⚠️ Itens "independentes" partem sempre da árvore original; "em seguida" parte do resultado anterior.
+⚠️ Confira que a chave removida **sumiu** (nem como separador).
+⚠️ Irmão com exatamente o mínimo **não** empresta.
+⚠️ Empréstimo não muda o número de chaves do pai; fusão tira uma.
+⚠️ Itens "**independentes**" partem **sempre da árvore original**; "**em seguida**" parte do resultado anterior.
 
 ### 6.3.6 Split de página em C (A8)
 
