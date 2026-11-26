@@ -4,7 +4,7 @@ Material de consulta e revisão sobre arquivos, registros, memória, ponteiros, 
 
 ## 📑 Sumário
 
-O material é um só, em duas partes: **P1** (arquivos em C) e **P2** (árvores B/B+, hash e Huffman). No fim há a [Ideia central da matéria](#-ideia-central-da-matéria), que junta as duas.
+O material é um só, em duas partes: **P1** (arquivos em C) e **P2** (árvores B/B+, hash e Huffman). Depois vem o [Guia de Estudos por Exercício](#7-guia-de-estudos-por-exercício) (E1 a E28, com código testado). No fim há a [Ideia central da matéria](#-ideia-central-da-matéria), que junta tudo.
 
 ### 📘 P1 — Arquivos em C
 
@@ -69,6 +69,41 @@ O material é um só, em duas partes: **P1** (arquivos em C) e **P2** (árvores 
   - [6.5 Huffman](#65-huffman)
   - [6.6 Código com índice em árvore B (questão 4 da P2)](#66-código-com-índice-em-árvore-b-questão-4-da-p2)
   - [6.7 Checklist — antes de entregar a P2](#67-checklist--antes-de-entregar-a-p2)
+
+### 📙 Guia de Estudos por Exercício
+
+- [7. Guia de Estudos por Exercício](#7-guia-de-estudos-por-exercício)
+  - [7.1 Conceitos básicos de arquivos](#71-conceitos-básicos-de-arquivos)
+  - [7.2 E1 — Leitura de bytes, linhas e histograma](#72-e1--leitura-de-bytes-linhas-e-histograma)
+  - [7.3 E2 — Cópia byte a byte](#73-e2--cópia-byte-a-byte)
+  - [7.4 E3 — Cópia em blocos](#74-e3--cópia-em-blocos)
+  - [7.5 Balanceamento de chaves `{}`](#75-balanceamento-de-chaves-)
+  - [7.6 E6 — Quantidade de registros e tamanho do arquivo](#76-e6--quantidade-de-registros-e-tamanho-do-arquivo)
+  - [7.7 E7 — Acesso direto a registros](#77-e7--acesso-direto-a-registros)
+  - [7.8 Ordenação externa](#78-ordenação-externa)
+  - [7.9 `malloc` — Alocação dinâmica](#79-malloc--alocação-dinâmica)
+  - [7.10 `qsort` e função comparadora](#710-qsort-e-função-comparadora)
+  - [7.11 E12 — Busca sequencial](#711-e12--busca-sequencial)
+  - [7.12 E13 — Ordenação em memória](#712-e13--ordenação-em-memória)
+  - [7.13 E14 — Busca binária em arquivo](#713-e14--busca-binária-em-arquivo)
+  - [7.14 E15 — Índice em vetor](#714-e15--índice-em-vetor)
+  - [7.15 Árvores B — Conceitos](#715-árvores-b--conceitos)
+  - [7.16 Árvore B — Exercício A: criação do índice](#716-árvore-b--exercício-a-criação-do-índice)
+  - [7.17 Árvore B — Exercício B: busca e impressão](#717-árvore-b--exercício-b-busca-e-impressão)
+  - [7.18 Árvore B — Exercício C: diferença entre arquivos](#718-árvore-b--exercício-c-diferença-entre-arquivos)
+  - [7.19 Resumo de funções importantes](#719-resumo-de-funções-importantes)
+  - [7.20 Como identificar qual técnica usar na prova](#720-como-identificar-qual-técnica-usar-na-prova)
+  - [7.21 Exercícios do treino que faltam — Bloco 1 (E4, E5)](#721-exercícios-do-treino-que-faltam--bloco-1-e4-e5)
+  - [7.22 Bloco 2 — registros: E8, E9, E10, E11](#722-bloco-2--registros-e8-e9-e10-e11)
+  - [7.23 Bloco 3 — E16: índice gravado em arquivo](#723-bloco-3--e16-índice-gravado-em-arquivo)
+  - [7.24 Bloco 4 — intercalação: E17, E18, E19](#724-bloco-4--intercalação-e17-e18-e19)
+  - [7.25 Bloco 5 — agrupamento, lacuna e janela: E20, E21, E22](#725-bloco-5--agrupamento-lacuna-e-janela-e20-e21-e22)
+  - [7.26 Bloco 6 — imagens BMP: E23 a E28](#726-bloco-6--imagens-bmp-e23-a-e28)
+  - [7.27 Mais enunciados → técnica (complementa o 7.20)](#727-mais-enunciados--técnica-complementa-o-720)
+  - [7.28 Mapa: API da prova × `ArvoreB.c` de estudo](#728-mapa-api-da-prova--arvorebc-de-estudo)
+  - [7.29 Checklist — antes de entregar um exercício de programação](#729-checklist--antes-de-entregar-um-exercício-de-programação)
+  - [7.30 Pontos básicos da P1 que a P2 usa (resumo para consulta)](#730-pontos-básicos-da-p1-que-a-p2-usa-resumo-para-consulta)
+  - [7.31 Lembretes da P1 (contas e últimos lembretes)](#731-lembretes-da-p1-contas-e-últimos-lembretes)
 
 ### 🧠 Fechamento
 
@@ -3417,6 +3452,2479 @@ Nota de estudo: o `ArvoreB.c` do guia usa nomes diferentes (`ArvoreB_Abre`, `Arv
 ```
 
 ---
+
+# 7. Guia de Estudos por Exercício
+
+Guia completo, **exercício por exercício** (E1 a E28 do treino), com a técnica, o código e o porquê de cada passo. Os subtópicos **7.1 a 7.20** são o seu *Guia de Estudos* mantido como está, com acréscimos marcados com ➕ (7.12, 7.16 e 7.20). Os subtópicos **7.21 a 7.31** são parte nova: exercícios que faltavam, mapa enunciado → técnica, checklist, o resumo dos pontos básicos da P1 e os lembretes da P1.
+
+> **Sobre os números dos exemplos:** valores como "registro de 100 bytes", "chaves 10 / 20 / 30" e "offsets 0, 100, 200" são **inventados só para ilustrar**. Tamanhos reais: `Endereco` = **300 bytes** (72+72+72+72+2+8+2); `Registro` da P2 = **1008 bytes** (8 do `long` + 1000 do `char dados[1000]`).
+
+## 7.1 Conceitos básicos de arquivos
+
+### Abrindo arquivos
+
+```c
+FILE *f = fopen("arquivo.dat", "rb");
+
+if (f == NULL) {
+    printf("Erro ao abrir arquivo.\n");
+    return 1;
+}
+```
+
+| Modo | Significado |
+|---|---|
+| `"r"` | Leitura de arquivo texto |
+| `"w"` | Escrita de arquivo texto, apagando conteúdo anterior |
+| `"a"` | Escrita no final do arquivo |
+| `"rb"` | Leitura de arquivo binário |
+| `"wb"` | Escrita de arquivo binário, apagando conteúdo anterior |
+| `"ab"` | Escrita no final de arquivo binário |
+| `"r+b"` | Leitura e escrita em arquivo existente |
+| `"w+b"` | Leitura e escrita, criando ou apagando o arquivo |
+
+**Importante:** arquivos binários que armazenam `struct` normalmente devem ser abertos com `"rb"` e `"wb"`.
+
+### Fechando arquivos
+
+```c
+fclose(f);
+```
+
+Sempre feche os arquivos que foram abertos, inclusive quando ocorrer um erro no meio da execução.
+
+### `fgetc` e `fputc`
+
+- `fgetc(f)`: lê um byte.
+- `fputc(c, f)`: escreve um byte.
+- `EOF`: indica que não há mais dados para ler.
+
+Use `int` para armazenar o retorno de `fgetc`, pois ele precisa representar todos os valores de byte e também `EOF`.
+
+```c
+int c;
+
+while ((c = fgetc(f)) != EOF) {
+    // processa o byte
+}
+```
+
+Não use `while (!feof(f))` como condição principal de leitura. O ideal é testar diretamente o retorno de `fgetc` ou `fread`.
+
+### `fread` e `fwrite`
+
+São utilizados para ler e escrever blocos de dados.
+
+```c
+fread(&registro, sizeof(Registro), 1, f);
+fwrite(&registro, sizeof(Registro), 1, f);
+```
+
+Formato:
+
+```c
+fread(endereco, tamanho, quantidade, arquivo);
+fwrite(endereco, tamanho, quantidade, arquivo);
+```
+
+Exemplo:
+
+```c
+Endereco e;
+
+while (fread(&e, sizeof(Endereco), 1, f) == 1) {
+    // processa um registro
+}
+```
+
+O retorno de `fread` informa quantos elementos completos foram lidos.
+
+## 7.2 E1 — Leitura de bytes, linhas e histograma
+
+Objetivo: percorrer um arquivo e contar seus bytes, suas quebras de linha e a frequência de cada valor de byte.
+
+```c
+int contador[256] = {0};
+int c;
+long totalBytes = 0;
+long linhas = 0;
+
+while ((c = fgetc(f)) != EOF) {
+    totalBytes++;
+    contador[(unsigned char)c]++;
+
+    if (c == '\n') {
+        linhas++;
+    }
+}
+```
+
+#### Entendendo
+
+- `contador[256]`: guarda a quantidade de ocorrências de cada valor de byte.
+- `contador[c]++`: incrementa o contador correspondente ao byte lido.
+- `totalBytes++`: cada leitura bem-sucedida representa um byte.
+- `c == '\n'`: verifica se o byte é uma quebra de linha.
+
+Por que 256 posições?
+
+Porque um byte pode representar 256 valores diferentes: de 0 a 255.
+
+Para imprimir o histograma:
+
+```c
+for (int i = 0; i < 256; i++) {
+    if (contador[i] > 0) {
+        printf("%d: %d\n", i, contador[i]);
+    }
+}
+```
+
+**Atenção:** contar `'\n'` não é necessariamente o mesmo que contar linhas lógicas. Se o arquivo terminar com uma linha sem quebra de linha, ela também deve ser considerada uma linha.
+
+## 7.3 E2 — Cópia byte a byte
+
+Objetivo: copiar o conteúdo de um arquivo para outro lendo um byte por vez.
+
+```c
+int c;
+
+while ((c = fgetc(entrada)) != EOF) {
+    fputc(c, saida);
+}
+```
+
+#### Funcionamento visual
+
+```text
+Arquivo original
+       |
+       v
+     fgetc
+       |
+       v
+  Lê um byte
+       |
+       v
+     fputc
+       |
+       v
+Arquivo destino
+```
+
+A cada repetição:
+1. Lê um byte do arquivo original.
+2. Escreve esse byte no arquivo destino.
+3. Continua até chegar ao `EOF`.
+
+## 7.4 E3 — Cópia em blocos
+
+Em vez de copiar um byte por vez, podemos ler vários bytes de uma vez.
+
+```c
+char buffer[1024];
+size_t lidos;
+
+while ((lidos = fread(buffer, 1, sizeof(buffer), entrada)) > 0) {
+    fwrite(buffer, 1, lidos, saida);
+}
+```
+
+#### O que é `buffer`?
+
+É uma área temporária na memória RAM.
+
+```text
+Arquivo original
+       |
+       v
+  fread (1024 bytes)
+       |
+       v
+   buffer[1024]
+       |
+       v
+  fwrite (lidos bytes)
+       |
+       v
+Arquivo destino
+```
+
+#### Por que usar `lidos` no `fwrite`?
+
+Porque o último bloco pode ter menos de 1024 bytes.
+
+Exemplo:
+
+```text
+Tamanho do arquivo: 2500 bytes
+
+1ª leitura: 1024 bytes
+2ª leitura: 1024 bytes
+3ª leitura:  452 bytes
+```
+
+Na última escrita, precisamos escrever apenas os 452 bytes realmente lidos.
+
+## 7.5 Balanceamento de chaves `{}`
+
+Objetivo: verificar se todas as chaves abertas foram fechadas corretamente.
+
+```c
+int c;
+int saldo = 0;
+int valido = 1;
+
+while ((c = fgetc(f)) != EOF) {
+
+    if (c == '{') {
+        saldo++;
+    }
+    else if (c == '}') {
+        saldo--;
+
+        if (saldo < 0) {
+            valido = 0;
+            break;
+        }
+    }
+}
+
+if (saldo != 0) {
+    valido = 0;
+}
+```
+
+#### Ideia visual
+
+```text
+{  -> saldo = 1
+{  -> saldo = 2
+}  -> saldo = 1
+{  -> saldo = 2
+}  -> saldo = 1
+}  -> saldo = 0
+```
+
+O arquivo é válido se:
+
+- O saldo nunca ficar negativo.
+- O saldo terminar em zero.
+
+Exemplos:
+
+```text
+{{{}}}   -> válido
+{}{}     -> válido
+{}}{     -> inválido
+{{}      -> inválido
+```
+
+Se o saldo ficar negativo, apareceu um `}` sem um `{` correspondente antes dele.
+
+## 7.6 E6 — Quantidade de registros e tamanho do arquivo
+
+Quando um arquivo possui registros de tamanho fixo, podemos descobrir quantos existem dividindo o tamanho total pelo tamanho de cada registro.
+
+```c
+fseek(f, 0, SEEK_END);
+
+long bytes = ftell(f);
+
+long quantidade = bytes / sizeof(Endereco);
+
+rewind(f);
+```
+
+#### Funções utilizadas
+
+| Função | Para que serve |
+|---|---|
+| `fseek` | Move o cursor do arquivo |
+| `ftell` | Informa a posição atual do cursor |
+| `rewind` | Volta o cursor para o início |
+| `sizeof` | Informa o tamanho de uma estrutura em bytes |
+
+#### Exemplo
+
+Imagine:
+
+```c
+sizeof(Endereco) = 100
+```
+
+E o arquivo possui 5000 bytes.
+
+```text
+5000 / 100 = 50 registros
+```
+
+Portanto:
+
+```c
+quantidade = 50;
+```
+
+**Atenção:** essa conta pressupõe que todos os registros possuem o mesmo tamanho e que o arquivo não contém bytes extras.
+
+## 7.7 E7 — Acesso direto a registros
+
+Podemos acessar um registro específico sem precisar ler todos os anteriores.
+
+```c
+long offset = (numero - 1) * sizeof(Endereco);
+
+fseek(f, offset, SEEK_SET);
+
+Endereco e;
+
+fread(&e, sizeof(Endereco), 1, f);
+```
+
+#### Por que `numero - 1`?
+
+Porque normalmente o usuário informa o registro começando em 1, mas as posições começam em 0.
+
+```text
+Registro 1 -> posição 0
+Registro 2 -> posição 1
+Registro 3 -> posição 2
+Registro 4 -> posição 3
+```
+
+#### Exemplo
+
+Se cada registro possui 100 bytes:
+
+```text
+Registro 1 -> offset 0
+Registro 2 -> offset 100
+Registro 3 -> offset 200
+Registro 4 -> offset 300
+```
+
+A fórmula é:
+
+```c
+offset = (numero - 1) * sizeof(Endereco);
+```
+
+#### Tipos de referência do `fseek`
+
+| Referência | Significado |
+|---|---|
+| `SEEK_SET` | Início do arquivo |
+| `SEEK_CUR` | Posição atual |
+| `SEEK_END` | Final do arquivo |
+
+## 7.8 Ordenação externa
+
+A ordenação externa é utilizada quando o arquivo é grande demais para ser carregado inteiro na memória.
+
+A ideia é dividir o arquivo em partes menores, ordenar cada parte na RAM e depois intercalar os arquivos ordenados.
+
+#### Exemplo: dividir em 8 partes
+
+```text
+Arquivo original
+       |
+       v
+  Divide em 8 partes
+       |
+       v
++------+------+------+------+
+| P1   | P2   | P3   | P4   |
++------+------+------+------+
+| P5   | P6   | P7   | P8   |
++------+------+------+------+
+       |
+       v
+Ordena cada parte com qsort
+       |
+       v
+Intercala os pares
+       |
+       v
+8 -> 4 -> 2 -> 1
+       |
+       v
+Arquivo final ordenado
+```
+
+### Divisão das partes
+
+```c
+int PARTES = 8;
+
+long divisao = quantidade / PARTES;
+long resto = quantidade % PARTES;
+```
+
+Para distribuir os registros:
+
+```c
+for (int i = 0; i < PARTES; i++) {
+
+    long quantidadeParte = divisao;
+
+    if (i < resto) {
+        quantidadeParte++;
+    }
+
+    // Aloca, lê, ordena e grava a parte
+}
+```
+
+Por que existe `resto`?
+
+Exemplo:
+
+```text
+Quantidade total = 83
+Partes = 8
+
+83 / 8 = 10
+Resto = 3
+```
+
+Distribuição:
+
+```text
+P1 = 11
+P2 = 11
+P3 = 11
+P4 = 10
+P5 = 10
+P6 = 10
+P7 = 10
+P8 = 10
+```
+
+**Importante:** recrie `quantidadeParte` a cada repetição. Não altere `divisao` permanentemente com `divisao++`.
+
+### Alocando e ordenando cada parte
+
+```c
+Endereco *e = malloc(quantidadeParte * sizeof(Endereco));
+
+if (e == NULL && quantidadeParte > 0) {
+    // Erro de alocação
+}
+
+fread(e, sizeof(Endereco), quantidadeParte, entrada);
+
+qsort(e, quantidadeParte, sizeof(Endereco), compara);
+
+fwrite(e, sizeof(Endereco), quantidadeParte, saida);
+
+free(e);
+```
+
+A ideia é ordenar cada parte separadamente na memória.
+
+### Intercalação
+
+A função recebe dois arquivos já ordenados e gera um terceiro arquivo também ordenado.
+
+```c
+void intercala(char *arqA, char *arqB, char *arqSaida) {
+
+    FILE *a = fopen(arqA, "rb");
+    FILE *b = fopen(arqB, "rb");
+    FILE *saida = fopen(arqSaida, "wb");
+
+    Endereco ea, eb;
+
+    int temA = fread(&ea, sizeof(Endereco), 1, a) == 1;
+    int temB = fread(&eb, sizeof(Endereco), 1, b) == 1;
+
+    while (temA && temB) {
+
+        if (strncmp(ea.cep, eb.cep, 8) <= 0) {
+            fwrite(&ea, sizeof(Endereco), 1, saida);
+            temA = fread(&ea, sizeof(Endereco), 1, a) == 1;
+        }
+        else {
+            fwrite(&eb, sizeof(Endereco), 1, saida);
+            temB = fread(&eb, sizeof(Endereco), 1, b) == 1;
+        }
+    }
+
+    while (temA) {
+        fwrite(&ea, sizeof(Endereco), 1, saida);
+        temA = fread(&ea, sizeof(Endereco), 1, a) == 1;
+    }
+
+    while (temB) {
+        fwrite(&eb, sizeof(Endereco), 1, saida);
+        temB = fread(&eb, sizeof(Endereco), 1, b) == 1;
+    }
+
+    fclose(a);
+    fclose(b);
+    fclose(saida);
+}
+```
+
+O exemplo pressupõe que os arquivos foram abertos corretamente; na implementação final, verifique os retornos de `fopen`.
+
+#### Como funciona a comparação?
+
+Imagine:
+
+```text
+Arquivo A: 100, 300, 500
+Arquivo B: 200, 400, 600
+```
+
+Comparamos os primeiros elementos:
+
+```text
+100 x 200 -> escreve 100
+300 x 200 -> escreve 200
+300 x 400 -> escreve 300
+500 x 400 -> escreve 400
+500 x 600 -> escreve 500
+```
+
+Quando um arquivo acaba, escrevemos o restante do outro.
+
+#### Rodadas de intercalação
+
+```text
+Rodada 1:
+P1 + P2
+P3 + P4
+P5 + P6
+P7 + P8
+
+Rodada 2:
+R1 + R2
+R3 + R4
+
+Rodada 3:
+R5 + R6
+```
+
+Resultado: um único arquivo ordenado.
+
+## 7.9 `malloc` — Alocação dinâmica
+
+`malloc` reserva espaço na memória RAM durante a execução do programa.
+
+Exemplo:
+
+```c
+Endereco *e;
+
+e = malloc(quantidade * sizeof(Endereco));
+```
+
+Imagine que queremos armazenar 100 registros:
+
+```text
+100 registros × tamanho de Endereco
+```
+
+O `malloc` reserva esse espaço e devolve um ponteiro para o início da região.
+
+#### Verificando se a alocação funcionou
+
+```c
+e = malloc(quantidade * sizeof(Endereco));
+
+if (e == NULL && quantidade > 0) {
+    printf("Erro ao alocar memória.\n");
+    return 1;
+}
+```
+
+Por que `quantidade > 0`?
+
+Porque `malloc(0)` pode retornar `NULL` ou um ponteiro especial. Uma quantidade igual a zero não significa necessariamente que ocorreu falta de memória.
+
+#### Liberando memória
+
+```c
+free(e);
+```
+
+Quando terminamos de usar a região alocada, devemos liberá-la.
+
+#### Diferença entre variável normal e `malloc`
+
+```c
+Endereco e;
+```
+
+Reserva espaço para apenas um registro, normalmente na pilha.
+
+```c
+Endereco *e = malloc(100 * sizeof(Endereco));
+```
+
+Reserva espaço para 100 registros na memória dinâmica.
+
+#### Como acessar os elementos?
+
+```c
+e[0]
+e[1]
+e[2]
+```
+
+Mesmo sendo um ponteiro, podemos usar a notação de vetor porque o espaço reservado é contínuo.
+
+## 7.10 `qsort` e função comparadora
+
+`qsort` ordena os elementos de um vetor.
+
+```c
+qsort(vetor, quantidade, tamanhoElemento, compara);
+```
+
+Exemplo:
+
+```c
+qsort(e, quantidade, sizeof(Endereco), compara);
+```
+
+Os argumentos são:
+
+| Argumento | Significado |
+|---|---|
+| `e` | Vetor que será ordenado |
+| `quantidade` | Número de elementos |
+| `sizeof(Endereco)` | Tamanho de cada elemento |
+| `compara` | Função que determina a ordem |
+
+### Função comparadora
+
+Como `qsort` é genérico, ele recebe os elementos como `void *`.
+
+Para ordenar pelo CEP:
+
+```c
+int compara(const void *a, const void *b) {
+
+    const Endereco *e1 = (const Endereco *)a;
+    const Endereco *e2 = (const Endereco *)b;
+
+    return strncmp(e1->cep, e2->cep, 8);
+}
+```
+
+#### O que acontece aqui?
+
+1. `a` aponta para um elemento do vetor.
+2. `b` aponta para outro elemento.
+3. Convertemos os ponteiros para `Endereco *`.
+4. Comparamos os CEPs.
+
+#### Por que `->`?
+
+Porque `e1` e `e2` são ponteiros para estruturas.
+
+```c
+e1->cep
+```
+
+É equivalente a:
+
+```c
+(*e1).cep
+```
+
+#### O que a comparação precisa retornar?
+
+| Retorno | Significado |
+|---|---|
+| Negativo | Primeiro elemento vem antes |
+| Zero | Elementos iguais |
+| Positivo | Primeiro elemento vem depois |
+
+Para comparar um campo numérico:
+
+```c
+int compara(const void *a, const void *b) {
+
+    const Endereco *e1 = a;
+    const Endereco *e2 = b;
+
+    if (e1->numero < e2->numero) return -1;
+    if (e1->numero > e2->numero) return 1;
+
+    return 0;
+}
+```
+
+**Dica:** não faça simplesmente `return e1->numero - e2->numero` para qualquer tipo numérico, pois a subtração pode causar problemas de overflow.
+
+## 7.11 E12 — Busca sequencial
+
+A busca sequencial percorre os registros um por um até encontrar a chave desejada.
+
+```c
+long buscaSequencial(FILE *f, char *cep, long *lidos) {
+
+    Endereco registro;
+    long pos = 0;
+
+    while (fread(&registro, sizeof(Endereco), 1, f) == 1) {
+
+        (*lidos)++;
+
+        if (strncmp(registro.cep, cep, 8) == 0) {
+            return pos;
+        }
+
+        pos++;
+    }
+
+    return -1;
+}
+```
+
+#### Exemplo visual
+
+Arquivo:
+
+```text
+Posição 0 -> CEP 100
+Posição 1 -> CEP 200
+Posição 2 -> CEP 300
+Posição 3 -> CEP 400
+```
+
+Buscando CEP 300:
+
+```text
+Lê posição 0 -> não encontrou
+Lê posição 1 -> não encontrou
+Lê posição 2 -> encontrou!
+```
+
+Retorna:
+
+```c
+2
+```
+
+Se não encontrar, retorna `-1`.
+
+#### Por que `long *lidos`?
+
+Porque queremos alterar a variável que foi criada fora da função.
+
+Na função principal:
+
+```c
+long lidos = 0;
+
+long pos = buscaSequencial(f, cep, &lidos);
+```
+
+Dentro da função:
+
+```c
+(*lidos)++;
+```
+
+- `lidos` é um ponteiro.
+- `*lidos` acessa o valor apontado.
+- `(*lidos)++` incrementa a variável original.
+
+**Atenção:** inicialize `lidos = 0` antes de chamar a função.
+
+## 7.12 E13 — Ordenação em memória
+
+Objetivo: carregar todos os registros do arquivo para a RAM, ordenar com `qsort` e gravar novamente no arquivo.
+
+```c
+fseek(f, 0, SEEK_END);
+
+long quantidade = ftell(f) / sizeof(Endereco);
+
+rewind(f);
+
+Endereco *vetor = malloc(quantidade * sizeof(Endereco));
+
+if (vetor == NULL && quantidade > 0) {
+    printf("Erro de memória.\n");
+    return;
+}
+
+size_t lidos = fread(vetor, sizeof(Endereco), quantidade, f);
+
+qsort(vetor, lidos, sizeof(Endereco), compara);
+
+rewind(f);
+
+fwrite(vetor, sizeof(Endereco), lidos, f);
+
+free(vetor);
+```
+
+> ➕ **Acréscimo — modo de abertura:** este código lê **e depois regrava no mesmo arquivo** (`rewind` + `fwrite`), então o arquivo precisa estar aberto com `"r+b"`. Com `"rb"` o `fwrite` falha; com `"wb"` o arquivo seria apagado antes de ler. Se o enunciado pedir gravar **em outro arquivo** (como o `ordena cep.dat ord.dat` do treino), abra a origem com `"rb"` e o destino com `"wb"`, e use `memcmp(a->cep, b->cep, 8)` no comparador (o CEP tem 8 bytes e **não tem `'\0'`**).
+
+#### Passo a passo
+
+```text
+1. Descobre quantos registros existem
+2. Volta ao início
+3. Aloca memória para os registros
+4. Lê o arquivo para o vetor
+5. Ordena com qsort
+6. Volta ao início do arquivo
+7. Grava os registros ordenados
+8. Libera a memória
+```
+
+#### Diferença entre E13 e ordenação externa
+
+| E13 | Ordenação externa |
+|---|---|
+| Carrega tudo na RAM | Divide em partes |
+| Ordena um vetor | Ordena vários vetores menores |
+| Usa `qsort` | Usa `qsort` em cada parte |
+| Grava o resultado | Intercala os arquivos ordenados |
+
+## 7.13 E14 — Busca binária em arquivo
+
+A busca binária só funciona quando o arquivo está ordenado pela chave pesquisada.
+
+Em vez de ler todos os registros, ela vai eliminando metade do intervalo a cada comparação.
+
+```c
+long buscaBinaria(FILE *f, char *cep, long quantidade) {
+
+    long inicio = 0;
+    long fim = quantidade - 1;
+
+    Endereco e;
+
+    while (inicio <= fim) {
+
+        long meio = (inicio + fim) / 2;
+
+        fseek(f, meio * sizeof(Endereco), SEEK_SET);
+
+        if (fread(&e, sizeof(Endereco), 1, f) != 1) {
+            return -1;
+        }
+
+        int resultado = strncmp(cep, e.cep, 8);
+
+        if (resultado == 0) {
+            return meio;
+        }
+
+        if (resultado < 0) {
+            fim = meio - 1;
+        }
+        else {
+            inicio = meio + 1;
+        }
+    }
+
+    return -1;
+}
+```
+
+#### Exemplo visual
+
+Arquivo ordenado:
+
+```text
+100  200  300  400  500  600  700
+```
+
+Queremos encontrar `600`.
+
+Primeira tentativa:
+
+```text
+100  200  300  400  500  600  700
+               ^
+             meio
+```
+
+O meio é 400.
+
+Como 600 é maior, descartamos a metade esquerda.
+
+Segunda tentativa:
+
+```text
+500  600  700
+      ^
+    meio
+```
+
+Encontramos 600.
+
+#### Atualização dos limites
+
+| Comparação | O que fazer |
+|---|---|
+| Chave igual | Encontrou |
+| Chave procurada menor | `fim = meio - 1` |
+| Chave procurada maior | `inicio = meio + 1` |
+
+Complexidade: O(log n) comparações e acessos ao arquivo.
+
+## 7.14 E15 — Índice em vetor
+
+Em vez de ordenar o arquivo original, podemos criar um vetor auxiliar que guarda a chave e a posição do registro original.
+
+```c
+typedef struct {
+    char cep[8];
+    long posicao;
+} IndiceCep;
+```
+
+#### Exemplo
+
+Arquivo original:
+
+```text
+Posição 0 -> CEP 300
+Posição 1 -> CEP 100
+Posição 2 -> CEP 200
+```
+
+Vetor de índices:
+
+```text
+CEP 300 -> posição 0
+CEP 100 -> posição 1
+CEP 200 -> posição 2
+```
+
+Ordenamos apenas o vetor:
+
+```text
+CEP 100 -> posição 1
+CEP 200 -> posição 2
+CEP 300 -> posição 0
+```
+
+O arquivo original continua na mesma ordem!
+
+#### Por que guardar a posição?
+
+Porque depois da busca binária no índice, precisamos recuperar o registro original.
+
+```c
+fseek(arquivo, indice[meio].posicao * sizeof(Endereco), SEEK_SET);
+
+fread(&e, sizeof(Endereco), 1, arquivo);
+```
+
+#### Comparador do índice
+
+```c
+int comparaIndice(const void *a, const void *b) {
+
+    const IndiceCep *i1 = a;
+    const IndiceCep *i2 = b;
+
+    return strncmp(i1->cep, i2->cep, 8);
+}
+```
+
+#### Diferença entre índice e arquivo
+
+```text
+ARQUIVO ORIGINAL
+300
+100
+200
+
+ÍNDICE ORDENADO
+100 -> posição 1
+200 -> posição 2
+300 -> posição 0
+```
+
+O índice permite pesquisar rapidamente sem precisar reorganizar os registros originais.
+
+**Atenção:** nesse exemplo, `posicao` representa o número do registro. Por isso multiplicamos por `sizeof(Endereco)`. Se armazenássemos o offset em bytes, usaríamos diretamente o valor no `fseek`.
+
+## 7.15 Árvores B — Conceitos
+
+Uma árvore B é uma estrutura de dados que organiza chaves em páginas, permitindo buscas eficientes.
+
+Diferentemente de uma árvore binária, uma página pode armazenar várias chaves e possuir vários filhos.
+
+#### Exemplo visual simplificado
+
+```text
+              [30 | 60]
+             /    |    \
+            /     |     \
+       [10,20] [40,50] [70,80]
+```
+
+A raiz possui duas chaves:
+
+- Menores que 30 ficam à esquerda.
+- Entre 30 e 60 ficam no filho do meio.
+- Maiores que 60 ficam à direita.
+
+A árvore organiza as chaves para evitar a leitura de todos os registros.
+
+### Árvore B como índice de arquivo
+
+Imagine que temos um arquivo de dados:
+
+```text
+Registro 0 -> chave 10
+Registro 1 -> chave 20
+Registro 2 -> chave 30
+Registro 3 -> chave 40
+```
+
+A árvore não precisa guardar os registros completos. Ela pode guardar:
+
+```text
+Chave 10 -> offset 0
+Chave 20 -> offset 100
+Chave 30 -> offset 200
+Chave 40 -> offset 300
+```
+
+Assim, a árvore funciona como um índice.
+
+#### O que é offset?
+
+É a posição, em bytes, onde um registro começa dentro do arquivo.
+
+Se cada registro possui 100 bytes:
+
+```text
+Registro 0 -> offset 0
+Registro 1 -> offset 100
+Registro 2 -> offset 200
+Registro 3 -> offset 300
+```
+
+Para recuperar o registro:
+
+```c
+fseek(dados, offset, SEEK_SET);
+fread(&r, sizeof(Registro), 1, dados);
+```
+
+## 7.16 Árvore B — Exercício A: criação do índice
+
+Objetivo: percorrer um arquivo de dados e inserir na árvore cada chave junto com seu offset.
+
+Estrutura:
+
+```c
+typedef struct {
+    long chave;
+    char dados[1000];
+} Registro;
+```
+
+Funções fornecidas:
+
+```c
+void* openTree(const char* nomeArquivo);
+
+bool findKey(void* tree, long key, long* offset);
+
+void insertKey(void* tree, long key, long offset);
+
+void closeTree(void* tree);
+```
+
+Lembre-se de incluir:
+
+```c
+#include <stdbool.h>
+```
+
+> ➕ **Números de exemplo:** "offset 100, 200…" nas figuras abaixo é só ilustração (registros de 100 bytes inventados). Na prova, `sizeof(Registro)` = 8 (`long`) + 1000 (`char dados[1000]`) = **1008 bytes**, então os offsets reais seriam 0, 1008, 2016… Quem calcula isso é o `ftell`, nunca você.
+
+#### Código principal
+
+```c
+void indexaArquivo(const char *arquivoDados,
+                   const char *arquivoIndice) {
+
+    FILE *dados = fopen(arquivoDados, "rb");
+
+    if (dados == NULL) {
+        return;
+    }
+
+    void *tree = openTree(arquivoIndice);
+
+    if (tree == NULL) {
+        fclose(dados);
+        return;
+    }
+
+    Registro r;
+
+    long offset = ftell(dados);
+
+    while (fread(&r, sizeof(Registro), 1, dados) == 1) {
+
+        insertKey(tree, r.chave, offset);
+
+        offset = ftell(dados);
+    }
+
+    closeTree(tree);
+    fclose(dados);
+}
+```
+
+#### Entendendo o offset
+
+Antes de ler o primeiro registro:
+
+```c
+long offset = ftell(dados);
+```
+
+Como o arquivo acabou de ser aberto, o cursor está na posição zero.
+
+Depois de ler um registro:
+
+```c
+fread(&r, sizeof(Registro), 1, dados);
+```
+
+O cursor avança para o início do próximo registro.
+
+Por isso:
+
+```c
+offset = ftell(dados);
+```
+
+Na próxima repetição, temos o offset do próximo registro.
+
+#### Visualização
+
+```text
+Arquivo:
++----------------+
+| Registro 0     | offset 0
++----------------+
+| Registro 1     | offset 100
++----------------+
+| Registro 2     | offset 200
++----------------+
+
+Árvore:
+Chave 10 -> 0
+Chave 20 -> 100
+Chave 30 -> 200
+```
+
+A árvore guarda a chave e a posição, não o conteúdo inteiro de `dados`.
+
+## 7.17 Árvore B — Exercício B: busca e impressão
+
+Objetivo: procurar uma chave na árvore e, se ela existir, recuperar o registro completo no arquivo.
+
+```c
+void imprimeDados(const char *arquivoDados,
+                  const char *arquivoIndice,
+                  long chave) {
+
+    FILE *dados = fopen(arquivoDados, "rb");
+
+    if (dados == NULL) {
+        return;
+    }
+
+    void *tree = openTree(arquivoIndice);
+
+    if (tree == NULL) {
+        fclose(dados);
+        return;
+    }
+
+    Registro r;
+    long offset;
+
+    bool achou = findKey(tree, chave, &offset);
+
+    if (!achou) {
+        printf("Chave não encontrada.\n");
+
+        closeTree(tree);
+        fclose(dados);
+        return;
+    }
+
+    if (fseek(dados, offset, SEEK_SET) == 0 &&
+        fread(&r, sizeof(Registro), 1, dados) == 1) {
+
+        printf("%.1000s\n", r.dados);
+    }
+
+    closeTree(tree);
+    fclose(dados);
+}
+```
+
+#### Como funciona?
+
+```text
+Usuário informa a chave
+          |
+          v
+      findKey()
+          |
+          v
+  A árvore encontra a chave?
+       /       \
+     NÃO       SIM
+      |          |
+      v          v
+  Informa     Retorna
+  ausência    offset
+                 |
+                 v
+          fseek(dados, offset)
+                 |
+                 v
+          fread(&r, ...)
+                 |
+                 v
+          Imprime os dados
+```
+
+#### Entendendo `findKey`
+
+```c
+bool achou = findKey(tree, chave, &offset);
+```
+
+A função recebe:
+
+- `tree`: árvore que será pesquisada.
+- `chave`: chave procurada.
+- `&offset`: endereço da variável que receberá o offset.
+
+Ela retorna:
+
+- `true`: encontrou.
+- `false`: não encontrou.
+
+**Importante:** `findKey` não retorna o registro completo. Ela retorna o offset por referência. Depois precisamos usar `fseek` e `fread`.
+
+## 7.18 Árvore B — Exercício C: diferença entre arquivos
+
+Enunciado: gerar um terceiro arquivo com os registros cujas chaves aparecem no arquivo 2, mas não aparecem no arquivo 1.
+
+A ideia é:
+
+1. Criar uma árvore com as chaves do arquivo 1.
+2. Percorrer o arquivo 2.
+3. Procurar cada chave do arquivo 2 na árvore.
+4. Se não encontrar, escrever o registro no arquivo de saída.
+
+#### Exemplo
+
+Arquivo 1:
+
+```text
+10
+20
+30
+```
+
+Arquivo 2:
+
+```text
+20
+40
+50
+```
+
+Árvore construída com o arquivo 1:
+
+```text
+[10 | 20 | 30]
+```
+
+Consultas:
+
+```text
+20 -> encontrou -> não escreve
+40 -> não encontrou -> escreve
+50 -> não encontrou -> escreve
+```
+
+Resultado:
+
+```text
+Arquivo 3:
+40
+50
+```
+
+#### Código-base
+
+```c
+void diferencaArquivos(const char *arquivo1,
+                       const char *arquivo2,
+                       const char *arquivoSaida,
+                       const char *arquivoIndice) {
+
+    FILE *dados1 = fopen(arquivo1, "rb");
+
+    if (dados1 == NULL) {
+        return;
+    }
+
+    FILE *dados2 = fopen(arquivo2, "rb");
+
+    if (dados2 == NULL) {
+        fclose(dados1);
+        return;
+    }
+
+    FILE *saida = fopen(arquivoSaida, "wb");
+
+    if (saida == NULL) {
+        fclose(dados1);
+        fclose(dados2);
+        return;
+    }
+
+    void *tree = openTree(arquivoIndice);
+
+    if (tree == NULL) {
+        fclose(dados1);
+        fclose(dados2);
+        fclose(saida);
+        return;
+    }
+
+    Registro r1, r2;
+    long offset = ftell(dados1);
+
+    // 1. Insere as chaves do arquivo 1 na árvore
+    while (fread(&r1, sizeof(Registro), 1, dados1) == 1) {
+
+        insertKey(tree, r1.chave, offset);
+
+        offset = ftell(dados1);
+    }
+
+    // 2. Percorre o arquivo 2 e consulta a árvore
+    while (fread(&r2, sizeof(Registro), 1, dados2) == 1) {
+
+        long offsetEncontrado;
+
+        bool achou = findKey(tree, r2.chave, &offsetEncontrado);
+
+        // 3. Só escreve se a chave não existir no arquivo 1
+        if (!achou) {
+            fwrite(&r2, sizeof(Registro), 1, saida);
+        }
+    }
+
+    closeTree(tree);
+
+    fclose(dados1);
+    fclose(dados2);
+    fclose(saida);
+}
+```
+
+#### Por que só precisamos de uma árvore?
+
+Porque a pergunta é:
+
+> A chave do arquivo 2 existe no arquivo 1?
+
+Então construímos o índice do arquivo 1 e usamos esse índice para consultar as chaves do arquivo 2.
+
+Não precisamos criar uma segunda árvore.
+
+#### Por que o `fwrite` usa `saida`?
+
+Porque queremos gravar os registros encontrados no terceiro arquivo:
+
+```c
+fwrite(&r2, sizeof(Registro), 1, saida);
+```
+
+Não devemos escrever em `dados2`, pois ele é o arquivo que estamos lendo.
+
+#### Atenção aos retornos
+
+A função está declarada como `void`, portanto usa apenas:
+
+```c
+return;
+```
+
+Se quisermos retornar códigos de sucesso ou erro, precisamos declarar a função como `int` e usar os retornos de maneira consistente.
+
+Também precisamos garantir que o índice esteja vazio ou seja reinicializado antes de reconstruí-lo, conforme o comportamento de `openTree`.
+
+## 7.19 Resumo de funções importantes
+
+| Função | O que faz |
+|---|---|
+| `fopen` | Abre um arquivo |
+| `fclose` | Fecha um arquivo |
+| `fgetc` | Lê um byte |
+| `fputc` | Escreve um byte |
+| `fread` | Lê dados em blocos |
+| `fwrite` | Escreve dados em blocos |
+| `fseek` | Move o cursor |
+| `ftell` | Retorna a posição atual |
+| `rewind` | Volta ao início |
+| `sizeof` | Retorna o tamanho de um tipo |
+| `malloc` | Aloca memória dinamicamente |
+| `free` | Libera memória alocada |
+| `qsort` | Ordena um vetor |
+| `strncmp` | Compara uma quantidade definida de caracteres |
+| `strcmp` | Compara strings terminadas em `\0` |
+| `findKey` | Pesquisa uma chave na árvore |
+| `insertKey` | Insere uma chave e seu offset |
+| `openTree` | Abre ou cria o índice em árvore |
+| `closeTree` | Fecha a árvore |
+
+### Diferenças que costumam confundir
+
+#### `fseek` x `ftell`
+
+```c
+fseek(f, 100, SEEK_SET);
+```
+
+Move o cursor para o byte 100.
+
+```c
+long pos = ftell(f);
+```
+
+Descobre em qual byte o cursor está.
+
+#### `rewind` x `fseek`
+
+```c
+rewind(f);
+```
+
+Volta ao início.
+
+```c
+fseek(f, 0, SEEK_SET);
+```
+
+Também volta ao início.
+
+#### `fread` x `fgetc`
+
+- `fgetc`: lê um byte.
+- `fread`: lê um ou mais elementos de determinado tamanho.
+
+#### `fwrite` x `fputc`
+
+- `fputc`: escreve um byte.
+- `fwrite`: escreve elementos ou blocos.
+
+#### `malloc` x `sizeof`
+
+- `sizeof`: calcula quantos bytes são necessários.
+- `malloc`: reserva esses bytes na memória.
+
+#### `qsort` x busca binária
+
+- `qsort`: coloca os elementos em ordem.
+- Busca binária: procura um elemento em uma sequência já ordenada.
+
+## 7.20 Como identificar qual técnica usar na prova
+
+| Se o enunciado pedir... | Pense em... |
+|---|---|
+| Contar bytes ou caracteres | `fgetc` |
+| Copiar arquivo byte a byte | `fgetc` + `fputc` |
+| Copiar arquivo em blocos | `fread` + `fwrite` |
+| Contar registros | `fseek` + `ftell` + `sizeof` |
+| Acessar registro específico | `fseek` + `fread` |
+| Procurar sem ordenação | Busca sequencial |
+| Ordenar registros em RAM | `malloc` + `qsort` |
+| Ordenar arquivo muito grande | Ordenação externa |
+| Procurar em arquivo ordenado | Busca binária |
+| Criar índice em vetor | Struct com chave + posição |
+| Criar índice em árvore B | `insertKey` |
+| Consultar índice em árvore B | `findKey` |
+| Recuperar registro após busca na árvore | `fseek` + `fread` |
+
+### Três ideias fundamentais para lembrar
+
+**1. Posição não é a mesma coisa que offset.**
+
+- Posição: número do registro, como 0, 1, 2...
+- Offset: posição em bytes dentro do arquivo.
+
+Se cada registro possui 100 bytes:
+
+```text
+posição 0 -> offset 0
+posição 1 -> offset 100
+posição 2 -> offset 200
+```
+
+**2. Um índice não precisa guardar o registro inteiro.**
+
+Ele pode guardar somente:
+
+```text
+chave -> posição
+```
+
+Assim, encontramos a posição rapidamente e depois buscamos o registro completo no arquivo.
+
+**3. Ordenar e pesquisar são operações diferentes.**
+
+- Primeiro podemos ordenar com `qsort`.
+- Depois podemos pesquisar com busca binária.
+- Se não pudermos carregar tudo na memória, podemos usar ordenação externa.
+- Se tivermos um índice, podemos consultar a chave sem percorrer o arquivo inteiro.
+
+> ➕ **Acréscimo:** os exercícios que o guia ainda não trazia (E4, E5, E8–E11, E16–E28) estão nos subtópicos 7.21 a 7.26, com os enunciados do treino e códigos testados.
+
+## 7.21 Exercícios do treino que faltam — Bloco 1 (E4, E5)
+
+> ➕ **Parte nova.** Os subtópicos 7.21 a 7.26 cobrem os exercícios do treino que o guia acima não trazia (E4, E5, E8–E11, E16–E28). Todos os códigos foram **compilados e testados** contra uma versão em Python do que cada exercício espera. Os arquivos de teste eram sintéticos (1003 registros de 300 bytes), por isso números como "1003" **não são do seu `cep.dat`**.
+
+**Cabeçalho comum** dos programas com `Endereco` (copie no início de cada um):
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct {
+    char logradouro[72], bairro[72], cidade[72], uf[72];
+    char sigla[2];
+    char cep[8];      // chave, sem '\0'
+    char lixo[2];
+} Endereco;           // 72+72+72+72+2+8+2 = 300 bytes
+```
+
+### E4 — Maiúsculas (sem `toupper`)
+
+Trocar `a`–`z` por `A`–`Z` pela diferença da tabela ASCII (`'a' - 'A'` = 32).
+
+```c
+#include <stdio.h>
+int main(int argc, char **argv) {
+    if (argc != 3) { printf("uso: %s origem destino\n", argv[0]); return 1; }
+    FILE *e = fopen(argv[1], "rb");
+    if (e == NULL) { printf("erro ao abrir origem\n"); return 1; }
+    FILE *s = fopen(argv[2], "wb");
+    if (s == NULL) { printf("erro ao abrir destino\n"); fclose(e); return 1; }
+    int c;                                   // int, para caber o EOF
+    while ((c = fgetc(e)) != EOF) {
+        if (c >= 'a' && c <= 'z') c = c - 'a' + 'A';   // ou c - 32
+        fputc(c, s);
+    }
+    fclose(e); fclose(s);
+    return 0;
+}
+```
+
+- `c` é **`int`**, não `char`, para caber o `EOF`.
+- Só mexe de `'a'` a `'z'`; o resto passa igual (inclusive bytes de acento, que não são letras ASCII).
+- Conferir: `tr a-z A-Z < exemplo.c | cmp - saida.txt`.
+
+### E5 — Histograma de bytes
+
+```c
+#include <stdio.h>
+int main(int argc, char **argv) {
+    if (argc != 2) { printf("uso: %s arquivo\n", argv[0]); return 1; }
+    FILE *f = fopen(argv[1], "rb");
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    int contador[256] = {0};
+    int c;
+    while ((c = fgetc(f)) != EOF)
+        contador[c]++;
+    for (int v = 0; v < 256; v++)
+        if (contador[v] > 0)
+            printf("%d %d\n", v, contador[v]);
+    fclose(f);
+    return 0;
+}
+```
+
+- O byte lido **é o índice** do vetor: `contador[c]++`.
+- `int c` também aqui: com `char` signed, o byte 255 viraria `-1` (= `EOF`) e o laço pararia no meio.
+- Vetor começa zerado (`= {0}`); índices de 0 a 255 (256 posições).
+
+## 7.22 Bloco 2 — registros: E8, E9, E10, E11
+
+### E8 — Inverter o arquivo
+
+Lê **um registro por vez**, de trás para frente (não carrega o arquivo na memória).
+
+```c
+// (começa com o cabeçalho comum do 7.21)
+int main(int argc, char **argv) {
+    if (argc != 3) { printf("uso: %s origem destino\n", argv[0]); return 1; }
+    FILE *e = fopen(argv[1], "rb");
+    if (e == NULL) { printf("erro ao abrir origem\n"); return 1; }
+    FILE *s = fopen(argv[2], "wb");
+    if (s == NULL) { printf("erro ao abrir destino\n"); fclose(e); return 1; }
+    fseek(e, 0, SEEK_END);
+    long n = ftell(e) / sizeof(Endereco);        // quantidade de registros
+    Endereco r;
+    for (long i = n - 1; i >= 0; i--) {          // do último (n-1) ao primeiro (0)
+        fseek(e, i * sizeof(Endereco), SEEK_SET);
+        fread(&r, sizeof(Endereco), 1, e);
+        fwrite(&r, sizeof(Endereco), 1, s);
+    }
+    fclose(e); fclose(s);
+    return 0;
+}
+```
+
+- Último registro = `n - 1`; primeiro = `0`.
+- `i` é `long` e o laço vai até `i >= 0`: com `unsigned` ele nunca ficaria negativo e o laço não terminaria.
+
+### E9 — Amostra (1 a cada k)
+
+```c
+// (começa com o cabeçalho comum do 7.21)
+int main(int argc, char **argv) {
+    if (argc != 4) { printf("uso: %s origem destino k\n", argv[0]); return 1; }
+    long k = atol(argv[3]);
+    if (k <= 0) { printf("k deve ser > 0\n"); return 1; }
+    FILE *e = fopen(argv[1], "rb");
+    if (e == NULL) { printf("erro ao abrir origem\n"); return 1; }
+    FILE *s = fopen(argv[2], "wb");
+    if (s == NULL) { printf("erro ao abrir destino\n"); fclose(e); return 1; }
+    Endereco r;
+    while (fread(&r, sizeof(Endereco), 1, e) == 1) {     // lê o registro 0, k, 2k...
+        fwrite(&r, sizeof(Endereco), 1, s);
+        fseek(e, (k - 1) * sizeof(Endereco), SEEK_CUR);  // pula os k-1 seguintes
+    }
+    fclose(e); fclose(s);
+    return 0;
+}
+```
+
+- Depois de ler 1 registro, o cursor já está no seguinte: pula só `k - 1` (`SEEK_CUR`).
+- Registros copiados: posições `0, k, 2k…`.
+- Teste `k <= 0` antes (k = 0 daria `fseek` para trás e laço infinito).
+
+### E10 — Alterar um registro no lugar
+
+```c
+// (começa com o cabeçalho comum do 7.21)
+int main(int argc, char **argv) {
+    if (argc != 4) { printf("uso: %s arquivo n cep\n", argv[0]); return 1; }
+    long n = atol(argv[2]);                      // o primeiro é o 1
+    FILE *f = fopen(argv[1], "r+b");             // ler E gravar sem apagar
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    Endereco r;
+    fseek(f, (n - 1) * sizeof(Endereco), SEEK_SET);
+    if (fread(&r, sizeof(Endereco), 1, f) != 1) { printf("registro nao existe\n"); fclose(f); return 1; }
+    memcpy(r.cep, argv[3], 8);                   // 8 bytes, sem '\0'
+    fseek(f, -(long)sizeof(Endereco), SEEK_CUR); // o fread avançou: volta 1 registro
+    fwrite(&r, sizeof(Endereco), 1, f);
+    fclose(f);
+    return 0;
+}
+```
+
+- Modo **`"r+b"`**: lê e grava no mesmo arquivo, sem apagar.
+- O `fread` **avança** o cursor; antes do `fwrite` volte 1 registro: `fseek(f, -(long)sizeof(Endereco), SEEK_CUR)`. O cast `(long)` é obrigatório: `sizeof` é sem sinal, e negar dá um número gigante.
+- CEP novo com `memcpy(..., 8)`: o campo tem 8 bytes e **sem `'\0'`**. Valide `strlen(argv[3]) == 8` se quiser ser seguro.
+- Teste sempre numa cópia: `cp cep.dat teste.dat`.
+
+### E11 — Acrescentar no final
+
+```c
+// (começa com o cabeçalho comum do 7.21)
+int main(int argc, char **argv) {
+    if (argc != 4) { printf("uso: %s arquivo cep logradouro\n", argv[0]); return 1; }
+    FILE *f = fopen(argv[1], "ab");              // sempre grava no fim
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    Endereco r;
+    memset(&r, 0, sizeof(Endereco));             // zera tudo (nada de lixo)
+    memcpy(r.cep, argv[2], 8);
+    strncpy(r.logradouro, argv[3], 71);          // cabe em 72 e deixa o '\0'
+    fwrite(&r, sizeof(Endereco), 1, f);
+    fclose(f);
+    return 0;
+}
+```
+
+- Modo **`"ab"`**: toda gravação vai para o fim; `fseek` não muda isso.
+- `memset` zera a struct antes de preencher: sem isso os campos não preenchidos gravam **lixo de memória** no arquivo.
+- `strncpy(r.logradouro, ..., 71)` deixa pelo menos 1 byte `'\0'` no fim do campo de 72.
+
+## 7.23 Bloco 3 — E16: índice gravado em arquivo
+
+Mesmo índice do E15 (7.15), mas **salvo em disco** (`cep.idx`) para reaproveitar sem recalcular.
+
+```c
+typedef struct {
+    char cep[8];
+    long posicao;      // número do registro (0, 1, 2...)
+} IndiceCep;           // 8 + 8 = 16 bytes
+int comparaIdx(const void *a, const void *b) {
+    return memcmp(((const IndiceCep*)a)->cep, ((const IndiceCep*)b)->cep, 8);
+}
+```
+
+**`criaidx cep.dat cep.idx`** — monta, ordena e grava com **um** `fwrite`:
+
+```c
+// (cabeçalho comum do 7.21 + struct IndiceCep do E15)
+int main(int argc, char **argv) {
+    if (argc != 3) { printf("uso: %s cep.dat cep.idx\n", argv[0]); return 1; }
+    FILE *f = fopen(argv[1], "rb");
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    fseek(f, 0, SEEK_END);
+    long n = ftell(f) / sizeof(Endereco);
+    rewind(f);
+    IndiceCep *v = malloc(n * sizeof(IndiceCep));
+    if (v == NULL) { fclose(f); return 1; }
+    Endereco r;
+    for (long i = 0; i < n; i++) {               // lê um por vez: só guarda cep + posição
+        fread(&r, sizeof(Endereco), 1, f);
+        memcpy(v[i].cep, r.cep, 8);
+        v[i].posicao = i;
+    }
+    fclose(f);
+    qsort(v, n, sizeof(IndiceCep), comparaIdx);
+    FILE *s = fopen(argv[2], "wb");
+    if (s == NULL) { free(v); return 1; }
+    fwrite(v, sizeof(IndiceCep), n, s);          // um único fwrite
+    fclose(s); free(v);
+    return 0;
+}
+```
+
+**`buscaidx cep.dat cep.idx CEP`** — carrega o índice, busca binária na RAM, lê o registro no `cep.dat`:
+
+```c
+// (cabeçalho comum do 7.21 + struct IndiceCep do E15)
+int main(int argc, char **argv) {
+    if (argc != 4) { printf("uso: %s cep.dat cep.idx CEP\n", argv[0]); return 1; }
+    FILE *fi = fopen(argv[2], "rb");
+    if (fi == NULL) { printf("erro ao abrir indice\n"); return 1; }
+    fseek(fi, 0, SEEK_END);
+    long n = ftell(fi) / sizeof(IndiceCep);      // quantidade pelo tamanho do arquivo
+    rewind(fi);
+    IndiceCep *v = malloc(n * sizeof(IndiceCep));
+    if (v == NULL) { fclose(fi); return 1; }
+    fread(v, sizeof(IndiceCep), n, fi);
+    fclose(fi);
+    long ini = 0, fim = n - 1, achou = -1;
+    while (ini <= fim) {                         // busca binária no vetor (RAM)
+        long meio = (ini + fim) / 2;
+        int c = memcmp(argv[3], v[meio].cep, 8);
+        if (c == 0) { achou = meio; break; }
+        if (c < 0) fim = meio - 1; else ini = meio + 1;
+    }
+    if (achou < 0) { printf("nao achou\n"); free(v); return 0; }
+    FILE *f = fopen(argv[1], "rb");
+    if (f == NULL) { free(v); return 1; }
+    Endereco r;
+    fseek(f, v[achou].posicao * sizeof(Endereco), SEEK_SET);   // posição × sizeof
+    fread(&r, sizeof(Endereco), 1, f);
+    printf("achou na posicao %ld\n%.72s | %.8s\n", v[achou].posicao, r.logradouro, r.cep);
+    fclose(f); free(v);
+    return 0;
+}
+```
+
+- Quantidade de entradas do índice = `tamanho do cep.idx / sizeof(IndiceCep)` (aqui 16 bytes por entrada).
+- No `cep.dat`: `fseek(f, posicao * sizeof(Endereco), SEEK_SET)`. A posição guardada é de **registro**, então multiplica; no índice em **árvore B** o que se guarda é **byte offset**, e aí **não** multiplica.
+- Conferir o tamanho: `ls -l cep.idx` deve dar `registros × 16`.
+
+## 7.24 Bloco 4 — intercalação: E17, E18, E19
+
+### E17 — Intercalar dois arquivos ordenados
+
+```c
+// (começa com o cabeçalho comum do 7.21)
+void intercala(char *arqA, char *arqB, char *arqSaida) {
+    FILE *a = fopen(arqA, "rb");
+    FILE *b = fopen(arqB, "rb");
+    FILE *s = fopen(arqSaida, "wb");
+    if (a == NULL || b == NULL || s == NULL) {
+        printf("erro ao abrir\n");
+        if (a) fclose(a);
+        if (b) fclose(b);
+        if (s) fclose(s);
+        return;
+    }
+    Endereco ra, rb;
+    int temA = fread(&ra, sizeof(Endereco), 1, a);   // 1 = tem registro, 0 = acabou
+    int temB = fread(&rb, sizeof(Endereco), 1, b);
+    while (temA && temB) {
+        if (memcmp(ra.cep, rb.cep, 8) <= 0) {        // <= mantém a estabilidade
+            fwrite(&ra, sizeof(Endereco), 1, s);
+            temA = fread(&ra, sizeof(Endereco), 1, a);
+        } else {
+            fwrite(&rb, sizeof(Endereco), 1, s);
+            temB = fread(&rb, sizeof(Endereco), 1, b);
+        }
+    }
+    while (temA) {                                   // sobrou em A
+        fwrite(&ra, sizeof(Endereco), 1, s);
+        temA = fread(&ra, sizeof(Endereco), 1, a);
+    }
+    while (temB) {                                   // sobrou em B
+        fwrite(&rb, sizeof(Endereco), 1, s);
+        temB = fread(&rb, sizeof(Endereco), 1, b);
+    }
+    fclose(a); fclose(b); fclose(s);
+}
+int main(int argc, char **argv) {
+    if (argc != 4) { printf("uso: %s A B saida\n", argv[0]); return 1; }
+    intercala(argv[1], argv[2], argv[3]);
+    return 0;
+}
+```
+
+- `temA` / `temB` guardam se ainda existe registro. **Não** use `feof` como condição do laço.
+- `<= 0` na comparação mantém a ordem original quando as chaves são iguais.
+- Depois do laço principal, **copie o que sobrou** do arquivo que não acabou (os dois `while` finais).
+- Todo `fopen` testado; se um falhar, feche os que abriram.
+- Conferir: dividir o `ord.dat` ao meio e reintercalar deve dar um arquivo idêntico (`cmp`).
+
+### E18 — União sem repetir
+
+Igual ao E17, mas com **três** casos: menor em A, menor em B, **iguais**.
+
+```c
+// (começa com o cabeçalho comum do 7.21)
+int main(int argc, char **argv) {
+    if (argc != 4) { printf("uso: %s A B saida\n", argv[0]); return 1; }
+    FILE *a = fopen(argv[1], "rb");
+    FILE *b = fopen(argv[2], "rb");
+    FILE *s = fopen(argv[3], "wb");
+    if (a == NULL || b == NULL || s == NULL) {
+        printf("erro ao abrir\n");
+        if (a) fclose(a);
+        if (b) fclose(b);
+        if (s) fclose(s);
+        return 1;
+    }
+    Endereco ra, rb;
+    int temA = fread(&ra, sizeof(Endereco), 1, a);
+    int temB = fread(&rb, sizeof(Endereco), 1, b);
+    while (temA && temB) {
+        int c = memcmp(ra.cep, rb.cep, 8);
+        if (c < 0) {
+            fwrite(&ra, sizeof(Endereco), 1, s);
+            temA = fread(&ra, sizeof(Endereco), 1, a);
+        } else if (c > 0) {
+            fwrite(&rb, sizeof(Endereco), 1, s);
+            temB = fread(&rb, sizeof(Endereco), 1, b);
+        } else {                                     // iguais: grava UM e avança OS DOIS
+            fwrite(&ra, sizeof(Endereco), 1, s);
+            temA = fread(&ra, sizeof(Endereco), 1, a);
+            temB = fread(&rb, sizeof(Endereco), 1, b);
+        }
+    }
+    while (temA) { fwrite(&ra, sizeof(Endereco), 1, s); temA = fread(&ra, sizeof(Endereco), 1, a); }
+    while (temB) { fwrite(&rb, sizeof(Endereco), 1, s); temB = fread(&rb, sizeof(Endereco), 1, b); }
+    fclose(a); fclose(b); fclose(s);
+    return 0;
+}
+```
+
+- Iguais → grava **um** e avança **os dois** arquivos.
+- Sem esse terceiro caso, a chave repetida sairia duas vezes.
+
+### E19 — Ordenação externa completa
+
+Divide em `PARTES`, ordena cada uma na RAM, grava `cep_0.dat … cep_(PARTES-1).dat` e intercala **dois a dois**; cada resultado ganha o próximo número. Reaproveita a `intercala` do E17.
+
+```c
+int compara(const void *a, const void *b) {
+    return memcmp(((const Endereco*)a)->cep, ((const Endereco*)b)->cep, 8);
+}
+int main(int argc, char **argv) {
+    if (argc != 3) { printf("uso: %s cep.dat partes\n", argv[0]); return 1; }
+    int PARTES = atoi(argv[2]);
+    if (PARTES < 1) return 1;
+    FILE *f = fopen(argv[1], "rb");
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    fseek(f, 0, SEEK_END);
+    long total = ftell(f) / sizeof(Endereco);
+    rewind(f);
+    long divisao = total / PARTES, resto = total % PARTES;
+    // 1) divide, ordena cada parte e grava cep_0.dat ... cep_(PARTES-1).dat
+    Endereco *v = malloc((divisao + 1) * sizeof(Endereco));   // +1 por causa do resto
+    if (v == NULL) { fclose(f); return 1; }
+    char nome[64];
+    for (int i = 0; i < PARTES; i++) {
+        long qtd = divisao + (i < resto ? 1 : 0);              // resto vai para as primeiras
+        fread(v, sizeof(Endereco), qtd, f);
+        qsort(v, qtd, sizeof(Endereco), compara);
+        sprintf(nome, "cep_%d.dat", i);
+        FILE *p = fopen(nome, "wb");
+        if (p == NULL) { free(v); fclose(f); return 1; }
+        fwrite(v, sizeof(Endereco), qtd, p);
+        fclose(p);
+    }
+    free(v); fclose(f);
+    // 2) intercala dois a dois; o resultado ganha o próximo número
+    int proximo = PARTES;                // nome do próximo arquivo a ser criado
+    for (int i = 0; i < proximo - 1; i += 2) {   // i e i+1 são o par da vez
+        char a[64], b[64], s[64];
+        sprintf(a, "cep_%d.dat", i);
+        sprintf(b, "cep_%d.dat", i + 1);
+        sprintf(s, "cep_%d.dat", proximo);
+        intercala(a, b, s);
+        proximo++;
+    }
+    printf("arquivo final: cep_%d.dat\n", proximo - 1);   // = 2*PARTES - 2
+    return 0;
+}
+```
+
+- Arquivo final = **`cep_(2·PARTES − 2).dat`**: com 8 partes é `cep_14.dat`, com 5 é `cep_8.dat`, com 1 é `cep_0.dat` (testei 1, 3, 5, 7 e 8).
+- Número de intercalações = `PARTES − 1`.
+- O **resto** da divisão vai para as primeiras partes (`i < resto ? +1 : +0`); por isso o `malloc` é de `(divisao + 1)` registros.
+- O laço `i += 2` percorre o par da vez; como `proximo` cresce, ele alcança também os arquivos novos.
+- Limpar os temporários: `rm cep_*.dat` (o `cep.dat` não tem `_`, não é apagado).
+
+## 7.25 Bloco 5 — agrupamento, lacuna e janela: E20, E21, E22
+
+### E20 — Agrupar por sigla (ordenar e depois contar grupos)
+
+```c
+// (começa com o cabeçalho comum do 7.21)
+int comparaSigla(const void *a, const void *b) {
+    return memcmp(((const Endereco*)a)->sigla, ((const Endereco*)b)->sigla, 2);
+}
+int main(int argc, char **argv) {
+    if (argc != 2) { printf("uso: %s cep.dat\n", argv[0]); return 1; }
+    FILE *f = fopen(argv[1], "rb");
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    fseek(f, 0, SEEK_END);
+    long n = ftell(f) / sizeof(Endereco);
+    rewind(f);
+    Endereco *v = malloc(n * sizeof(Endereco));
+    if (v == NULL) { fclose(f); return 1; }
+    fread(v, sizeof(Endereco), n, f);
+    fclose(f);
+    qsort(v, n, sizeof(Endereco), comparaSigla);          // (1) ordena pela sigla
+    FILE *s = fopen("por-sigla.dat", "wb");
+    if (s == NULL) { free(v); return 1; }
+    fwrite(v, sizeof(Endereco), n, s);
+    fclose(s); free(v);
+
+    f = fopen("por-sigla.dat", "rb");                     // (2) agrupa lendo 1 por vez
+    if (f == NULL) return 1;
+    Endereco r;
+    char atual[2] = {0, 0};
+    long cont = 0;
+    while (fread(&r, sizeof(Endereco), 1, f) == 1) {
+        if (cont > 0 && memcmp(r.sigla, atual, 2) != 0) { // mudou de grupo: fecha o anterior
+            printf("%.2s: %ld\n", atual, cont);
+            cont = 0;
+        }
+        memcpy(atual, r.sigla, 2);
+        cont++;
+    }
+    if (cont > 0) printf("%.2s: %ld\n", atual, cont);     // ÚLTIMO grupo, depois do laço
+    fclose(f);
+    return 0;
+}
+```
+
+- Padrão de **grupo**: compara o registro atual com o grupo atual; mudou → imprime e zera.
+- **O último grupo só é impresso depois do laço**. Esquecer isso é a pegadinha clássica.
+- Comparador novo, pela sigla de 2 bytes: `memcmp(..., 2)`; impressão `%.2s` (sem `'\0'`).
+
+### E21 — Lacunas
+
+Arquivo de `long` (8 bytes cada). Imprime `lacuna entre A e B` quando um valor não é o anterior `+ 1`.
+
+```c
+#include <stdio.h>
+int main(int argc, char **argv) {
+    if (argc != 2) { printf("uso: %s numeros.dat\n", argv[0]); return 1; }
+    FILE *f = fopen(argv[1], "rb");
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    long ant, atual;
+    if (fread(&ant, sizeof(long), 1, f) == 1) {           // o primeiro não tem anterior
+        while (fread(&atual, sizeof(long), 1, f) == 1) {
+            if (atual != ant + 1)
+                printf("lacuna entre %ld e %ld\n", ant, atual);
+            ant = atual;
+        }
+    }
+    fclose(f);
+    return 0;
+}
+```
+
+- O **primeiro** valor não tem anterior: lê fora do laço.
+- Dentro do laço: compara, depois `ant = atual`.
+- Com `1 2 3 4 7 8 9 15 16` (valores do teste, ilustrativos) saem as lacunas `4→7` e `9→15`.
+
+### E22 — Janela móvel
+
+Soma de cada janela de `k` registros seguidos.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+int main(int argc, char **argv) {
+    if (argc != 3) { printf("uso: %s numeros.dat k\n", argv[0]); return 1; }
+    long k = atol(argv[2]);
+    if (k <= 0) return 1;
+    FILE *f = fopen(argv[1], "rb");
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    long v, soma;
+    while (1) {
+        soma = 0;
+        long i;
+        for (i = 0; i < k; i++) {                         // lê k valores
+            if (fread(&v, sizeof(long), 1, f) != 1) break;
+            soma += v;
+        }
+        if (i < k) break;                                 // janela incompleta: acabou
+        printf("%ld\n", soma);
+        fseek(f, -(long)((k - 1) * sizeof(long)), SEEK_CUR);  // volta k-1 registros
+    }
+    fclose(f);
+    return 0;
+}
+```
+
+- Lê `k`, soma, **volta `k − 1`** registros: `fseek(f, -(long)((k - 1) * sizeof(long)), SEEK_CUR)`.
+- Sem o `-(long)` o `sizeof` (sem sinal) quebra o recuo.
+- Janela incompleta no fim: não imprime. Quantidade de janelas = `n − k + 1` (9 valores e `k=3` → 7 somas).
+
+## 7.26 Bloco 6 — imagens BMP: E23 a E28
+
+**Cabeçalho comum** (54 bytes; a struct do seu `gerabmp.c` sem o `pixels[]`):
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#pragma pack(1)                 // sem isso o compilador coloca enchimento e sizeof != 54
+typedef struct {
+    char magic[2];                                  // "BM"
+    unsigned int tamanhoArquivo, lixo, inicioArray, tamCab2, largura, altura;
+    unsigned short planes, bitsPorPixel;
+    unsigned int compressao, tamanhoImagem, resH, resV, numeroCores, coresImportantes;
+} CabBMP;
+#pragma pack()
+int padding(int largura) { return (4 - (largura * 3) % 4) % 4; }
+long tamanhoArquivo(int largura, int altura) {
+    return 54 + (long)altura * (largura * 3 + padding(largura));
+}
+```
+
+> **Lembretes do formato:** cada pixel = 3 bytes na ordem **B, G, R**. Cada linha ocupa `largura × 3` bytes **mais o padding**, para fechar múltiplo de 4. `padding = (4 − (largura×3) % 4) % 4`. Os pixels começam no byte 54.
+
+### E23 — Ler o cabeçalho
+
+```c
+// (começa com o cabeçalho BMP do 7.26)
+int main(int argc, char **argv) {
+    if (argc != 2) { printf("uso: %s arq.bmp\n", argv[0]); return 1; }
+    FILE *f = fopen(argv[1], "rb");
+    if (f == NULL) { printf("erro ao abrir\n"); return 1; }
+    CabBMP c;
+    if (fread(&c, sizeof(CabBMP), 1, f) != 1 || c.magic[0] != 'B' || c.magic[1] != 'M') {
+        printf("nao e BMP\n"); fclose(f); return 1;
+    }
+    printf("largura: %u\naltura: %u\nbits por pixel: %u\npixels comecam em: %u\ntamanho (cabecalho): %u\n",
+           c.largura, c.altura, c.bitsPorPixel, c.inicioArray, c.tamanhoArquivo);
+    fclose(f);
+    return 0;
+}
+```
+
+### E24 — Padding
+
+```c
+// (começa com o cabeçalho BMP do 7.26)
+int main(void) {
+    for (int l = 1; l <= 8; l++)
+        printf("%d %d %ld\n", l, padding(l), tamanhoArquivo(l, 3));
+    return 0;
+}
+```
+
+Saída (largura, padding, tamanho com altura 3): `1 1 66 · 2 2 78 · 3 3 90 · 4 0 90 · 5 1 102 · 6 2 114 · 7 3 126 · 8 0 126` (confere com a tabela do enunciado).
+
+### E25 — Gerar um BMP de qualquer largura (degradê)
+
+```c
+// (começa com o cabeçalho BMP do 7.26)
+int main(int argc, char **argv) {
+    if (argc != 4) { printf("uso: %s saida.bmp largura altura\n", argv[0]); return 1; }
+    int L = atoi(argv[2]), A = atoi(argv[3]);
+    if (L <= 0 || A <= 0) return 1;
+    FILE *f = fopen(argv[1], "wb");
+    if (f == NULL) { printf("erro ao criar\n"); return 1; }
+    CabBMP c = {0};                                       // zera tudo
+    c.magic[0] = 'B'; c.magic[1] = 'M';
+    c.tamanhoArquivo = tamanhoArquivo(L, A);
+    c.inicioArray = 54; c.tamCab2 = 40;
+    c.largura = L; c.altura = A;
+    c.planes = 1; c.bitsPorPixel = 24;
+    c.tamanhoImagem = c.tamanhoArquivo - 54;
+    fwrite(&c, sizeof(CabBMP), 1, f);
+    int pad = padding(L);
+    unsigned char zero[3] = {0, 0, 0};
+    for (int i = 0; i < A; i++) {
+        for (int j = 0; j < L; j++) {
+            unsigned char px[3];
+            px[0] = j * 255 / L;                          // B
+            px[1] = i * 255 / A;                          // G
+            px[2] = 128;                                  // R
+            fwrite(px, 1, 3, f);
+        }
+        fwrite(zero, 1, pad, f);                          // padding de cada linha
+    }
+    fclose(f);
+    return 0;
+}
+```
+
+- `CabBMP c = {{0}};` zera tudo; preencha só o que importa.
+- Depois de **cada linha** grave o padding (bytes `0`).
+- Pixel: `B = j·255/largura`, `G = i·255/altura`, `R = 128`, nessa ordem de bytes.
+- Confira com `file g5.bmp` (deve dizer `5 x 3 x 24`, `cbSize 102`).
+
+### E26, E27, E28 — Negativo, cinza e espelho (mesma estrutura)
+
+Os três **lêem linha por linha** (pixels **+ padding**), alteram só os pixels e gravam a linha inteira. O cabeçalho é copiado igual. Escreva uma vez a função `processa` e troque só a função de linha:
+
+```c
+// (começa com o cabeçalho BMP acima)
+typedef void (*Func)(unsigned char *linha, int largura);
+int processa(char *ent, char *sai, Func f) {
+    FILE *e = fopen(ent, "rb");
+    if (e == NULL) { printf("erro ao abrir entrada\n"); return 1; }
+    FILE *s = fopen(sai, "wb");
+    if (s == NULL) { printf("erro ao criar saida\n"); fclose(e); return 1; }
+    CabBMP c;
+    fread(&c, sizeof(CabBMP), 1, e);
+    fwrite(&c, sizeof(CabBMP), 1, s);                 // cabeçalho igual
+    int bytes = c.largura * 3, pad = padding(c.largura);
+    unsigned char *linha = malloc(bytes + pad);
+    if (linha == NULL) { fclose(e); fclose(s); return 1; }
+    for (unsigned i = 0; i < c.altura; i++) {
+        fread(linha, 1, bytes + pad, e);              // pixels + padding
+        f(linha, c.largura);                          // mexe só nos pixels
+        fwrite(linha, 1, bytes + pad, s);
+    }
+    free(linha); fclose(e); fclose(s);
+    return 0;
+}
+```
+
+**E26 — negativo** (`255 − valor` em cada componente):
+
+```c
+void neg(unsigned char *l, int w) { for (int i = 0; i < w * 3; i++) l[i] = 255 - l[i]; }
+int main(int argc, char **argv) {
+    if (argc != 3) { printf("uso: %s ent.bmp sai.bmp\n", argv[0]); return 1; }
+    return processa(argv[1], argv[2], neg);
+}
+```
+
+**E27 — tons de cinza** (média inteira dos três):
+
+```c
+void cz(unsigned char *l, int w) {
+    for (int i = 0; i < w; i++) {
+        int m = (l[3*i] + l[3*i+1] + l[3*i+2]) / 3;   // divisão de inteiros
+        l[3*i] = l[3*i+1] = l[3*i+2] = m;
+    }
+}
+```
+
+**E28 — espelho** (inverte cada linha):
+
+```c
+void esp(unsigned char *l, int w) {
+    for (int i = 0; i < w / 2; i++)
+        for (int k = 0; k < 3; k++) {                // troca o PIXEL i com o w-1-i
+            unsigned char t = l[3*i + k];
+            l[3*i + k] = l[3*(w-1-i) + k];
+            l[3*(w-1-i) + k] = t;
+        }
+}
+```
+
+- **Padding não é pixel**: nas funções acima ele fica de fora, porque só vão até `w * 3` (ou `w` pixels).
+- E28: troque **pixels inteiros** (3 bytes), não bytes soltos; senão B, G e R de cada pixel se invertem entre si e as cores mudam.
+- Teste de sanidade: negativo duas vezes e espelho duas vezes devolvem o arquivo **idêntico** ao original (`cmp`). Testei com 5×3 (padding 1) e 200×100 (padding 0).
+- Teste com **largura que não é múltipla de 4** (a `g5.bmp` do E25): é aí que o padding aparece.
+
+## 7.27 Mais enunciados → técnica (complementa o 7.20)
+
+| Se o enunciado pedir... | Pense em... |
+|---|---|
+| Trocar letras (maiúsculas) | `fgetc` com `int c` + conta na tabela ASCII + `fputc` |
+| Contar quantas vezes cada byte aparece | `int contador[256]`, `contador[c]++` |
+| Último registro / ordem inversa | `fseek` para `(n-1) × sizeof` e ir descendo, 1 registro por vez |
+| 1 a cada `k` registros | `fread` + `fseek(..., (k-1) × sizeof, SEEK_CUR)` |
+| Alterar um campo "no lugar", sem outro arquivo | `"r+b"` + `fseek` + `fread` + **volta 1 registro** + `fwrite` |
+| Acrescentar registro no fim | `"ab"` + `memset` + `fwrite` |
+| Salvar o índice para usar depois | `fwrite` do vetor inteiro; ler com `tamanho / sizeof(IndiceCep)` |
+| Juntar dois arquivos ordenados | Intercalação com `temA` / `temB` + copiar o resto |
+| Juntar sem repetir | Intercalação com 3 casos (menor A, menor B, **iguais**) |
+| "Não cabe na memória" | Ordenação externa: partes → `qsort` → intercala 2 a 2 |
+| Contar por grupo (sigla, UF…) | Ordenar pelo campo + laço com "grupo atual" + **tratar o último grupo** |
+| Achar buracos em sequência | Guardar o anterior; imprimir quando `atual != anterior + 1` |
+| Soma de k vizinhos | Ler k, somar, `fseek` de volta `k-1` |
+| Imagem BMP | Cabeçalho de 54 bytes + linhas com **padding** |
+| Quais chaves de B não estão em A (árvore B) | Indexar A (`insertKey`), percorrer B, `findKey`; só grava se `!achou` |
+
+## 7.28 Mapa: API da prova × `ArvoreB.c` de estudo
+
+O que aparece na prova (7.16 a 7.18) tem correspondente no `ArvoreB.c` que você estudou. A ideia é a mesma: **chave → offset em bytes**.
+
+| Na prova | No `ArvoreB.c` de estudo | Observação |
+|---|---|---|
+| `openTree(nome)` | `ArvoreB_Abre(nome)` | Cria o arquivo da árvore se não existir |
+| `insertKey(tree, long key, long offset)` | `ArvoreB_Insere(arvore, char chave[8], long pos)` | Na prova a chave é `long`; no estudo, 8 bytes de `char` |
+| `findKey(tree, key, &offset)` → `bool` | `ArvoreB_Busca(arvore, chave)` → offset ou `-1` | Na prova o offset sai **por referência** |
+| `closeTree(tree)` | `ArvoreB_Fecha(arvore)` | Sempre chamar antes de sair |
+
+Por isso, na prova, **não** reimplemente a árvore: use só essas 4 funções. O custo de cada `insertKey` / `findKey` é o da altura da árvore (O(log n)).
+
+## 7.29 Checklist — antes de entregar um exercício de programação
+
+```text
+[ ] Todos os #include certos? (stdio, stdlib, string; stdbool se usar bool)
+[ ] argc conferido e cada fopen / malloc testado?
+[ ] Modo de abertura certo? rb leitura · wb novo/apaga · r+b ler e alterar · ab acrescenta
+[ ] fgetc guardado em int (não char)?
+[ ] Passei &variável (e não a variável) no fread / fwrite / findKey?
+[ ] sizeof(struct), e não sizeof do ponteiro?
+[ ] fseek em BYTES: registro n → n × sizeof(Endereco)?
+[ ] ftell ANTES do fread ao guardar o offset?
+[ ] Depois do fread o cursor avançou: precisei voltar?
+[ ] Comparador com cast certo e sem subtração que estoure?
+[ ] CEP sem '\0': memcmp / memcpy com 8, nunca strcmp / strcpy?
+[ ] Tratei o último grupo / o resto da intercalação?
+[ ] Fechei os arquivos e dei free no que alocei?
+[ ] return 0 no fim do main?
+```
+
+## 7.30 Pontos básicos da P1 que a P2 usa (resumo para consulta)
+
+> Tudo aqui já aparece nos subtópicos anteriores e na seção 5; este é o resumo **num lugar só**, para quando o enunciado da P2 (árvore B, índice, busca) pedir "leia o registro", "volte ao início", "ordene" ou "aloque".
+
+### `fopen` — modos
+
+| Modo | Faz | Quando usar |
+|---|---|---|
+| `"rb"` | só lê; o arquivo precisa existir | ler dados / índice |
+| `"wb"` | cria ou **APAGA** e escreve | arquivo de saída novo |
+| `"r+b"` | lê **e** escreve; não apaga; precisa existir | alterar registro no lugar |
+| `"ab"` | escreve **sempre no fim** (`fseek` não muda isso) | acrescentar registro |
+| `"w+b"` | lê e escreve; cria ou **APAGA** | arquivo novo que também será relido |
+
+Sempre `if (f == NULL) {...}` depois do `fopen`; se o **2º** `fopen` falhar, feche o 1º antes de sair.
+
+### `fgetc` / `fputc` — byte a byte
+
+```c
+int c;                              // int, nunca char (precisa caber o EOF = -1)
+while ((c = fgetc(f)) != EOF)
+    fputc(c, saida);
+```
+
+### `fread` / `fwrite` — registros
+
+```c
+fread(&r, sizeof(Registro), 1, f);        // 1 registro numa variável → com &
+fread(v, sizeof(Registro), qtd, f);       // vários num vetor/malloc → SEM &
+fwrite(&r, sizeof(Registro), 1, saida);
+
+while (fread(&r, sizeof(Registro), 1, f) == 1) { /* processa r */ }
+```
+
+- Os dois **devolvem quantos itens** leram/gravaram (não bytes). Compare com `== 1` (ou com `qtd`).
+- Os dois **avançam o cursor** pelo que leram/gravaram.
+- `feof(f)` só vira verdadeiro **depois** de uma leitura que falhou: não use como condição do laço.
+
+### `fseek`, `ftell`, `rewind`
+
+```c
+fseek(f, deslocamento, SEEK_SET);   // conta a partir do INÍCIO do arquivo
+fseek(f, deslocamento, SEEK_CUR);   // conta a partir da posição ATUAL (pode ser negativo)
+fseek(f, deslocamento, SEEK_END);   // conta a partir do FIM
+long pos = ftell(f);                // posição atual em BYTES (devolve long)
+rewind(f);                          // volta ao início
+```
+
+| Comparação | Diferença |
+|---|---|
+| `fseek` × `ftell` | `fseek` **muda** a posição; `ftell` só **informa** a posição atual |
+| `rewind(f)` × `fseek(f, 0, SEEK_SET)` | Mesmo efeito na posição; o `rewind` ainda limpa o indicador de fim/erro e não devolve valor |
+
+Fórmulas (registros de tamanho fixo):
+
+```text
+quantidade de registros = tamanho do arquivo / sizeof(Registro)
+registro número i (primeiro = 0)  → offset = i * sizeof(Registro)
+registro número n (primeiro = 1)  → offset = (n - 1) * sizeof(Registro)
+tamanho do arquivo:  fseek(f, 0, SEEK_END);  long tam = ftell(f);  rewind(f);
+```
+
+Pegadinhas:
+
+- `fseek(f, 0, SEEK_END)` leva ao **fim** (depois do último registro), não **ao** último registro. O último é `fseek(f, -(long)sizeof(Registro), SEEK_END)`.
+- Deslocamento **negativo**: `-(long)sizeof(Registro)`. O `sizeof` é sem sinal, então escreva sempre o cast `(long)`.
+- Depois de `fread` de 1 registro o cursor já está no **seguinte**. Para reescrever o mesmo: `fseek(f, -(long)sizeof(Registro), SEEK_CUR)` e então `fwrite`.
+- Guardar a posição de um registro: `long offset = ftell(f);` **antes** do `fread` (é o que se passa ao `insertKey` da árvore B).
+- Ler um registro pelo offset (vindo da árvore): `fseek(f, offset, SEEK_SET); fread(&r, sizeof(Registro), 1, f);` (offset já está em **bytes**: não multiplique).
+
+### `malloc` / `free` / `sizeof`
+
+```c
+Registro *v = malloc(qtd * sizeof(Registro));
+if (v == NULL) { /* erro: feche o que abriu e saia */ }
+/* ... usa v[0] ... v[qtd-1] ... */
+free(v);
+```
+
+- `sizeof(Registro)` = tamanho de **um** elemento; `sizeof(v)` com `v` ponteiro é o tamanho do **ponteiro** (errado aqui).
+- Vetores começam no **0**: o último é `v[qtd - 1]`.
+- Um único `fread(v, sizeof(Registro), qtd, f)` enche o vetor.
+
+### `qsort` e comparador
+
+```c
+qsort(v, qtd, sizeof(Registro), compara);      // compara SEM parênteses
+```
+
+```c
+int compara(const void *a, const void *b) {
+    const Registro *x = (const Registro*) a;   // cast para o MESMO tipo do vetor
+    const Registro *y = (const Registro*) b;
+    if (x->chave < y->chave) return -1;        // negativo: x vem antes
+    if (x->chave > y->chave) return  1;        // positivo: x vem depois
+    return 0;                                  // zero: iguais
+}
+```
+
+- Chave `long`/`int`: compare com `<` e `>`. Não devolva `x - y`: a subtração pode **estourar**.
+- Chave de **bytes sem `'\0'`** (como o `cep[8]`): `return memcmp(x->cep, y->cep, 8);`. Nunca `strcmp`.
+- O `sizeof` do `qsort` tem de combinar com o tipo do vetor e com o cast do comparador.
+- `qsort` **ordena**; busca binária **procura** num vetor/arquivo **já ordenado**. São coisas diferentes.
+
+### Resto do básico
+
+| Assunto | Lembrete |
+|---|---|
+| `argc` / `argv` | `if (argc != N) {...}`; `argv[0]` é o nome do programa, `argv[1]` o 1º argumento |
+| `struct` | `e.campo` (variável) · `p->campo` (ponteiro para struct) |
+| Ponteiro | `x` conteúdo, `&x` endereço; `p` endereço, `*p` conteúdo apontado |
+| `memset(&r, 0, sizeof(r))` | zera a struct antes de preencher (senão grava lixo de memória no arquivo) |
+| `return` | `return 1;` ao falhar · `return 0;` no fim do `main` · `return;` em função `void` |
+| Bytes × registros | `fseek`/`ftell` contam **bytes**; `fread`/`fwrite` contam **itens** |
+
+## 7.31 Lembretes da P1 (contas e últimos lembretes)
+
+> Mesmos lembretes da seção 5.14, mais as suas anotações (`anotacao.txt`). Os programas para copiar e colar (copiar byte a byte e em blocos, busca, índice, ordenação externa, intercalação) continuam na seção 5.13.
+
+### 📍 Posição e quantidade
+
+```text
+registro n (primeiro = 0)  → n * sizeof(Tipo) bytes
+fseek(f, n * sizeof(Tipo), SEEK_SET);
+
+bytes / sizeof(Tipo)       → quantidade de registros
+registros * sizeof(Tipo)   → bytes
+```
+
+### 🧠 Ponteiros
+
+```text
+Tipo x;      x → conteúdo      &x → endereço
+Tipo *x;     x → endereço      *x → conteúdo apontado
+struct       → .
+ponteiro     → ->
+```
+
+### 📖 Leitura
+
+```text
+fgetc → 1 byte → int
+fread → itens/registros
+ler → testar → usar → ler de novo
+```
+
+- `fread` **avança** o cursor; `ftell` acompanha isso (depois do `fread` ele já informa o início do **próximo** registro).
+- `EOF` **não** é `feof`: `EOF` é o valor que o `fgetc` devolve; `feof(f)` só fica verdadeiro **depois** de uma leitura que tentou passar do fim.
+- `ftell` devolve **`long`**: guarde em `long` e imprima com `%ld`.
+
+### 🔎 Busca
+
+```text
+sequencial:  fread → compara → continua/para
+binária:     meio → fseek → fread → compara      (arquivo ORDENADO)
+
+ANTES  → continua
+IGUAL  → faz
+DEPOIS → break
+```
+
+### 📇 Índice
+
+```text
+índice = chave + posição original
+busca no índice → encontra a posição → fseek no arquivo original → fread
+ordenar o índice NÃO muda a posição guardada
+```
+
+### 📦 Ordenação externa
+
+```text
+arquivo grande → dividir → qsort cada parte → intercalar 2 a 2 → repetir → 1 arquivo
+
+divisao = quantidade / PARTES        i < resto  → parte com divisao + 1
+resto   = quantidade % PARTES        i >= resto → parte com divisao
+
+PARTES = 8  →  intercalações = PARTES − 1 = 7  →  arquivo final = cep_14.dat
+(fórmula geral: arquivo final = cep_(2·PARTES − 2).dat)
+```
+
+### ⚠️ Últimos lembretes
+
+```text
+fseek(SEEK_END)   → vai para o FIM, não para o último registro
+ftell()           → long
+fgetc()           → int
+fread()/fwrite()  → devolvem itens, não bytes
+malloc()          → recebe BYTES (qtd * sizeof)
+free()            → depois do último uso
+qsort(..., compara) → sem ()
+wb                → apaga
+ab                → adiciona no final
+vetores           → começam no 0
+return 0          → fim do main (não esquecer)
+```
 
 ---
 
