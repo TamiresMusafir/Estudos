@@ -68,9 +68,10 @@ O material é um só, em duas partes: **P1** (arquivos em C) e **P2** (árvores 
   - [6.4 Hash com encadeamento externo](#64-hash-com-encadeamento-externo)
   - [6.5 Huffman](#65-huffman)
   - [6.6 Código com índice em árvore B (questão 4 da P2)](#66-código-com-índice-em-árvore-b-questão-4-da-p2)
-  - [6.7 Pontos básicos da P1 que a P2 usa](#67-pontos-básicos-da-p1-que-a-p2-usa)
-  - [6.8 Lembretes da P1 (contas e últimos lembretes)](#68-lembretes-da-p1-contas-e-últimos-lembretes)
-  - [6.9 Checklist — antes de entregar a P2](#69-checklist--antes-de-entregar-a-p2)
+  - [6.7 Diferença entre arquivos ordenados e índices (denso e clustering)](#67-diferença-entre-arquivos-ordenados-e-índices-denso-e-clustering)
+  - [6.8 Pontos básicos da P1 que a P2 usa](#68-pontos-básicos-da-p1-que-a-p2-usa)
+  - [6.9 Lembretes da P1 (contas e últimos lembretes)](#69-lembretes-da-p1-contas-e-últimos-lembretes)
+  - [6.10 Checklist — antes de entregar a P2](#610-checklist--antes-de-entregar-a-p2)
 
 ### 🧠 Fechamento
 
@@ -2918,8 +2919,9 @@ Guia completo: [`arvore-huf/README.md`](arvore-huf/README.md). Programas de estu
 | Árvore e códigos de Huffman | [6.5](#65-huffman) |
 | Código com índice em árvore B (`openTree`, `findKey`...) | [6.6](#66-código-com-índice-em-árvore-b-questão-4-da-p2) |
 | Qualquer código em C (arquivos, busca, `qsort`...) | [seção 5](#5-folha-de-cola) |
-| Lembrar rápido `fopen`, `fseek`, `fread`, `malloc`, `qsort` | [6.7](#67-pontos-básicos-da-p1-que-a-p2-usa) |
-| Contas e lembretes da P1 | [6.8](#68-lembretes-da-p1-contas-e-últimos-lembretes) |
+| Lembrar rápido `fopen`, `fseek`, `fread`, `malloc`, `qsort` | [6.8](#68-pontos-básicos-da-p1-que-a-p2-usa) |
+| Contas e lembretes da P1 | [6.9](#69-lembretes-da-p1-contas-e-últimos-lembretes) |
+| Diferença A1 − A2 com arquivos ordenados · índice denso · índice clustering | [6.7](#67-diferença-entre-arquivos-ordenados-e-índices-denso-e-clustering) |
 
 ## 6.1 Respostas objetivas
 
@@ -3369,7 +3371,149 @@ long chave = atol(tmp);
 
 Nota de estudo: o `ArvoreB.c` do guia usa nomes diferentes (`ArvoreB_Abre`, `ArvoreB_Insere(arvore, chave, pos)`, `ArvoreB_Busca` devolve **-1** se não achar; o 0 é posição válida). Na prova, use as funções que o enunciado der.
 
-## 6.7 Pontos básicos da P1 que a P2 usa
+## 6.7 Diferença entre arquivos ordenados e índices (denso e clustering)
+
+### 6.7.1 Diferença entre arquivos ordenados (A1 − A2)
+
+Grava os registros que estão em **A1** e **não** estão em **A2**. Os dois arquivos precisam estar **ordenados pela mesma chave**; lê-se **uma vez** cada arquivo.
+
+```c
+int IntercalaArquivos(char nome1[], char nome2[], char nomeSaida[]) {
+    Registro a, b;
+    FILE *f1 = fopen(nome1, "rb");
+    FILE *f2 = fopen(nome2, "rb");
+    FILE *saida = fopen(nomeSaida, "wb");
+
+    if (!f1 || !f2 || !saida) {
+        return 1;
+    }
+
+    int temA = fread(&a, sizeof(Registro), 1, f1) == 1;
+    int temB = fread(&b, sizeof(Registro), 1, f2) == 1;
+
+    while (temA && temB) {
+        int resultado = compara(&a, &b);
+
+        if (resultado < 0) {
+            fwrite(&a, sizeof(Registro), 1, saida);
+            temA = fread(&a, sizeof(Registro), 1, f1) == 1;
+
+        } else if (resultado == 0) {
+            temA = fread(&a, sizeof(Registro), 1, f1) == 1;
+            temB = fread(&b, sizeof(Registro), 1, f2) == 1;
+
+        } else {
+            temB = fread(&b, sizeof(Registro), 1, f2) == 1;
+        }
+    }
+
+    while (temA) {
+        fwrite(&a, sizeof(Registro), 1, saida);
+        temA = fread(&a, sizeof(Registro), 1, f1) == 1;
+    }
+
+    fclose(f1);
+    fclose(f2);
+    fclose(saida);
+
+    return 0;
+}
+```
+
+| Comparação | O que fazer |
+|---|---|
+| `a < b` | só existe em A1 → **grava** `a` e avança **só A1** |
+| `a == b` | existe nos dois → **não grava**, avança **os dois** |
+| `a > b` | só existe em A2 → **não grava**, avança **só A2** |
+| A2 acabou | grava o **resto** de A1 (último `while`) |
+
+Testei com A1 = {1, 3, 5, 7, 9, 11} e A2 = {3, 4, 9, 12}: a saída foi {1, 5, 7, 11}.
+
+### 6.7.2 Índice denso (ex.: CEP)
+
+Uma entrada para **cada registro**.
+
+```c
+typedef struct {
+    char chave[8];
+    long posicao;
+} Indice;
+
+// Descobre quantidade de registros
+fseek(arquivo, 0, SEEK_END);
+long tamanho = ftell(arquivo);
+long registros = tamanho / sizeof(Registro);
+
+rewind(arquivo);
+
+// Aloca índice
+Indice *indice = malloc(registros * sizeof(Indice));
+
+if (indice == NULL && registros > 0) {
+    return 1;
+}
+
+// Preenche índice
+Registro r;
+
+for (long i = 0; i < registros; i++) {
+    fread(&r, sizeof(Registro), 1, arquivo);
+
+    strncpy(indice[i].chave, r.chave, 8);
+    indice[i].posicao = i;
+}
+
+// Ordena índice
+qsort(indice, registros, sizeof(Indice), comparaIndice);
+```
+
+### 6.7.3 Índice clustering (esparso) (ex.: SINASC)
+
+Uma entrada para **cada chave distinta**. O arquivo original já está **ordenado (agrupado) pela chave**.
+
+```c
+typedef struct {
+    unsigned int codigo;
+    unsigned int posicao;
+} Indice;
+
+Registro *r;
+Indice indice;
+
+unsigned int codigoAnterior;
+int primeiro = 1;
+
+while (1) {
+    unsigned int posicao = (unsigned int) ftell(entrada);
+
+    r = leRegistro(entrada);
+
+    if (r == NULL) {
+        break;
+    }
+
+    unsigned int codigoAtual = getCodigoMunicipio(r);
+
+    if (primeiro || codigoAtual != codigoAnterior) {
+        indice.codigo = codigoAtual;
+        indice.posicao = posicao;
+
+        fwrite(&indice, sizeof(Indice), 1, saida);
+
+        codigoAnterior = codigoAtual;
+        primeiro = 0;
+    }
+}
+```
+
+### Lembretes rápidos
+
+- **Índice denso:** uma entrada por registro → pode precisar de `qsort`.
+- **Índice clustering:** uma entrada por grupo → **não precisa ordenar** se o arquivo já estiver agrupado.
+- Posição no índice **denso** (acima) é o **número do registro** (`i`): para o `fseek`, **multiplica** por `sizeof(Registro)`.
+- Posição no **clustering** é o **offset em bytes**, obtido com `ftell` **antes** de ler o registro: usa **direto** no `fseek`.
+
+## 6.8 Pontos básicos da P1 que a P2 usa
 
 > Tudo aqui já aparece nas seções 1 a 5; este é o resumo **num lugar só**, para quando o enunciado da P2 (árvore B, índice, busca) pedir "leia o registro", "volte ao início", "ordene" ou "aloque".
 
@@ -3484,7 +3628,7 @@ int compara(const void *a, const void *b) {
 | `return` | `return 1;` ao falhar · `return 0;` no fim do `main` · `return;` em função `void` |
 | Bytes × registros | `fseek`/`ftell` contam **bytes**; `fread`/`fwrite` contam **itens** |
 
-## 6.8 Lembretes da P1 (contas e últimos lembretes)
+## 6.9 Lembretes da P1 (contas e últimos lembretes)
 
 > Mesmos lembretes da [seção 5.14](#514-contas-e-lembretes), mais as anotações do `anotacao.txt`. Os programas para copiar e colar (copiar byte a byte e em blocos, busca, índice, ordenação externa, intercalação) estão na [seção 5.13](#513-programas-para-copiar-e-colar).
 
@@ -3566,7 +3710,7 @@ vetores           → começam no 0
 return 0          → fim do main (não esquecer)
 ```
 
-## 6.9 Checklist — antes de entregar a P2
+## 6.10 Checklist — antes de entregar a P2
 
 ```text
 [ ] Raiz no nível 0 ou 1?
