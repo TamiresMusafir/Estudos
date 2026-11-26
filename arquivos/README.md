@@ -62,7 +62,7 @@ O material é um só, em duas partes: **P1** (arquivos em C) e **P2** (árvores 
 - Guias completos, nas pastas: [`arvores/`](arvores/README.md) · [`hash/`](hash/README.md) · [`arvore-huf/`](arvore-huf/README.md) · [`provasp2/`](provasp2/README.md)
 
 - [6. Folha de cola da P2](#6-folha-de-cola-da-p2)
-  - [6.1 Respostas objetivas (para copiar)](#61-respostas-objetivas-para-copiar)
+  - [6.1 Respostas objetivas](#61-respostas-objetivas)
   - [6.2 Pior caso e melhor caso](#62-pior-caso-e-melhor-caso)
   - [6.3 Árvore B e B+: como funciona e as contas](#63-árvore-b-e-b-como-funciona-e-as-contas)
   - [6.4 Hash com encadeamento externo](#64-hash-com-encadeamento-externo)
@@ -2909,7 +2909,7 @@ Guia completo: [`arvore-huf/README.md`](arvore-huf/README.md). Programas de estu
 
 | Se a questão pede... | Vá a |
 |---|---|
-| Explicar / diferença B × B+, hash × árvore, heap, split | [6.1](#61-respostas-objetivas-para-copiar) |
+| Explicar / diferença B × B+, hash × árvore, heap, split | [6.1](#61-respostas-objetivas) |
 | Múltipla escolha de árvore B/B+ | 6.1.2 |
 | Pior caso / melhor caso / custo | [6.2](#62-pior-caso-e-melhor-caso) |
 | Calcular n pelo bloco, quantas chaves, altura | 6.3.2 e 6.3.3 |
@@ -2921,119 +2921,84 @@ Guia completo: [`arvore-huf/README.md`](arvore-huf/README.md). Programas de estu
 | Lembrar rápido `fopen`, `fseek`, `fread`, `malloc`, `qsort` | [6.7](#67-pontos-básicos-da-p1-que-a-p2-usa) |
 | Contas e lembretes da P1 | [6.8](#68-lembretes-da-p1-contas-e-últimos-lembretes) |
 
-## 6.1 Respostas objetivas (para copiar)
+## 6.1 Respostas objetivas
 
 ### 6.1.1 Diferença entre árvore B e árvore B+
 
-```text
-ÁRVORE B   chaves E dados (ou ponteiros p/ dados) ficam em TODOS os nós,
-           internos e folhas. Cada chave aparece uma vez só.
+- **Árvore B:** chaves **e** dados (ou ponteiros para os dados) ficam em **todos** os nós, internos e folhas. Cada chave aparece uma vez só.
+- **Árvore B+:** os nós internos têm só **chaves-guia**, que servem para direcionar a busca, **sem dados**. Todos os dados (ou ponteiros) ficam **só nas folhas**, e as folhas são **encadeadas** entre si em ordem.
 
-ÁRVORE B+  nós internos só têm chaves-guia (servem para direcionar a busca),
-           SEM dados. Todos os dados (ou ponteiros) ficam SÓ NAS FOLHAS.
-           As folhas são ENCADEADAS entre si em ordem.
+**Por que a B+ é mais eficiente em arquivo indexado:**
 
-POR QUE A B+ É MAIS EFICIENTE EM ARQUIVO INDEXADO
- 1. nó interno sem dados → cabem MAIS chaves por bloco (fan-out maior)
-    → árvore mais BAIXA → MENOS leituras de bloco
- 2. folhas encadeadas → varredura sequencial e consulta por INTERVALO
-    sem voltar à raiz
- 3. toda busca desce até a folha → custo parecido para qualquer chave
-```
+1. Nó interno sem dados → cabem **mais chaves por bloco** (fan-out maior) → árvore mais **baixa** → **menos leituras** de bloco.
+2. Folhas encadeadas → varredura sequencial e consulta por **intervalo**, sem voltar à raiz.
+3. Toda busca desce até a folha → custo parecido para qualquer chave.
 
 ### 6.1.2 Múltipla escolha (A10)
 
-```text
-Onde ficam as chaves reais (com dados) na B+?        (b) apenas nas folhas
-Principal vantagem da B+ sobre a B?                  (a) busca sequencial
-                                                         (folhas encadeadas)
-O que é exclusivo da B e não da B+?                  (a) chaves nos nós internos
-```
+| Pergunta | Resposta |
+|---|---|
+| Onde ficam as chaves reais (com dados) na B+? | **(b)** apenas nas folhas |
+| Principal vantagem da B+ sobre a B? | **(a)** busca sequencial (folhas encadeadas) |
+| O que é exclusivo da B e não da B+? | **(a)** chaves nos nós internos |
 
 ### 6.1.3 Hash como índice: vantagens e desvantagens
 
-```text
-VANTAGENS
-  consulta por IGUALDADE: calcula h(k) e vai direto → O(1) em média
-  simples e rápida quando há poucas colisões
+**Vantagens**
 
-DESVANTAGENS
-  NÃO mantém a ORDEM das chaves
-  NÃO atende consulta por INTERVALO (teria de varrer tudo)
-  muitas colisões → listas longas → pode chegar a O(n)
-```
+- Consulta por **igualdade**: calcula `h(k)` e vai direto, **O(1) em média**.
+- Simples e rápido quando há poucas colisões.
+
+**Desvantagens**
+
+- **Não** mantém a **ordem** das chaves.
+- **Não** atende consulta por **intervalo** (teria de varrer tudo).
+- Muitas colisões → listas longas → pode chegar a **O(n)**.
 
 ### 6.1.4 Hash × árvore B/B+
 
-```text
-Organização  árvore: nós ligados por ponteiros      hash: função calcula a posição
-Acesso       árvore: raiz → segue ponteiros         hash: vai direto à posição
-                                                          (colisão: segue a lista)
-Ordenação    árvore: mantém as chaves em ordem      hash: não mantém
-Custo        árvore: O(log n)                       hash: O(1) médio, O(n) pior caso
+| | Árvore B/B+ | Hash |
+|---|---|---|
+| **Organização** | Nós ligados por ponteiros | Função calcula a posição |
+| **Acesso** | Raiz → segue os ponteiros | Vai direto à posição (se houver colisão, segue a lista) |
+| **Ordenação** | Mantém as chaves em ordem | Não mantém |
+| **Custo** | O(log n) | O(1) médio, O(n) no pior caso |
+| **É melhor para** | **Intervalo** e resultado em **ordem** (ex.: notas entre 7 e 10; listar alunos por matrícula) | **Igualdade** (ex.: buscar o aluno de matrícula 2025001) |
 
-Árvore B/B+ é melhor para: INTERVALO e resultado em ORDEM
-   (ex.: notas entre 7 e 10; listar alunos por matrícula)
-Hash é melhor para: IGUALDADE
-   (ex.: buscar o aluno de matrícula 2025001)
-
-A ordem de inserção se perde no hash porque a posição vem de h(k),
-não da ordem de chegada.
-```
+A ordem de inserção se perde no hash porque a posição vem de `h(k)`, não da ordem de chegada.
 
 ### 6.1.5 Split e o mínimo de 50% de ocupação
 
-```text
-O nó só divide quando ESTOURA (n chaves, sendo n o grau).
-A chave do meio sobe e as outras n − 1 se repartem em duas metades:
-cada metade fica com pelo menos ⌈n/2⌉ − 1 chaves = o mínimo permitido.
+O nó só divide quando **estoura** (`n` chaves, sendo `n` o grau). A chave do meio **sobe** e as outras `n − 1` se repartem em duas metades: cada metade fica com pelo menos `⌈n/2⌉ − 1` chaves, que é o **mínimo permitido**.
 
-Ex.: grau 5 → estoura com 5 chaves → 2 + (1 que sobe) + 2   (mínimo = 2) ✓
-```
+> **Exemplo:** grau 5 → estoura com 5 chaves → 2 + (1 que sobe) + 2, e o mínimo é 2 ✓
 
 ### 6.1.6 Huffman
 
-```text
-POR QUE USAR HEAP: a cada passo é preciso achar os 2 menores pesos e devolver
-o nó novo. O heap mínimo extrai o menor e insere em O(log n); numa lista
-isso custa O(n). Total: O(n log n).
-
-QUANDO COMPENSA: quando alguns símbolos são muito mais frequentes que outros
-(frequentes → código curto).
-
-ARQUIVO JÁ COMPACTADO: bytes com frequências quase uniformes → códigos quase
-todos com ~8 bits → ganho ≈ 0.
-
-CÓDIGO LIVRE DE PREFIXO: nenhum código é começo de outro → dá para decodificar
-sem separador.
-```
+- **Por que usar heap:** a cada passo é preciso achar os **2 menores** pesos e devolver o nó novo. O heap mínimo extrai o menor e insere em **O(log n)**; numa lista isso custa O(n). Total: **O(n log n)**.
+- **Quando compensa:** quando alguns símbolos são **muito mais frequentes** que outros (frequentes → código curto).
+- **Arquivo já compactado:** bytes com frequências quase uniformes → códigos quase todos com ~8 bits → ganho ≈ 0.
+- **Código livre de prefixo:** nenhum código é começo de outro, então dá para decodificar **sem separador**.
 
 ### 6.1.7 Por que a árvore B é um bom índice em disco
 
-```text
-Cada nó = 1 bloco = 1 leitura de disco.
-Custo da busca = ALTURA da árvore.
-Nó grande (muitas chaves) → árvore BAIXA → poucas leituras.
-Balanceada: todas as folhas no mesmo nível; cresce pela RAIZ.
-```
+- Cada nó = **1 bloco** = **1 leitura de disco**.
+- Custo da busca = **altura** da árvore.
+- Nó grande (muitas chaves) → árvore **baixa** → poucas leituras.
+- É **balanceada**: todas as folhas no mesmo nível, e a árvore cresce pela **raiz**.
 
 ### 6.1.8 Índice (chave → posição)
 
-```text
-O arquivo de dados não muda; o índice guarda pares (chave, posição em bytes).
-Busca: acha a chave no índice → pega a posição → fseek + fread.
-Vantagem: busca rápida sem ordenar o arquivo de dados.
-Custo: espaço extra, e se o arquivo for reordenado o índice precisa ser refeito.
-```
+- O arquivo de dados **não muda**; o índice guarda pares (chave, posição em bytes).
+- **Busca:** acha a chave no índice → pega a posição → `fseek` + `fread`.
+- **Vantagem:** busca rápida sem ordenar o arquivo de dados.
+- **Custo:** espaço extra, e se o arquivo for reordenado o índice precisa ser **refeito**.
 
 ### 6.1.9 Custo de "arquivo2 menos arquivo1" com árvore B (D2d)
 
-```text
-uma busca na árvore B para CADA registro de arquivo2:  n2 × O(log n1)
-mais a leitura sequencial de arquivo2 e a escrita da saída
-→ O(n2 · log n1)
-(se o índice do arquivo1 ainda precisar ser construído: O((n1 + n2) · log n1))
-```
+- Uma busca na árvore B para **cada** registro do arquivo2: `n2 × O(log n1)`, mais a leitura sequencial do arquivo2 e a escrita da saída.
+- **Custo: O(n2 · log n1)**.
+- Se o índice do arquivo1 ainda precisar ser construído: **O((n1 + n2) · log n1)**.
 
 
 ## 6.2 Pior caso e melhor caso
