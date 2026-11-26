@@ -64,15 +64,13 @@ O material é um só, em duas partes: **P1** (arquivos em C) e **P2** (árvores 
 - [6. Folha de cola da P2](#6-folha-de-cola-da-p2)
   - [6.1 Respostas objetivas](#61-respostas-objetivas)
   - [6.2 Pior caso e melhor caso](#62-pior-caso-e-melhor-caso)
-  - [6.3 Árvore B e B+: como funciona e as contas](#63-árvore-b-e-b-como-funciona-e-as-contas)
+  - [6.3 Árvore B e B+](#63-árvore-b-e-b)
   - [6.4 Hash com encadeamento externo](#64-hash-com-encadeamento-externo)
   - [6.5 Huffman](#65-huffman)
   - [6.6 Código com índice em árvore B (questão 4 da P2)](#66-código-com-índice-em-árvore-b-questão-4-da-p2)
-  - [6.7 Diferença entre arquivos ordenados e índices (denso e clustering)](#67-diferença-entre-arquivos-ordenados-e-índices-denso-e-clustering)
-  - [6.8 Pontos básicos da P1 que a P2 usa](#68-pontos-básicos-da-p1-que-a-p2-usa)
-  - [6.9 Consulta rápida da P1](#69-consulta-rápida-da-p1)
-  - [6.10 Hash em arquivo com Python](#610-hash-em-arquivo-com-python)
-  - [6.11 Respostas prontas do treino (árvore B e hash)](#611-respostas-prontas-do-treino-árvore-b-e-hash)
+  - [6.7 Diferença entre arquivos ordenados e índices](#67-diferença-entre-arquivos-ordenados-e-índices)
+  - [6.8 Básico de C (P1) que a P2 usa](#68-básico-de-c-p1-que-a-p2-usa)
+  - [6.9 Hash em arquivo com Python](#69-hash-em-arquivo-com-python)
 
 ### 🧠 Fechamento
 
@@ -2907,156 +2905,147 @@ Guia completo: [`arvore-huf/README.md`](arvore-huf/README.md). Programas de estu
 
 # 6. Folha de Cola da P2
 
-> Folha para consulta na prova, no mesmo formato da [seção 5](#5-folha-de-cola) (que é a folha da P1 e cobre arquivos em C: `fseek`, `ftell`, `fread`, `qsort`, busca, índice, ordenação externa; o código da P2 reaproveita tudo isso). Aqui ficam as respostas objetivas, pior e melhor caso, funcionamento de árvore B/B+, hash e Huffman, e o código da questão 4.
+Folha de consulta para a prova, no mesmo formato da [seção 5](#5-folha-de-cola) (a folha da P1, com os programas completos em C). Aqui ficam as respostas objetivas, pior e melhor caso, árvore B/B+, hash, Huffman, os códigos da questão 4 e o básico de C que a P2 reaproveita.
 
-| **Se a questão pede...**                                                    | **Vá a**                                                                                                                                                   |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Explicar / diferença B × B+, hash × árvore, heap, split                     | [6.1](#61-respostas-objetivas)                                                       |
-| Múltipla escolha de árvore B/B+                                             | 6.1.2                                                                                                                                                      |
-| Pior caso / melhor caso / custo                                             | [6.2](#62-pior-caso-e-melhor-caso)                                                   |
-| Calcular n pelo bloco, quantas chaves, altura                               | 6.3.2 e 6.3.3                                                                                                                                              |
-| Desenhar inserção ou remoção em árvore B                                    | 6.3.4 e 6.3.5                                                                                                                                              |
-| Tabela de hash com colisões                                                 | [6.4](#64-hash-com-encadeamento-externo)                                             |
-| Árvore e códigos de Huffman                                                 | [6.5](#65-huffman)                                                                   |
-| Código com índice em árvore B (`openTree`, `findKey`...)                    | [6.6](#66-código-com-índice-em-árvore-b-questão-4-da-p2)         |
-| Qualquer código em C (arquivos, busca, `qsort`...)                          | [seção 5](#5-folha-de-cola)                                                          |
-| Lembrar rápido `fopen`, `fseek`, `fread`, `malloc`, `qsort`                 | [6.8](#68-pontos-básicos-da-p1-que-a-p2-usa)                                    |
-| Contas e lembretes da P1                                                    | [6.9](#69-consulta-rápida-da-p1)                           |
-| Diferença A1 − A2 com arquivos ordenados · índice denso · índice clustering | [6.7](#67-diferença-entre-arquivos-ordenados-e-índices-denso-e-clustering) |
-| Hash em arquivo com Python (`struct`, `seek`, lista de colisões) | [6.10](#610-hash-em-arquivo-com-python) |
-| Resposta pronta com todas as contas (A1 nó da árvore B, A2, A6, A8 split, A9 N e capacidade; hash B1–B4, B8) | [6.11](#611-respostas-prontas-do-treino-árvore-b-e-hash) |
+| **Se a questão pede...** | **Vá a** |
+| --- | --- |
+| Explicar diferença B × B+, hash × árvore, split, Huffman | [6.1](#61-respostas-objetivas) |
+| Múltipla escolha de árvore B/B+ | [6.1.1](#611-árvore-b--árvore-b) |
+| Pior caso / melhor caso / custo | [6.2](#62-pior-caso-e-melhor-caso) |
+| Calcular n pelo bloco, quantas chaves, altura | [6.3](#63-árvore-b-e-b) (6.3.2 e 6.3.3) |
+| Desenhar inserção ou remoção em árvore B | [6.3](#63-árvore-b-e-b) (6.3.4 e 6.3.5) |
+| Código do split de uma página | [6.3](#63-árvore-b-e-b) (6.3.6) |
+| Tabela de hash com colisões | [6.4](#64-hash-com-encadeamento-externo) |
+| Árvore e códigos de Huffman | [6.5](#65-huffman) |
+| Código com índice em árvore B (`openTree`, `findKey`...) | [6.6](#66-código-com-índice-em-árvore-b-questão-4-da-p2) |
+| Diferença A1 − A2 · índice denso · índice clustering | [6.7](#67-diferença-entre-arquivos-ordenados-e-índices) |
+| `fopen`, `fseek`, `fread`, `malloc`, `qsort`, fórmulas | [6.8](#68-básico-de-c-p1-que-a-p2-usa) |
+| Hash em arquivo com Python | [6.9](#69-hash-em-arquivo-com-python) |
+| Qualquer programa completo em C (arquivos, busca, ordenação externa) | [seção 5](#5-folha-de-cola) |
+
+---
 
 ## 6.1 Respostas objetivas
 
-### 6.1.1 Diferença entre árvore B e árvore B+
+### 6.1.1 Árvore B × árvore B+
 
-- **Árvore B:** chaves **e** dados (ou ponteiros para os dados) ficam em **todos** os nós, internos e folhas. Cada chave aparece uma vez só.
-- **Árvore B+:** os nós internos têm só **chaves-guia**, que servem para direcionar a busca, **sem dados**. Todos os dados (ou ponteiros) ficam **só nas folhas**, e as folhas são **encadeadas** entre si em ordem.
+**Árvore B:** chaves e dados (ou ponteiros para os dados) ficam em todos os nós, internos e folhas. Cada chave aparece uma vez só.
+
+**Árvore B+:** os nós internos têm só chaves-guia, sem dados. Todos os dados (ou ponteiros) ficam só nas folhas, e as folhas são encadeadas em ordem. Ao dividir uma folha, a chave do meio é **copiada** para o pai (continua na folha).
 
 **Por que a B+ é mais eficiente em arquivo indexado:**
 
-1. Nó interno sem dados → cabem **mais chaves por bloco** (fan-out maior) → árvore mais **baixa** → **menos leituras** de bloco.
-2. Folhas encadeadas → varredura sequencial e consulta por **intervalo**, sem voltar à raiz.
-3. Toda busca desce até a folha → custo parecido para qualquer chave.
+- Nó interno sem dados → cabem mais chaves por bloco → árvore mais baixa → menos leituras de bloco.
+- Folhas encadeadas → varredura sequencial e consulta por intervalo, sem voltar à raiz.
+- Toda busca desce até a folha → custo parecido para qualquer chave.
 
-### 6.1.2 Múltipla escolha (A10)
+**Múltipla escolha (A10):**
 
-| **Pergunta**                                  | **Resposta**                                 |
-| --------------------------------------------- | -------------------------------------------- |
-| Onde ficam as chaves reais (com dados) na B+? | **(b)** apenas nas folhas                    |
-| Principal vantagem da B+ sobre a B?           | **(a)** busca sequencial (folhas encadeadas) |
-| O que é exclusivo da B e não da B+?           | **(a)** chaves nos nós internos              |
+| Pergunta | Resposta |
+|---|---|
+| Onde ficam as chaves reais (com dados) na B+? | (b) apenas nas folhas |
+| Principal vantagem da B+ sobre a B? | (a) busca sequencial (folhas encadeadas) |
+| O que é exclusivo da B e não da B+? | (a) chaves nos nós internos |
 
-### 6.1.3 Hash como índice: vantagens e desvantagens
+### 6.1.2 Por que a árvore B é um bom índice em disco
 
-**Vantagens**
+- Cada nó = 1 bloco = 1 leitura de disco; custo da busca = altura da árvore.
+- Nó grande (muitas chaves) → árvore baixa → poucas leituras.
+- É balanceada: todas as folhas no mesmo nível, e a árvore cresce pela raiz.
 
-- Consulta por **igualdade**: calcula `h(k)` e vai direto, **O(1) em média**.
-- Simples e rápido quando há poucas colisões.
+### 6.1.3 Split e o mínimo de 50% de ocupação
 
-**Desvantagens**
+O nó só divide quando estoura (n chaves, sendo n o grau). A chave do meio sobe e as outras n − 1 se repartem em duas metades: cada metade fica com pelo menos ⌈n/2⌉ − 1 chaves, que é o mínimo permitido. Exemplo: grau 5 → estoura com 5 chaves → 2 + (1 que sobe) + 2, e o mínimo é 2 ✓.
 
-- **Não** mantém a **ordem** das chaves.
-- **Não** atende consulta por **intervalo** (teria de varrer tudo).
-- Muitas colisões → listas longas → pode chegar a **O(n)**.
+### 6.1.4 Colisão e hash
 
-### 6.1.4 Hash × árvore B/B+
+**O que é colisão:** chaves **diferentes** que caem na mesma posição. (Chaves iguais é chave duplicada, não colisão.)
 
-|                   | **Árvore B/B+**                                                                               | **Hash**                                                 |
-| ----------------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| **Organização**   | Nós ligados por ponteiros                                                                     | Função calcula a posição                                 |
-| **Acesso**        | Raiz → segue os ponteiros                                                                     | Vai direto à posição (se houver colisão, segue a lista)  |
-| **Ordenação**     | Mantém as chaves em ordem                                                                     | Não mantém                                               |
-| **Custo**         | O(log n)                                                                                      | O(1) médio, O(n) no pior caso                            |
-| **É melhor para** | **Intervalo** e resultado em **ordem** (ex.: notas entre 7 e 10; listar alunos por matrícula) | **Igualdade** (ex.: buscar o aluno de matrícula 2025001) |
+**Encadeamento externo:** a chave que colidiu vai para uma área separada (no fim do mesmo arquivo), e a entrada da tabela guarda um ponteiro (Próximo) para ela, formando uma lista.
 
-A ordem de inserção se perde no hash porque a posição vem de `h(k)`, não da ordem de chegada.
+**Vantagens do hash:** consulta por igualdade vai direto à posição, O(1) em média; simples e rápido com poucas colisões.
 
-### 6.1.5 Split e o mínimo de 50% de ocupação
+**Desvantagens:** não mantém ordem (a posição vem de h(k), não da ordem de chegada); não atende intervalo; muitas colisões → listas longas → até O(n); tabela de tamanho fixo degrada quando fica cheia (fator de carga alto).
 
-O nó só divide quando **estoura** (`n` chaves, sendo `n` o grau). A chave do meio **sobe** e as outras `n − 1` se repartem em duas metades: cada metade fica com pelo menos `⌈n/2⌉ − 1` chaves, que é o **mínimo permitido**.
+### 6.1.5 Hash × árvore B/B+
 
-> **Exemplo:** grau 5 → estoura com 5 chaves → 2 + (1 que sobe) + 2, e o mínimo é 2 ✓
+| | Árvore B/B+ | Hash |
+|---|---|---|
+| Organização | nós com chaves ordenadas e ponteiros | função calcula a posição |
+| Acesso | raiz → segue os ponteiros | vai direto à posição (se colidir, segue a lista) |
+| Ordenação | mantém as chaves em ordem | não mantém |
+| Custo | O(log n) | O(1) médio, O(n) no pior caso |
+| Melhor para | intervalo, ORDER BY, prefixo (LIKE 'Ma%'), mínimo/máximo | igualdade exata (buscar o aluno de matrícula 2025001) |
 
-### 6.1.6 Huffman
+### 6.1.6 Huffman (teoria)
 
-- **Por que usar heap:** a cada passo é preciso achar os **2 menores** pesos e devolver o nó novo. O heap mínimo extrai o menor e insere em **O(log n)**; numa lista isso custa O(n). Total: **O(n log n)**.
-- **Quando compensa:** quando alguns símbolos são **muito mais frequentes** que outros (frequentes → código curto).
-- **Arquivo já compactado:** bytes com frequências quase uniformes → códigos quase todos com \~8 bits → ganho ≈ 0.
-- **Código livre de prefixo:** nenhum código é começo de outro, então dá para decodificar **sem separador**.
+- **Por que heap:** a cada passo é preciso achar os 2 menores pesos e devolver o nó novo. Heap mínimo: O(log n) por operação; lista: O(n). Total: O(n log n).
+- **Quando compensa:** quando alguns símbolos são muito mais frequentes que outros (frequente → código curto).
+- **Arquivo já compactado:** frequências quase uniformes → códigos de ~8 bits → ganho ≈ 0.
+- **Código livre de prefixo:** nenhum código é começo de outro, então dá para decodificar sem separador.
 
-### 6.1.7 Por que a árvore B é um bom índice em disco
+### 6.1.7 Índice (chave → posição)
 
-- Cada nó = **1 bloco** = **1 leitura de disco**.
-- Custo da busca = **altura** da árvore.
-- Nó grande (muitas chaves) → árvore **baixa** → poucas leituras.
-- É **balanceada**: todas as folhas no mesmo nível, e a árvore cresce pela **raiz**.
+O arquivo de dados não muda; o índice guarda pares (chave, posição em bytes). Busca: acha a chave no índice → pega a posição → fseek + fread. Vantagem: busca rápida sem ordenar o arquivo de dados. Custo: espaço extra, e se o arquivo for reordenado o índice precisa ser refeito.
 
-### 6.1.8 Índice (chave → posição)
+### 6.1.8 Custo de "arquivo2 menos arquivo1" com árvore B (D2d)
 
-- O arquivo de dados **não muda**; o índice guarda pares (chave, posição em bytes).
-- **Busca:** acha a chave no índice → pega a posição → `fseek` + `fread`.
-- **Vantagem:** busca rápida sem ordenar o arquivo de dados.
-- **Custo:** espaço extra, e se o arquivo for reordenado o índice precisa ser **refeito**.
+Uma busca na árvore B para cada registro do arquivo2: **O(n2 · log n1)**. Se o índice do arquivo1 ainda precisar ser construído: O((n1 + n2) · log n1).
 
-### 6.1.9 Custo de "arquivo2 menos arquivo1" com árvore B (D2d)
-
-- Uma busca na árvore B para **cada** registro do arquivo2: `n2 × O(log n1)`, mais a leitura sequencial do arquivo2 e a escrita da saída.
-- **Custo: O(n2 · log n1)**.
-- Se o índice do arquivo1 ainda precisar ser construído: **O((n1 + n2) · log n1)**.
+---
 
 ## 6.2 Pior caso e melhor caso
 
-| **Operação**                                  | **Melhor caso**                                                | **Pior caso**                                                                                     |
-| --------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Busca sequencial no arquivo                   | 1 leitura (é o 1º registro)                                    | n leituras (é o último ou não existe). Médio ≈ n/2                                                |
-| Busca sequencial em arquivo **ordenado**      | 1 leitura                                                      | n leituras, mas para ao passar da chave (DEPOIS → break)                                          |
-| Busca binária no arquivo                      | 1 (acha no meio)                                               | ⌊log₂ n⌋ + 1 leituras, ou seja, O(log n)                                                          |
-| Acesso direto por posição (`fseek` + `fread`) | O(1)                                                           | O(1)                                                                                              |
-| Busca em árvore B                             | 1 leitura (chave na raiz)                                      | h leituras (h = altura)                                                                           |
-| Busca em árvore B+                            | h (sempre desce até a folha)                                   | h                                                                                                 |
-| Inserção em árvore B                          | sem divisão: só grava a folha                                  | divisão em **todos** os níveis: **h páginas novas + 1 raiz nova** (A6: 8 + 1 = 9)                 |
-| Remoção em árvore B                           | folha com sobra: só tira a chave                               | fusões até a raiz (altura − 1)                                                                    |
-| Busca em hash                                 | 1 acesso (sem colisão)                                         | n acessos: todas as chaves na mesma posição, lista única (B4: 10 chaves na posição 4, 9 colisões) |
-| Hash, caso médio                              | ≈ 1 + α/2 acessos, com α = n/m                                 |                                                                                                   |
-| Huffman (construção)                          | O(n log n) com heap                                            | O(n²) com lista sem ordem                                                                         |
-| Huffman (árvore)                              | frequências iguais → árvore equilibrada, códigos ≈ log₂ n bits | frequências muito desiguais → árvore "em escada", código de até n − 1 bits                        |
-| Intercalação de 2 arquivos ordenados          | lê cada registro **uma vez**: O(n + m)                         | O(n + m)                                                                                          |
-| Ordenação externa                             | PARTES − 1 intercalações, cada uma percorre o arquivo todo     |                                                                                                   |
+| Operação | Melhor caso | Pior caso |
+|---|---|---|
+| Busca sequencial no arquivo | 1 leitura | n leituras (último ou inexistente). Médio ≈ n/2 |
+| Busca sequencial em arquivo ordenado | 1 leitura | n, mas para ao passar da chave |
+| Busca binária no arquivo | 1 (acha no meio) | ⌊log₂ n⌋ + 1 leituras → O(log n) |
+| Acesso direto por posição (fseek + fread) | O(1) | O(1) |
+| Busca em árvore B | 1 leitura (chave na raiz) | h leituras (h = altura) |
+| Busca em árvore B+ | h (sempre desce até a folha) | h |
+| Inserção em árvore B | sem divisão: só grava a folha | divisão em todos os níveis: h páginas novas + 1 raiz nova (A6: 8 + 1 = 9) |
+| Remoção em árvore B | folha com sobra: só tira a chave | fusões até a raiz |
+| Busca em hash | 1 acesso (sem colisão) | n acessos: todas na mesma posição (B4: 10 chaves, 9 colisões) |
+| Hash, caso médio | ≈ 1 + α/2 acessos, α = n/m | |
+| Huffman (construção) | O(n log n) com heap | O(n²) com lista sem ordem |
+| Huffman (árvore) | frequências iguais → códigos ≈ log₂ n bits | frequências muito desiguais → "escada", código de até n − 1 bits |
+| Intercalação de 2 arquivos ordenados | O(n + m) (lê cada registro uma vez) | O(n + m) |
+| Ordenação externa | PARTES − 1 intercalações, cada uma percorre o arquivo todo | |
 
 ```
-altura h de uma árvore com N chaves e m filhos por nó ≈ log_m (N)
-árvore cheia: N = m^h − 1  →  h = log_m (N + 1)
-
+altura h de uma árvore com N chaves e m filhos por nó  ≈  log_m (N)
+árvore cheia:  N = m^h − 1   →   h = log_m (N + 1)
 ```
 
-## 6.3 Árvore B e B+: como funciona e as contas
+---
+
+## 6.3 Árvore B e B+
 
 ### 6.3.1 Grau, chaves e filhos
 
-O grau **n** é o máximo de **filhos (ponteiros)**. As chaves ficam entre os ponteiros: sempre uma a menos.
+O grau n é o máximo de filhos (ponteiros). As chaves ficam entre os ponteiros: sempre uma a menos.
 
 ```
 máximo            → n filhos   e  n − 1 chaves
 mínimo (não raiz) → ⌈n/2⌉ filhos  e  ⌈n/2⌉ − 1 chaves
 raiz              → mínimo 1 chave (2 filhos)
 todas as folhas no mesmo nível
-
 ```
 
-| **Grau n** | **Chaves (máx)** | **Chaves (mín, não raiz)** | **Filhos (mín)** |
-| ---------- | ---------------- | -------------------------- | ---------------- |
-| 3          | 2                | 1                          | 2                |
-| 4          | 3                | 1                          | 2                |
-| 5          | 4                | 2                          | 3                |
-| 6          | 5                | 2                          | 3                |
-| 7          | 6                | 3                          | 4                |
+| Grau n | Chaves (máx) | Chaves (mín, não raiz) | Filhos (mín) |
+|---|---|---|---|
+| 3 | 2 | 1 | 2 |
+| 4 | 3 | 1 | 2 |
+| 5 | 4 | 2 | 3 |
+| 6 | 5 | 2 | 3 |
+| 7 | 6 | 3 | 4 |
 
-⚠️ 1 chave é válido em grau 3 e 4. **0 chaves** fora da raiz não é (é o que a remoção precisa consertar).
+⚠️ 1 chave é válido em grau 3 e 4. 0 chaves fora da raiz não é (é o que a remoção precisa consertar).
 
 ### 6.3.2 Conta do bloco (A1, A9)
 
-O nó inteiro tem que **caber em um bloco**. Some os bytes, isole `n` e **arredonde para baixo**.
+O nó inteiro tem que caber em um bloco. Some os bytes, isole n e arredonde para baixo.
 
 ```
 Árvore B:   n·Pb + (n−1)·(V + Pr) ≤ B
@@ -3065,7 +3054,6 @@ B+ folha:   k·(V + Pr) + Pb ≤ B          (k chaves; Pb = próxima folha)
 
 V  = tamanho da chave          Pr = ponteiro p/ registro (arquivo de dados)
 Pb = ponteiro p/ outro bloco   B  = tamanho do bloco
-
 ```
 
 ```
@@ -3076,35 +3064,28 @@ A1: V=9  Pr=7  Pb=6  B=512
 
 B+ com os mesmos dados:  6n + 9(n−1) ≤ 512  →  15n ≤ 521  →  n = 34
     prova: 34·6 + 33·9 = 501 ✓   (com 35 daria 516 > 512)
-
 ```
 
-Struct em C (A9), `int` = 4 bytes:
-
-```
-struct { int qt; int chaves[N]; int valores[N]; int filhos[N+1]; }
+```c
+// A9: struct em C, int = 4 bytes, bloco de 1024 bytes
+struct { int qt; int chaves[N]; int valores[N]; int filhos[N+1]; };
 // 4·(1 + N + N + N+1) = 12N + 8 ≤ 1024  →  N ≤ 84,67  →  N = 84
 // prova: 12·84 + 8 = 1016 ≤ 1024 ✓   (N = 85 → 1028 > 1024)
 ```
 
-⚠️ **n** = ponteiros; **N** da struct = chaves. "Adequado" = o **maior** que cabe. Confira se o tamanho vem em bytes ou em `int`.
+⚠️ n = ponteiros; N da struct = chaves. "Adequado" = o maior que cabe. Confira se o tamanho vem em bytes ou em int.
 
 ### 6.3.3 Quantas chaves cabem · altura · páginas novas
 
-Nó cheio com **N chaves** tem **m = N + 1 filhos**. Cada nível multiplica os nós por **m**.
+Nó cheio com N chaves tem m = N + 1 filhos. Cada nível multiplica os nós por m. Árvore cheia com h níveis (raiz = nível 1): chaves = m^h − 1.
 
 ```
-árvore cheia, h níveis (raiz = nível 1):   chaves = m^h − 1
-
 A9 (N = 84, m = 85, 3 níveis):
   nível 1:   1 nó            × 84 =      84
   nível 2:  85 nós           × 84 =   7.140
   nível 3:  85² = 7.225 nós  × 84 = 606.900
-  total = 614.124  (= 85³ − 1)
+  total = 614.124 chaves  (= 85³ − 1)  ·  7.311 páginas
 
-```
-
-```
 A1c (ocupação média 70%, n = 24):
   0,7 × 23 = 16,1 ≈ 16 chaves/nó  →  17 filhos
   nível 3 = 17 × 17 = 289 nós × 16 = 4.624 chaves
@@ -3115,10 +3096,9 @@ A2 (altura 3, grau 3, MÍNIMO de chaves):
 A6 (folhas no nível 7, raiz no nível 0, inserir 1 chave):
   caminho = níveis 0 a 7 = 8 páginas
   pior caso: todas cheias → 8 divisões (8 páginas novas) + 1 raiz nova = 9
-
 ```
 
-⚠️ Nível 3 = 17 **×** 17 (não 17 + 1). Raiz no nível 0 ou 1? **Conte os níveis.**
+⚠️ Nível 3 = 17 × 17 (não 17 + 1). Raiz no nível 0 ou 1? Conte os níveis.
 
 ### 6.3.4 Inserção (split)
 
@@ -3128,22 +3108,19 @@ A6 (folhas no nível 7, raiz no nível 0, inserir 1 chave):
    cada metade vira um nó
 3. o pai passou do máximo?  repete
 4. a raiz dividiu?  nasce raiz nova (altura + 1)
-
 ```
 
 ```
 A3 (grau 5, máx 4 chaves): inserir 6 na folha [2 3 5 7]
-
   [2 3 5 6 7]  → estourou (5 chaves), meio = 5
   o 5 SOBE;  ficam [2 3]  e  [6 7]
-
 ```
 
-⚠️ Estouro **par** (ex.: grau 4 com 4 chaves) tem **duas** chaves do meio: escolha uma (ex.: a da direita) e **escreva qual**.
+⚠️ Estouro par (ex.: grau 4 com 4 chaves) tem duas chaves do meio: escolha uma (ex.: a da direita) e **escreva qual**.
 
-⚠️ O nó não precisa estar cheio para a árvore crescer. A árvore B cresce **pela raiz**.
+⚠️ A árvore B cresce pela raiz; o nó não precisa estar cheio para a árvore crescer.
 
-⚠️ Na **B+**, ao dividir uma folha a chave do meio é **copiada** para o pai (continua na folha).
+⚠️ Na B+, ao dividir uma folha a chave do meio é **copiada** para o pai (continua na folha).
 
 ### 6.3.5 Remoção
 
@@ -3154,7 +3131,6 @@ A3 (grau 5, máx 4 chaves): inserir 6 na folha [2 3 5 7]
 3. senão FUNDE:  folha + separador do pai + irmão  = um nó só
 4. o pai perdeu uma chave: volta ao passo 1 no pai.
    raiz vazia some (altura − 1)
-
 ```
 
 ```
@@ -3167,18 +3143,41 @@ Fusão (A4, grau 4, mín 1):
   raiz [70]   folhas [60]  [80]               remover 60
   [60] fica VAZIA; irmão [80] só tem o mínimo → não empresta
   funde: vazia + 70 + [80] = [70 80]; a raiz fica sem chaves e some
-
 ```
 
-⚠️ Confira que a chave removida **sumiu** (nem como separador).
+⚠️ Remoção de chave em nó interno: troque pela predecessora (ou sucessora) da folha e remova lá. Diga qual regra usou.
+⚠️ Irmão com exatamente o mínimo não empresta. Confira que a chave removida sumiu (nem como separador).
+⚠️ Itens "independentes" partem sempre da árvore original; "em seguida" parte do resultado anterior.
 
-⚠️ Itens "**independentes**" partem **sempre da árvore original**; "**em seguida**" parte do resultado anterior.
+### 6.3.6 Split de página em C (A8)
 
-⚠️ Irmão com exatamente o mínimo **não** empresta.
+```c
+struct Pagina { int qt; int chaves[N]; int valores[N]; int filhos[N+1]; };
+void split(Pagina* p1, Pagina* p2, int novaChave, int novoValor, int* chave, int* valor);
+```
 
-### 6.3.6 Lembrete rápido
+Explicação: a página está cheia e a chave nova não cabe. Com a nova, ela passa a ter N + 1 chaves: as menores ficam em p1, as maiores vão para p2 e a chave do meio **sobe** para o pai como separador (menores à esquerda, maiores à direita).
 
-A diferença completa entre B e B+ está na **seção 6.1.1**. Para questões de desenho, lembre-se: na B+ as folhas ficam encadeadas e, ao dividir uma folha, a chave separadora é **copiada** para o pai (continua na folha).
+Pseudocódigo (a nova chave é maior que todas as de p1):
+
+```
+meio = (N + 1) / 2                        // índice da chave que sobe (divisão inteira)
+*chave = p1.chaves[meio]
+*valor = p1.valores[meio]
+j = 0
+para i de meio + 1 até N - 1:             // as maiores vão para p2
+    p2.chaves[j]  = p1.chaves[i]
+    p2.valores[j] = p1.valores[i]
+    j = j + 1
+p2.chaves[j]  = novaChave                 // a nova é a maior de todas: vai por último
+p2.valores[j] = novoValor
+j = j + 1
+p1.qt = meio                              // p1 fica com as chaves 0 .. meio - 1
+p2.qt = j
+todos os filhos de p1 e de p2 = 0         // são folhas
+```
+
+---
 
 ## 6.4 Hash com encadeamento externo
 
@@ -3187,10 +3186,9 @@ h(k) = k mod 11      posições 0 a 10
 área de colisão      a partir da posição 11
 colunas              Chave · Valor · Próximo     (Próximo 0 = fim da lista)
 colisão              chaves DIFERENTES na mesma posição
-
 ```
 
-Inserir:
+**Inserir:**
 
 ```
 posição livre   → a chave entra, Próximo = 0
@@ -3198,39 +3196,53 @@ posição ocupada → vai para a PRÓXIMA POSIÇÃO LIVRE DA ÁREA e é ligada
                   logo depois do 1º da lista, NESTA ORDEM:
                       Próximo(novo)     = Próximo(primeiro)
                       Próximo(primeiro) = posição do novo
-
 ```
 
-```
-B5: 43, 27, 34, 70, 21, 84, 55, 38
+**O que fica na coluna Próximo:** o Próximo da **cabeça** (quem está na tabela principal) sempre aponta para o **último inserido** da lista; cada novo herda o ponteiro antigo da cabeça. A lista fica do mais novo para o mais antigo, depois da cabeça.
 
-  43→10   27→5   34→1   70→4
-  21→10   colide com 43  → vai p/ 11;  Próximo(11)=0;  Próximo(10)=11
-  84→7    55→0 (múltiplo de 11)
-  38→5    colide com 27  → vai p/ 12;  Próximo(12)=0;  Próximo(5)=12
+⚠️ Se o enunciado disser "no início" ou "no fim" da lista, siga o enunciado.
+⚠️ Múltiplos de 11 → posição 0. Chaves que diferem de 11 em 11 → mesma posição.
 
-```
-
-| **Posição** | **Chave** | **Próximo** |
-| ----------- | --------- | ----------- |
-| 0           | 55        | 0           |
-| 1           | 34        | 0           |
-| 4           | 70        | 0           |
-| 5           | 27        | 12          |
-| 7           | 84        | 0           |
-| 10          | 43        | 11          |
-| 11          | 21        | 0           |
-| 12          | 38        | 0           |
+**Exemplo (P2 2025.2): 25, 32, 12, 34, 63, 65, 80, 76**
 
 ```
-B6: 32, 65, 76 caem na posição 10  →  lista  32 → 76 → 65
-    (o último a chegar fica em 2º)
-
+25→3   32→10   12→1   34→1 (colide) → 11   63→8
+65→10 (colide) → 12   80→3 (colide) → 13   76→10 (colide) → 14
 ```
 
-⚠️ Múltiplos de 11 → posição **0**. Chaves que diferem de 11 em 11 → **mesma** posição.
+| Pos | Chave | Próximo |
+|---|---|---|
+| 1 | 12 | 11 |
+| 3 | 25 | 13 |
+| 8 | 63 | 0 |
+| 10 | 32 | 14 |
+| 11 | 34 | 0 |
+| 12 | 65 | 0 |
+| 13 | 80 | 0 |
+| 14 | 76 | 12 |
 
-⚠️ Se o enunciado disser "no início" ou "no fim" da lista, **siga o enunciado**.
+Listas: 1: 12 → 34 · 3: 25 → 80 · 8: 63 · 10: **32 → 76 → 65** (o último a chegar fica em 2º).
+
+**Exemplo com várias listas (B3, P2 2024.1): 10, 27, 34, 41, 67, 86, 17, 38, 72, 49**
+
+| Pos | Chave | Próximo |
+|---|---|---|
+| 1 | 34 | 11 |
+| 5 | 27 | 14 |
+| 6 | 17 | 13 |
+| 8 | 41 | 0 |
+| 9 | 86 | 0 |
+| 10 | 10 | 0 |
+| 11 | 67 | 0 |
+| 12 | 38 | 0 |
+| 13 | 72 | 0 |
+| 14 | 49 | 12 |
+
+4 colisões (67, 38, 72, 49). Listas: 1: 34 → 67 · 5: 27 → 49 → 38 · 6: 17 → 72. Maior lista: posição 5, tamanho 3.
+
+**Pior caso (B4, P2 2024.2): 15, 26, 37, 48, 59, 70, 81, 92, 103, 114**: todas diferem de 11 em 11 → todas na posição 4 → 9 colisões, lista única de 10. Percurso: 15 → 114 → 103 → 92 → 81 → 70 → 59 → 48 → 37 → 26.
+
+**B1 (contar colisões), h = k mod 11, chaves 10, 33, 85, 43, 27, 63, 95, 88, 32:** posições 10, 0, 8, 10, 5, 8, 7, 0, 10 → colidem 43, 63, 88 e 32 → **4 colisões**.
 
 ```
 No arquivo: posição da entrada = h(k) × tamanho da entrada
@@ -3238,7 +3250,9 @@ Fator de carga  α = n / m      acessos médios com sucesso ≈ 1 + α/2
 Perguntas comuns: nº de colisões · tamanho da maior lista · onde ela começa
 ```
 
-**Atenção:** este exemplo mostra a tabela desenhada em posições (0, 1, 2...). Na implementação em arquivo/Python, a posição principal é acessada por `p * indexStruct.size`, enquanto `prox` já guarda um **offset em bytes** para o próximo registro. Não multiplique `prox` pelo tamanho do registro.
+⚠️ Na tabela desenhada, Próximo é número de posição (0, 1, 2...). No arquivo/Python, a posição principal é acessada por p * indexStruct.size, mas prox já é offset em bytes: não multiplique de novo (6.9).
+
+---
 
 ## 6.5 Huffman
 
@@ -3248,42 +3262,41 @@ Perguntas comuns: nº de colisões · tamanho da maior lista · onde ela começa
 3. devolva o pai ao conjunto; repita até sobrar 1 nó (a raiz)
 4. ESQUERDA = 0 · DIREITA = 1
 5. código = caminho raiz → folha · tamanho = nº de ligações
-
 ```
 
 ```
 C1: A4 B7 C10 D15 E20 F28 G33 H47
 
   4+7=11 · 10+11=21 · 15+20=35 · 21+28=49 · 33+35=68 · 47+49=96 · 68+96=164
-
 ```
 
-| **Símbolo** | **Freq.** | **Código** | **Tamanho** | **Freq × tamanho** |
-| ----------- | --------- | ---------- | ----------- | ------------------ |
-| A           | 4         | 11010      | 5           | 20                 |
-| B           | 7         | 11011      | 5           | 35                 |
-| C           | 10        | 1100       | 4           | 40                 |
-| D           | 15        | 010        | 3           | 45                 |
-| E           | 20        | 011        | 3           | 60                 |
-| F           | 28        | 111        | 3           | 84                 |
-| G           | 33        | 00         | 2           | 66                 |
-| H           | 47        | 10         | 2           | 94                 |
-| **Total**   | 164       |            |             | **444**            |
+| Símbolo | Freq. | Código | Tamanho | Freq × tamanho |
+|---|---|---|---|---|
+| A | 4 | 11010 | 5 | 20 |
+| B | 7 | 11011 | 5 | 35 |
+| C | 10 | 1100 | 4 | 40 |
+| D | 15 | 010 | 3 | 45 |
+| E | 20 | 011 | 3 | 60 |
+| F | 28 | 111 | 3 | 84 |
+| G | 33 | 00 | 2 | 66 |
+| H | 47 | 10 | 2 | 94 |
+| Total | 164 | | | 444 |
 
 ```
 custo = Σ (freq × tamanho) = soma dos nós internos
       = 11+21+35+49+68+96+164 = 444 bits     (3 bits fixos: 3 × 164 = 492)
 n símbolos → n − 1 junções · 2n − 1 nós
-
 ```
 
-⚠️ Custo **não** é só o peso da raiz. Empate muda a árvore, **não** o custo. Escreva qual lado é 0.
+⚠️ Custo não é só o peso da raiz. Empate muda a árvore, não o custo. Escreva qual lado é 0.
+
+---
 
 ## 6.6 Código com índice em árvore B (questão 4 da P2)
 
-A árvore é um índice em disco: **chave → posição em bytes** do registro no arquivo de dados. Na prova (P2 2026.1) vêm prontas estas funções:
+A árvore é um índice em disco: chave → posição **em bytes** do registro no arquivo de dados. Na prova vêm prontas:
 
-```
+```c
 void* openTree(const char* nomeArquivo);
 bool  findKey(void* tree, long key, long* offset);   // true = achou (offset preenchido)
 void  insertKey(void* tree, long key, long offset);
@@ -3292,9 +3305,9 @@ void  closeTree(void* tree);
 typedef struct { long chave; char dados[1000]; } Registro;
 ```
 
-**(a)** Construir o índice:
+**(a) Construir o índice:**
 
-```
+```c
 void indexaArquivo(const char *nomeDados, const char *nomeIndice){
     FILE *f = fopen(nomeDados, "rb");
     void *tree = openTree(nomeIndice);
@@ -3314,9 +3327,9 @@ void indexaArquivo(const char *nomeDados, const char *nomeIndice){
 }
 ```
 
-**(b)** Buscar e imprimir:
+**(b) Buscar e imprimir:**
 
-```
+```c
 void imprimeDados(const char *nomeDados, const char *nomeIndice, long chave){
     void *tree = openTree(nomeIndice);
     FILE *f = fopen(nomeDados, "rb");
@@ -3336,9 +3349,9 @@ void imprimeDados(const char *nomeDados, const char *nomeIndice, long chave){
 }
 ```
 
-**(c)** Registros de arquivo2 que **não estão** em arquivo1 (índice do arquivo1 já existe):
+**(c) Registros de arquivo2 que não estão em arquivo1 (índice do arquivo1 já existe):**
 
-```
+```c
 void diferencaArquivos(const char *arq1, const char *arq2,
                        const char *indice1, const char *saida){
     void *tree = openTree(indice1);
@@ -3359,36 +3372,30 @@ void diferencaArquivos(const char *arq1, const char *arq2,
 }
 ```
 
-```
-custo: n2 buscas na árvore, cada uma O(log n1)  →  O(n2 · log n1)
+Custo: n2 buscas, cada O(log n1) → O(n2 · log n1).
 
-```
+⚠️ ftell ANTES do fread. Depois, a posição seria a do registro seguinte.
+⚠️ A posição guardada na árvore é em bytes: fseek(f, off, SEEK_SET) sem multiplicar. O índice em memória da P1 (seção 5.13 F) guarda o **número** do registro e multiplica por sizeof. Não misture.
+⚠️ Reordenou o arquivo de dados? As posições mudam: refaça o índice.
+⚠️ Chave da árvore inteira e campo texto (CEP, 8 caracteres sem '\0'): converta.
 
-⚠️ **`ftell` ANTES do `fread`.** Depois, a posição seria a do registro seguinte.
-
-⚠️ A posição guardada na árvore é em **bytes**: `fseek(f, off, SEEK_SET)` **sem** multiplicar. O índice em memória da P1 (seção 5.13 F) guarda o **número do registro** e multiplica por `sizeof`. **Não misture.**
-
-⚠️ Se a chave da árvore é inteira e o campo é texto (CEP, 8 caracteres sem `'\0'`), converta:
-
-```
+```c
 char tmp[9];
 memcpy(tmp, e.cep, 8);  tmp[8] = '\0';
 long chave = atol(tmp);
 ```
 
-⚠️ Reordenou o arquivo de dados? As posições mudam: **refaça o índice**.
+Nota de estudo: o ArvoreB.c do guia usa outros nomes (ArvoreB_Abre, ArvoreB_Insere, ArvoreB_Busca devolve −1 se não achar; 0 é posição válida). Na prova, use as funções que o enunciado der.
 
-⚠️ Diferença de dois arquivos **ordenados** (D4): leia uma linha de cada; menor → está só no 1º: grave e avance **só ele**; igual → avance **os dois**; maior → avance **só o 2º**. Quando o 2º acabar, grave o **resto** do 1º.
+---
 
-Nota de estudo: o `ArvoreB.c` do guia usa nomes diferentes (`ArvoreB_Abre`, `ArvoreB_Insere(arvore, chave, pos)`, `ArvoreB_Busca` devolve **-1** se não achar; o 0 é posição válida). Na prova, use as funções que o enunciado der.
+## 6.7 Diferença entre arquivos ordenados e índices
 
-## 6.7 Diferença entre arquivos ordenados e índices (denso e clustering)
+### 6.7.1 Diferença A1 − A2 (registros que estão em A1 e não em A2)
 
-### 6.7.1 Diferença entre arquivos ordenados (A1 − A2)
+Os dois arquivos precisam estar ordenados pela mesma chave; cada arquivo é lido uma vez.
 
-Grava os registros que estão em **A1** e **não** estão em **A2**. Os dois arquivos precisam estar **ordenados pela mesma chave**; lê-se **uma vez** cada arquivo.
-
-```
+```c
 int IntercalaArquivos(char nome1[], char nome2[], char nomeSaida[]) {
     Registro a, b;
     FILE *f1 = fopen(nome1, "rb");
@@ -3431,20 +3438,18 @@ int IntercalaArquivos(char nome1[], char nome2[], char nomeSaida[]) {
 }
 ```
 
-| **Comparação** | **O que fazer**                                     |
-| -------------- | --------------------------------------------------- |
-| `a < b`        | só existe em A1 → **grava** `a` e avança **só A1**  |
-| `a == b`       | existe nos dois → **não grava**, avança **os dois** |
-| `a > b`        | só existe em A2 → **não grava**, avança **só A2**   |
-| A2 acabou      | grava o **resto** de A1 (último `while`)            |
+| Comparação | O que fazer |
+|---|---|
+| a < b | só existe em A1 → grava a e avança só A1 |
+| a == b | existe nos dois → não grava, avança os dois |
+| a > b | só existe em A2 → não grava, avança só A2 |
+| A2 acabou | grava o resto de A1 (último while) |
 
-Testei com A1 = {1, 3, 5, 7, 9, 11} e A2 = {3, 4, 9, 12}: a saída foi {1, 5, 7, 11}.
+Teste: A1 = {1, 3, 5, 7, 9, 11} e A2 = {3, 4, 9, 12} → saída {1, 5, 7, 11}.
 
-### 6.7.2 Índice denso (ex.: CEP)
+### 6.7.2 Índice denso (ex.: CEP): uma entrada por registro
 
-Uma entrada para **cada registro**.
-
-```
+```c
 typedef struct {
     char chave[8];
     long posicao;
@@ -3454,22 +3459,18 @@ typedef struct {
 fseek(arquivo, 0, SEEK_END);
 long tamanho = ftell(arquivo);
 long registros = tamanho / sizeof(Registro);
-
 rewind(arquivo);
 
 // Aloca índice
 Indice *indice = malloc(registros * sizeof(Indice));
-
 if (indice == NULL && registros > 0) {
     return 1;
 }
 
 // Preenche índice
 Registro r;
-
 for (long i = 0; i < registros; i++) {
     fread(&r, sizeof(Registro), 1, arquivo);
-
     strncpy(indice[i].chave, r.chave, 8);
     indice[i].posicao = i;
 }
@@ -3478,11 +3479,11 @@ for (long i = 0; i < registros; i++) {
 qsort(indice, registros, sizeof(Indice), comparaIndice);
 ```
 
-### 6.7.3 Índice clustering (esparso) (ex.: SINASC)
+### 6.7.3 Índice clustering/esparso (ex.: SINASC): uma entrada por chave distinta
 
-Uma entrada para **cada chave distinta**. O arquivo original já está **ordenado (agrupado) pela chave**.
+O arquivo original já está ordenado (agrupado) pela chave.
 
-```
+```c
 typedef struct {
     unsigned int codigo;
     unsigned int posicao;
@@ -3490,15 +3491,12 @@ typedef struct {
 
 Registro *r;
 Indice indice;
-
 unsigned int codigoAnterior;
 int primeiro = 1;
 
 while (1) {
-    unsigned int posicao = (unsigned int) ftell(entrada);
-
+    unsigned int posicao = (unsigned int) ftell(entrada);   // ANTES de ler
     r = leRegistro(entrada);
-
     if (r == NULL) {
         break;
     }
@@ -3508,49 +3506,42 @@ while (1) {
     if (primeiro || codigoAtual != codigoAnterior) {
         indice.codigo = codigoAtual;
         indice.posicao = posicao;
-
         fwrite(&indice, sizeof(Indice), 1, saida);
-
         codigoAnterior = codigoAtual;
         primeiro = 0;
     }
 }
 ```
 
-### Lembretes rápidos
+| | Denso | Clustering |
+|---|---|---|
+| Entradas | uma por registro | uma por grupo/chave distinta |
+| Ordenar o índice? | sim (qsort) | não, se o arquivo já está agrupado |
+| Posição guardada | número do registro i → fseek multiplica por sizeof(Registro) | offset em bytes (ftell antes de ler) → fseek direto |
 
-- **Índice denso:** uma entrada por registro → pode precisar de `qsort`.
-- **Índice clustering:** uma entrada por grupo → **não precisa ordenar** se o arquivo já estiver agrupado.
-- Posição no índice **denso** (acima) é o **número do registro** (`i`): para o `fseek`, **multiplica** por `sizeof(Registro)`.
-- Posição no **clustering** é o **offset em bytes**, obtido com `ftell` **antes** de ler o registro: usa **direto** no `fseek`.
+---
 
-## 6.8 Pontos básicos da P1 que a P2 usa
+## 6.8 Básico de C (P1) que a P2 usa
 
-> Tudo aqui já aparece nas seções 1 a 5; este é o resumo **num lugar só**, para quando o enunciado da P2 (árvore B, índice, busca) pedir "leia o registro", "volte ao início", "ordene" ou "aloque".
+### fopen: modos
 
-### `fopen` — modos
+| Modo | Faz | Quando usar |
+|---|---|---|
+| "rb" | só lê; o arquivo precisa existir | ler dados / índice |
+| "wb" | cria ou APAGA e escreve | arquivo de saída novo |
+| "r+b" | lê e escreve; não apaga; precisa existir | alterar registro no lugar |
+| "ab" | escreve sempre no fim (fseek não muda isso) | acrescentar registro |
+| "w+b" | lê e escreve; cria ou APAGA | arquivo novo que também será relido |
 
-| **Modo** | **Faz**                                           | **Quando usar**                     |
-| -------- | ------------------------------------------------- | ----------------------------------- |
-| `"rb"`   | só lê; o arquivo precisa existir                  | ler dados / índice                  |
-| `"wb"`   | cria ou **APAGA** e escreve                       | arquivo de saída novo               |
-| `"r+b"`  | lê **e** escreve; não apaga; precisa existir      | alterar registro no lugar           |
-| `"ab"`   | escreve **sempre no fim** (`fseek` não muda isso) | acrescentar registro                |
-| `"w+b"`  | lê e escreve; cria ou **APAGA**                   | arquivo novo que também será relido |
+Sempre `if (f == NULL) {...}` depois do fopen; se o 2º fopen falhar, feche o 1º antes de sair.
 
-Sempre `if (f == NULL) {...}` depois do `fopen`; se o **2º** `fopen` falhar, feche o 1º antes de sair.
+### fgetc, fread, fwrite
 
-### `fgetc` / `fputc` — byte a byte
-
-```
+```c
 int c;                              // int, nunca char (precisa caber o EOF = -1)
 while ((c = fgetc(f)) != EOF)
     fputc(c, saida);
-```
 
-### `fread` / `fwrite` — registros
-
-```
 fread(&r, sizeof(Registro), 1, f);        // 1 registro numa variável → com &
 fread(v, sizeof(Registro), qtd, f);       // vários num vetor/malloc → SEM &
 fwrite(&r, sizeof(Registro), 1, saida);
@@ -3558,63 +3549,52 @@ fwrite(&r, sizeof(Registro), 1, saida);
 while (fread(&r, sizeof(Registro), 1, f) == 1) { /* processa r */ }
 ```
 
-- Os dois **devolvem quantos itens** leram/gravaram (não bytes). Compare com `== 1` (ou com `qtd`).
-- Os dois **avançam o cursor** pelo que leram/gravaram.
-- `feof(f)` só vira verdadeiro **depois** de uma leitura que falhou: não use como condição do laço.
+- fread/fwrite devolvem quantos **itens** leram/gravaram (não bytes) e avançam o cursor.
+- feof(f) só vira verdadeiro depois de uma leitura que falhou: não use como condição do laço.
 
-### `fseek`, `ftell`, `rewind`
+### fseek, ftell, rewind
 
-```
-fseek(f, deslocamento, SEEK_SET);   // conta a partir do INÍCIO do arquivo
-fseek(f, deslocamento, SEEK_CUR);   // conta a partir da posição ATUAL (pode ser negativo)
-fseek(f, deslocamento, SEEK_END);   // conta a partir do FIM
+```c
+fseek(f, deslocamento, SEEK_SET);   // a partir do INÍCIO
+fseek(f, deslocamento, SEEK_CUR);   // a partir da posição ATUAL (pode ser negativo)
+fseek(f, deslocamento, SEEK_END);   // a partir do FIM
 long pos = ftell(f);                // posição atual em BYTES (devolve long)
-rewind(f);                          // volta ao início
+rewind(f);                          // volta ao início (também limpa indicador de fim/erro)
 ```
-
-| **Comparação**                        | **Diferença**                                                                               |
-| ------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `fseek` × `ftell`                     | `fseek` **muda** a posição; `ftell` só **informa** a posição atual                          |
-| `rewind(f)` × `fseek(f, 0, SEEK_SET)` | Mesmo efeito na posição; o `rewind` ainda limpa o indicador de fim/erro e não devolve valor |
-
-Fórmulas (registros de tamanho fixo):
 
 ```
 quantidade de registros = tamanho do arquivo / sizeof(Registro)
 registro número i (primeiro = 0)  → offset = i * sizeof(Registro)
 registro número n (primeiro = 1)  → offset = (n - 1) * sizeof(Registro)
 tamanho do arquivo:  fseek(f, 0, SEEK_END);  long tam = ftell(f);  rewind(f);
-
+bytes = quantidade de registros * sizeof(Registro)
 ```
 
-Pegadinhas:
+**Pegadinhas:**
 
-- `fseek(f, 0, SEEK_END)` leva ao **fim** (depois do último registro), não **ao** último registro. O último é `fseek(f, -(long)sizeof(Registro), SEEK_END)`.
-- Deslocamento **negativo**: `-(long)sizeof(Registro)`. O `sizeof` é sem sinal, então escreva sempre o cast `(long)`.
-- Depois de `fread` de 1 registro o cursor já está no **seguinte**. Para reescrever o mesmo: `fseek(f, -(long)sizeof(Registro), SEEK_CUR)` e então `fwrite`.
-- Guardar a posição de um registro: `long offset = ftell(f);` **antes** do `fread` (é o que se passa ao `insertKey` da árvore B).
-- Ler um registro pelo offset (vindo da árvore): `fseek(f, offset, SEEK_SET); fread(&r, sizeof(Registro), 1, f);` (offset já está em **bytes**: não multiplique).
+- `fseek(f, 0, SEEK_END)` vai para depois do último registro. O último é `fseek(f, -(long)sizeof(Registro), SEEK_END)`.
+- Deslocamento negativo: sempre o cast `(long)` (sizeof é sem sinal).
+- Depois de fread de 1 registro o cursor já está no seguinte. Para reescrever o mesmo: `fseek(f, -(long)sizeof(Registro), SEEK_CUR)` e então fwrite.
+- Guardar a posição de um registro: `long offset = ftell(f);` **antes** do fread.
+- Posição em bytes vai direto para fseek; número do registro precisa ser multiplicado por sizeof.
+- fseek/ftell contam bytes; fread/fwrite contam itens.
 
-### `malloc` / `free` / `sizeof`
+### malloc, free, sizeof
 
-```
+```c
 Registro *v = malloc(qtd * sizeof(Registro));
 if (v == NULL) { /* erro: feche o que abriu e saia */ }
-/* ... usa v[0] ... v[qtd-1] ... */
+/* ... v[0] ... v[qtd-1] ... */
 free(v);
 ```
 
-- `sizeof(Registro)` = tamanho de **um** elemento; `sizeof(v)` com `v` ponteiro é o tamanho do **ponteiro** (errado aqui).
-- Vetores começam no **0**: o último é `v[qtd - 1]`.
-- Um único `fread(v, sizeof(Registro), qtd, f)` enche o vetor.
+`sizeof(v)` com v ponteiro é o tamanho do ponteiro (errado aqui). Um único `fread(v, sizeof(Registro), qtd, f)` enche o vetor.
 
-### `qsort` e comparador
+### qsort e comparador
 
-```
+```c
 qsort(v, qtd, sizeof(Registro), compara);      // compara SEM parênteses
-```
 
-```
 int compara(const void *a, const void *b) {
     const Registro *x = (const Registro*) a;   // cast para o MESMO tipo do vetor
     const Registro *y = (const Registro*) b;
@@ -3624,53 +3604,25 @@ int compara(const void *a, const void *b) {
 }
 ```
 
-- Chave `long`/`int`: compare com `<` e `>`. Não devolva `x - y`: a subtração pode **estourar**.
-- Chave de **bytes sem `'\0'`** (como o `cep[8]`): `return memcmp(x->cep, y->cep, 8);`. Nunca `strcmp`.
-- O `sizeof` do `qsort` tem de combinar com o tipo do vetor e com o cast do comparador.
-- `qsort` **ordena**; busca binária **procura** num vetor/arquivo **já ordenado**. São coisas diferentes.
+- Chave long/int: compare com `<` e `>` (não devolva x − y: pode estourar).
+- Chave de bytes sem '\0' (como cep[8]): `return memcmp(x->cep, y->cep, 8);`. Nunca strcmp.
+- qsort ordena; busca binária procura num vetor/arquivo já ordenado.
 
 ### Resto do básico
 
-| **Assunto**                | **Lembrete**                                                                      |
-| -------------------------- | --------------------------------------------------------------------------------- |
-| `argc` / `argv`            | `if (argc != N) {...}`; `argv[0]` é o nome do programa, `argv[1]` o 1º argumento  |
-| `struct`                   | `e.campo` (variável) · `p->campo` (ponteiro para struct)                          |
-| Ponteiro                   | `x` conteúdo, `&x` endereço; `p` endereço, `*p` conteúdo apontado                 |
-| `memset(&r, 0, sizeof(r))` | zera a struct antes de preencher (senão grava lixo de memória no arquivo)         |
-| `return`                   | `return 1;` ao falhar · `return 0;` no fim do `main` · `return;` em função `void` |
-| Bytes × registros          | `fseek`/`ftell` contam **bytes**; `fread`/`fwrite` contam **itens**               |
+| Assunto | Lembrete |
+|---|---|
+| argc / argv | `if (argc != N) {...}`; argv[0] é o nome do programa, argv[1] o 1º argumento |
+| struct | `e.campo` (variável) · `p->campo` (ponteiro para struct) |
+| Ponteiro | `x` conteúdo, `&x` endereço; `p` endereço, `*p` conteúdo apontado |
+| memset(&r, 0, sizeof(r)) | zera a struct antes de preencher (senão grava lixo no arquivo) |
+| return | `return 1;` ao falhar · `return 0;` no fim do main · `return;` em void |
 
-## 6.9 Consulta rápida da P1
+---
 
-Os detalhes e exemplos de `fopen`, `fread`, `fwrite`, `fseek`, `ftell`, `malloc`, `qsort` e ponteiros já estão na **seção 6.8**. Os programas completos da P1 continuam na **seção 5.13**.
+## 6.9 Hash em arquivo com Python
 
-### Fórmulas para bater o olho
-
-```
-quantidade de registros = tamanho do arquivo / sizeof(Tipo)
-offset do registro i (começando em 0) = i * sizeof(Tipo)
-bytes = quantidade de registros * sizeof(Tipo)
-```
-
-### Pegadinhas essenciais
-
-- `fseek(..., SEEK_END)` vai para depois do último registro.
-- `ftell()` devolve `long` e informa a posição atual em bytes.
-- `fread`/`fwrite` devolvem quantidade de itens, não bytes.
-- `fgetc()` devolve `int`, pois precisa representar `EOF`.
-- `malloc(qtd * sizeof(Tipo))` recebe quantidade em bytes; depois use `free`.
-- `qsort(v, qtd, sizeof(Tipo), compara)` recebe o nome da função, sem `()`.
-- `"wb"` apaga/cria; `"ab"` acrescenta no fim.
-- Vetores começam no índice 0.
-- `fread` avança o cursor; guarde `ftell` **antes** da leitura se precisar do início do registro.
-- Posição em bytes vai direto para `fseek`; número do registro precisa ser multiplicado por `sizeof(Tipo)`.
-
-
-## 6.10 Hash em arquivo com Python
-
-> **Ideia:** a tabela hash fica em um arquivo binário. Cada posição principal aponta para o primeiro registro; colisões ficam encadeadas pelo campo `prox`.
-
-### Estrutura dos arquivos
+Ideia: a tabela hash fica em um arquivo binário. Cada posição principal aponta para o primeiro registro; colisões ficam encadeadas pelo campo prox.
 
 ```python
 import struct
@@ -3687,71 +3639,26 @@ keyColumnIndex = 5
 
 dataStruct = struct.Struct(dataFormat)
 indexStruct = struct.Struct(indexFormat)
+
+def h(key):                       # key em bytes: b"22071020"
+    return int(hashlib.sha1(key).hexdigest(), 16) % hashSize
 ```
 
 | Código | Significado |
 |---|---|
-| `72s` | texto de 72 bytes |
-| `8s` | chave de 8 bytes (CEP) |
-| `L` | inteiro longo sem sinal (posição/offset) |
-| `dataStruct.size` | tamanho de um registro de dados, em bytes |
-| `indexStruct.size` | tamanho de um registro do índice, em bytes |
+| 72s / 8s | texto de 72 bytes / chave de 8 bytes (CEP) |
+| L | inteiro longo sem sinal (posição/offset) |
+| dataStruct.size / indexStruct.size | tamanho de um registro de dados / do índice, em bytes |
 
-**Registro do índice (`8sLL`):** `[0]` chave · `[1]` posição do registro no arquivo de dados · `[2]` offset em bytes do próximo registro da lista.
+Registro do índice (8sLL): **[0]** chave · **[1]** posição do registro no arquivo de dados · **[2]** offset em bytes do próximo da lista.
 
-### Função hash
+**Unidades:**
 
-```python
-def h(key):
-    return int(hashlib.sha1(key).hexdigest(), 16) % hashSize
-```
+- `p = h(chave)` é número de posição → `p * indexStruct.size` para obter bytes.
+- `prox` já é offset em bytes → `fi.seek(prox, os.SEEK_SET)` direto. Não multiplique de novo.
+- `indice[1]` aponta para o arquivo de dados → multiplica por `dataStruct.size`.
 
-- `key` precisa estar em bytes: `b"22071020"`.
-- `h(key)` devolve a posição principal da tabela, entre `0` e `hashSize - 1`.
-
-### Como chegar a um registro do índice
-
-```python
-p = h(chave)
-offset = p * indexStruct.size
-fi.seek(offset, os.SEEK_SET)
-registroIndice = indexStruct.unpack(fi.read(indexStruct.size))
-```
-
-**Atenção às unidades:**
-- `p` é número da posição principal → multiplica por `indexStruct.size` para obter bytes.
-- `prox` já é um offset em bytes → use `fi.seek(prox, os.SEEK_SET)` direto. **Não multiplique de novo.**
-- A posição `[1]` aponta para um registro do arquivo de dados → multiplica por `dataStruct.size`.
-
-### Busca de uma chave (percorre a lista de colisões)
-
-```python
-fi = open(indexName, "rb")
-f = open(fileName, "rb")
-
-chave = b"22071020"
-p = h(chave)
-offset = p * indexStruct.size
-
-while offset != 0:  # na primeira leitura, offset é a posição principal
-    fi.seek(offset, os.SEEK_SET)
-    indice = indexStruct.unpack(fi.read(indexStruct.size))
-
-    if indice[0] == chave:
-        f.seek(indice[1] * dataStruct.size, os.SEEK_SET)
-        registro = dataStruct.unpack(f.read(dataStruct.size))
-        print(registro)
-        break
-
-    offset = indice[2]  # próximo nó; 0 = fim da lista
-
-fi.close()
-f.close()
-```
-
-**Atenção:** para a primeira leitura, a posição principal pode ser `0`. Por isso, em uma implementação completa, faça a primeira leitura antes do `while` ou use um controle separado; não use `while offset != 0` para decidir se deve ler a posição principal.
-
-### Padrão correto de busca (inclusive quando a posição principal é 0)
+**Busca de uma chave** (correta mesmo quando a posição principal é 0, porque lê a principal antes de testar o prox):
 
 ```python
 fi = open(indexName, "rb")
@@ -3770,7 +3677,7 @@ while True:
         print(registro)
         break
 
-    offset = indice[2]
+    offset = indice[2]            # próximo nó; 0 = fim da lista
     if offset == 0:
         print("Chave não encontrada")
         break
@@ -3779,9 +3686,7 @@ fi.close()
 f.close()
 ```
 
-### Posição com a maior lista de colisões
-
-Percorre todas as posições principais e conta quantos registros existem em cada cadeia.
+**Posição com a maior lista de colisões:**
 
 ```python
 fi = open(indexName, "rb")
@@ -3790,15 +3695,13 @@ maiorLista = 0
 maiorPosicao = -1
 
 for p in range(hashSize):
-    offset = p * indexStruct.size
-    fi.seek(offset, os.SEEK_SET)
+    fi.seek(p * indexStruct.size, os.SEEK_SET)
     indice = indexStruct.unpack(fi.read(indexStruct.size))
 
-    # posição vazia
-    if indice[0][0] == 0:
+    if indice[0][0] == 0:         # posição vazia
         continue
 
-    quantidade = 1       # conta o registro principal
+    quantidade = 1                # conta o registro principal
     prox = indice[2]
 
     while prox != 0:
@@ -3818,189 +3721,16 @@ print("Registros na lista:", maiorLista)
 print("Colisões:", maiorLista - 1)
 ```
 
-### Decore estas relações
-
 | Expressão | Para que serve |
 |---|---|
-| `h(chave)` | calcula a posição principal |
-| `p * indexStruct.size` | transforma posição principal em offset de bytes |
-| `indice[0]` | chave armazenada |
-| `indice[1] * dataStruct.size` | offset do registro no arquivo de dados |
-| `indice[2]` | offset em bytes do próximo nó |
-| `prox == 0` | fim da cadeia |
-| `quantidade = 1` | começa contando o registro principal |
-| `quantidade - 1` | número de colisões, sem contar o primeiro registro |
+| h(chave) | calcula a posição principal |
+| p * indexStruct.size | posição principal → offset em bytes |
+| indice[0] | chave armazenada |
+| indice[1] * dataStruct.size | offset do registro no arquivo de dados |
+| indice[2] | offset em bytes do próximo nó (0 = fim da cadeia) |
+| quantidade − 1 | número de colisões (não conta o primeiro) |
 
-**Pegadinhas:** Python usa `b"..."` para chaves em bytes; `unpack()` transforma bytes em tupla; `pack()` faz o caminho inverso; `seek()` recebe offset em bytes; `range(hashSize)` percorre todas as posições principais.
-
-## 6.11 Respostas prontas do treino (árvore B e hash)
-
-> Respostas do gabarito do treino, para consultar o **raciocínio completo** de cada tipo de questão. As questões de desenhar árvore (A3, A4, A5, A7) dependem das figuras do treino e **não** estão aqui; B5, B6, C1 e A10/A11 já estão resolvidas em 6.1, 6.4 e 6.5.
-
-### 6.11.1 A1 — Tamanho do nó de uma árvore B (Lista 2023.2, questão 2)
-
-**Dados:** V = 9 (chave), Pr = 7 (ponteiro de registro), Pb = 6 (ponteiro de bloco), B = 512 bytes. Cada nó tem no máximo `n` ponteiros de bloco, `n − 1` chaves e `n − 1` ponteiros de dados, e tudo tem de caber em **1 bloco**.
-
-**(a) Valor de n.** Conta do bloco: `6n + (9 + 7)(n − 1) ≤ 512`, ou seja, `22n ≤ 528`, então **n = 24**.
-Prova: 6 × 24 + 16 × 23 = 144 + 368 = **512** (ocupa o bloco exatamente).
-
-**(b) Chaves por nó (não raiz).**
-- **Máximo:** n − 1 = **23 chaves**.
-- **Mínimo:** ⌈n/2⌉ = 12 ponteiros, ou seja, 12 − 1 = **11 chaves**.
-
-**(c) Ocupação média de 70%, chaves no 3º nível.**
-
-| Passo | Conta |
-|---|---|
-| Chaves por nó | 0,7 × 23 ≈ **16** |
-| Filhos por nó | 16 + 1 = **17** |
-| Nível 1 (raiz) | 1 nó |
-| Nível 2 | 17 nós |
-| Nível 3 | 17 × 17 = **289 nós** |
-| **Chaves no nível 3** | 289 × 16 = **4.624** (≈ 4,6 mil) |
-
-O valor depende do arredondamento: sem arredondar (16,1 chaves e 16,8 filhos por nó) dá em torno de 4.500. Na prova, **mostre o raciocínio nó por nível**.
-
-### 6.11.2 A2 — Altura mínima (Lista 2023.2, questão 3b)
-
-**Pergunta:** quantas chaves, no mínimo, para uma árvore B de **grau 3** atingir **altura 3**?
-
-**Resposta: 7 chaves.** Altura 3 exige uma raiz (pelo menos 1 chave), pelo menos 2 nós no nível 2 e pelo menos 4 folhas, cada nó com pelo menos ⌈3/2⌉ − 1 = 1 chave: **1 + 2 + 4 = 7**. Inserindo 1, 2, 3, 4, 5, 6, 7 em ordem, a árvore chega à altura 3 na 7ª chave (com 3 a 6 chaves a altura máxima é 2).
-
-### 6.11.3 A6 — Páginas novas em uma inserção (P2 2024.1, questão 2)
-
-**Dados:** folhas no nível 7, raiz no nível 0; inserir **uma** chave. Máximo de páginas novas?
-
-**Resposta: 9 páginas novas.**
-
-1. A inserção desce até a folha. Se a folha está cheia, ela **divide** (cria 1 página nova) e a chave do meio **sobe** para o pai.
-2. Se o pai também estava cheio, ele divide, e assim por diante, **em cascata**.
-3. **Pior caso:** todos os nós do caminho estão cheios: níveis 7, 6, …, 0, ou seja, **8 nós**, e cada divisão cria 1 página irmã → **8 páginas**.
-4. Como a **raiz** também divide, é criada ainda **1 raiz nova** → 8 + 1 = **9**. A árvore ganha um nível.
-
-### 6.11.4 A8 — Dividir uma página (P2 de 11/12/2025, questão 3)
-
-```c
-struct Pagina { int qt; int chaves[N]; int valores[N]; int filhos[N+1]; };
-void split(Pagina* p1, Pagina* p2, int novaChave, int novoValor, int* chave, int* valor);
-```
-
-**(a) Como ocorre o split (explicação).**
-- **Por que é necessário:** a página está cheia e a chave nova não cabe.
-- **Redistribuição:** a página, com a chave nova, passa a ter N + 1 chaves. As **menores** ficam na página original, as **maiores** vão para a página nova e a chave do **meio sobe** para o pai.
-- **Papel da chave promovida:** vira o **separador** entre as duas páginas no pai: chaves menores que ela ficam à esquerda, maiores à direita.
-
-**(b) Pseudocódigo** (a nova chave é maior que todas as de `p1`):
-
-```text
-meio = (N + 1) / 2                        // índice da chave que sobe (divisão inteira)
-*chave = p1.chaves[meio]
-*valor = p1.valores[meio]
-j = 0
-para i de meio + 1 até N - 1:             // as maiores vão para p2
-    p2.chaves[j]  = p1.chaves[i]
-    p2.valores[j] = p1.valores[i]
-    j = j + 1
-p2.chaves[j]  = novaChave                 // a nova é a maior de todas: vai por último
-p2.valores[j] = novoValor
-j = j + 1
-p1.qt = meio                              // p1 fica com as chaves 0 .. meio - 1
-p2.qt = j                                 // j = N - meio
-todos os filhos de p1 e de p2 = 0         // são folhas
-```
-
-### 6.11.5 A9 — Valor de N e capacidade (P2 de 11/12/2025, questão 4)
-
-**Dados:** a página da A8 (`qt`, `chaves[N]`, `valores[N]`, `filhos[N+1]`), `int` = 4 bytes, bloco de 1024 bytes.
-
-**(a) Valor adequado de N.** A página tem: `qt` (4 bytes) + `chaves[N]` (4N) + `valores[N]` (4N) + `filhos[N+1]` (4(N+1)) = 4 + 4N + 4N + 4N + 4 = **12N + 8 bytes**.
-`12N + 8 ≤ 1024` → N ≤ 84,67 → **N = 84** (a página ocupa 12 × 84 + 8 = **1016 bytes**; com N = 85 seriam 1028, que não cabe).
-
-**(b) Capacidade máxima com a árvore cheia e altura 3** (raiz no nível 1). Cada página cheia tem **84 chaves e 85 filhos**.
-
-| Nível | Páginas | Chaves |
-|---|---:|---:|
-| 1 (raiz) | 1 | 84 |
-| 2 | 85 | 85 × 84 = 7.140 |
-| 3 | 85 × 85 = 7.225 | 7.225 × 84 = 606.900 |
-| **Total** | **7.311** | **614.124** (= 85³ − 1) |
-
-### 6.11.6 B1 — Contar colisões (Lista 2023.2, questão 3a)
-
-**Dados:** h(k) = k mod 11; chaves 10, 33, 85, 43, 27, 63, 95, 88, 32.
-
-Posições: 10→**10**, 33→**0**, 85→**8**, 43→**10** (colide com o 10), 27→**5**, 63→**8** (colide com o 85), 95→**7**, 88→**0** (colide com o 33), 32→**10** (colide de novo).
-
-**Resposta: 4 colisões** (43, 63, 88 e 32).
-
-### 6.11.7 B2 — O que é colisão e como se trata (P2 de 23/11/2023)
-
-**Questão 3 → (c).** Colisão é quando **chaves diferentes** caem no **mesmo índice**. As alternativas (a) e (d) falam de chaves iguais (isso é chave duplicada, não colisão) e (b) descreve o caso normal, sem colisão.
-
-**Questão 4 — encadeamento externo.** A chave que colidiu vai para uma **área separada** (aqui, no fim do mesmo arquivo), e a entrada da tabela guarda um ponteiro (**Próximo**) para ela, formando uma lista.
-
-**Exemplo** (h(k) = k mod 11): as chaves 10 e 21 caem na posição 10. O 10 ocupa a posição 10; o 21 vai para a posição 11 da área de colisão, e o Próximo da posição 10 passa a apontar para a 11. Na busca do 21 vai-se à posição 10, vê-se que não é ele e **segue-se o ponteiro** até a 11.
-
-### 6.11.8 B3 — Tabela, colisões e maior lista (P2 2024.1, questão 4)
-
-**Dados:** 11 entradas (h = k mod 11), encadeamento externo; chaves na ordem 10, 27, 34, 41, 67, 86, 17, 38, 72, 49.
-
-| Posição | Chave | Próximo |
-|---:|---:|---:|
-| 1 | 34 | 11 |
-| 5 | 27 | 14 |
-| 6 | 17 | 13 |
-| 8 | 41 | 0 |
-| 9 | 86 | 0 |
-| 10 | 10 | 0 |
-| 11 | 67 | 0 |
-| 12 | 38 | 0 |
-| 13 | 72 | 0 |
-| 14 | 49 | 12 |
-
-- **Colisões: 4.** 67 (com 34, posição 1), 38 (com 27, posição 5), 72 (com 17, posição 6) e 49 (posição 5).
-- **Listas:** posição 1: 34 → 67 · posição 5: 27 → 49 → 38 · posição 6: 17 → 72.
-- **Maior lista:** a da **posição 5**, de tamanho **3**.
-
-### 6.11.9 B4 — Chaves de 11 em 11 (P2 2024.2, questão 2)
-
-**Dados:** h(k) = k mod 11; chaves 15, 26, 37, 48, 59, 70, 81, 92, 103, 114.
-
-Todas diferem de 11 em 11, então **todas caem na posição 4**. É o **pior caso**: **9 colisões** e uma **lista única de tamanho 10**.
-
-| Posição | Chave | Próximo |
-|---:|---:|---:|
-| 4 | 15 | 19 |
-| 11 | 26 | 0 |
-| 12 | 37 | 11 |
-| 13 | 48 | 12 |
-| 14 | 59 | 13 |
-| 15 | 70 | 14 |
-| 16 | 81 | 15 |
-| 17 | 92 | 16 |
-| 18 | 103 | 17 |
-| 19 | 114 | 18 |
-
-**Percurso da posição 4:** 15 → 114 → 103 → 92 → 81 → 70 → 59 → 48 → 37 → 26.
-
-**Explicação:** no encadeamento externo as chaves que colidem **não ocupam outras posições da tabela**; vão para uma área à parte e ficam ligadas por ponteiros, partindo da posição primária. Cada chave nova vai para a próxima posição livre da área e é encadeada **logo após a entrada primária**.
-
-### 6.11.10 B8 — Teoria: hash (resposta curta por item)
-
-- **(a) Por que o hash não mantém ordem:** a posição vem de `h(k)`, que **espalha** as chaves; chaves vizinhas ou inseridas em sequência vão para posições sem relação. Percorrer a tabela não devolve as chaves na ordem de inserção nem de valor.
-- **(b) Hash × árvore:**
-
-| | Árvore B/B+ | Hash |
-|---|---|---|
-| **Organização** | blocos com chaves ordenadas e ponteiros | tabela de posições + área de colisão |
-| **Acesso** | desce da raiz comparando chaves | calcula a posição direto de `h(k)` |
-| **Ordenação** | mantém as chaves ordenadas (B+ encadeia as folhas) | não mantém |
-| **Custo** | O(log n) acessos a bloco | O(1) em média; piora com colisões ou tabela cheia |
-
-- **(c) Quando usar cada um:** **árvore B/B+** para intervalo (`BETWEEN 10 AND 20`), ordenação (`ORDER BY`), prefixo (`LIKE 'Ma%'`), mínimo e máximo. **Hash** para igualdade exata (`WHERE cpf = '...'`, buscar o CEP 22071020).
-- **(d) Vantagens e desvantagens do hash:** **vantagens:** acesso direto em tempo médio constante para igualdade; implementação simples. **Desvantagens:** não atende intervalo nem devolve em ordem; há colisões; a tabela tem tamanho fixo, degrada quando fica cheia (fator de carga alto) e exige recriar a tabela para crescer.
-
----
+Python: chaves em bytes `b"..."`; `unpack()` devolve tupla; `pack()` faz o caminho inverso; `seek()` recebe offset em bytes; `range(hashSize)` percorre todas as posições principais.
 
 ---
 
